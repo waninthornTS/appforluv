@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Our Little World</title>
+  <meta name="description" content="โลกใบเล็กของเราสองคน — วันครบรอบ ไดอารี่ ปฏิทิน และทริปเที่ยว">
+  <meta name="theme-color" content="#FFF6F9">
+
+  <!-- iOS: ทำให้เปิดแบบเต็มจอเหมือนแอปเมื่อ "เพิ่มไปยังหน้าจอโฮม" -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Our World">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="sky" aria-hidden="true"></div>
+
+  <div class="topbar">
+    <div class="clock" aria-live="off">
+      <span id="clock-ico">🕒</span><b id="clock-time">--:--</b><span class="clock-sep">·</span><span id="clock-date"></span>
+    </div>
+  </div>
+
+  <main id="view" class="view"></main>
+
+  <button id="fab" class="fab" aria-label="เพิ่ม" hidden>
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+
+  <nav class="tabbar" aria-label="เมนูหลัก">
+    <a href="#home" data-tab="home">
+      <svg viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7v8.5a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1z"/></svg>
+      <span>หน้าแรก</span>
+    </a>
+    <a href="#diary" data-tab="diary">
+      <svg viewBox="0 0 24 24"><path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4z"/><path d="M12 9.4c.9-1.3 3-1 3 .6 0 1.5-3 3.2-3 3.2S9 11.5 9 10c0-1.6 2.1-1.9 3-.6z"/></svg>
+      <span>ไดอารี่</span>
+    </a>
+    <a href="#calendar" data-tab="calendar">
+      <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      <span>ปฏิทิน</span>
+    </a>
+    <a href="#travel" data-tab="travel">
+      <svg viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="13" rx="3"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3.5 12.5h17"/></svg>
+      <span>เที่ยว</span>
+    </a>
+    <a href="#me" data-tab="me">
+      <svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg>
+      <span>เรา</span>
+    </a>
+  </nav>
+
+  <div id="sheet-root"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
