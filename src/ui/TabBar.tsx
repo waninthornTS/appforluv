@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactElement } from 'react';
+import { sfx } from '../lib/sound';
 
 export const TABS = ['home', 'diary', 'calendar', 'travel', 'me'] as const;
 export type Tab = (typeof TABS)[number];
@@ -21,7 +22,7 @@ export function TabBar({ active }: { active: Tab }) {
   return (
     <nav className="tabbar" aria-label="เมนูหลัก">
       {ITEMS.map(it => (
-        <a key={it.tab} href={`#${it.tab}`} className={it.tab === active ? 'active' : ''} aria-current={it.tab === active ? 'page' : undefined}>
+        <a key={it.tab} href={`#${it.tab}`} onClick={() => { if (it.tab !== active) sfx('tab'); }} className={it.tab === active ? 'active' : ''} aria-current={it.tab === active ? 'page' : undefined}>
           <span className="app-ico" style={{ '--c': COLORS[it.tab][0], '--cd': COLORS[it.tab][1] } as CSSProperties}>
             <svg viewBox="0 0 24 24">{it.icon}</svg>
           </span>

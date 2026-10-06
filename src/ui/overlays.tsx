@@ -2,6 +2,7 @@
 // เรียกใช้แบบ imperative ได้จากทุกที่ เช่น openSheet({...}), toast('...'), confirmSheet({...})
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createStore, useStore } from '../lib/signal';
+import { sfx } from '../lib/sound';
 import { usePhotoURL } from '../lib/photos';
 
 
@@ -12,6 +13,7 @@ let sheetId = 0;
 
 export function openSheet(opts: { title: string; render: (close: () => void) => ReactNode; onClose?: () => void }) {
   const id = ++sheetId;
+  sfx('open');
   sheets.set([...sheets.get(), { id, ...opts }]);
   return () => closeSheet(id);
 }
@@ -102,6 +104,7 @@ function Lightbox() {
 // ---------- หัวใจลอย ----------
 const HEARTS = ['💗', '💖', '💕', '💞', '🩷', '✨'];
 export function burstHearts(x: number, y: number, n = 8, pool = HEARTS) {
+  sfx('sparkle');
   for (let i = 0; i < n; i++) {
     const h = document.createElement('span');
     h.className = 'float-heart';

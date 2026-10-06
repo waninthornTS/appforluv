@@ -25,25 +25,31 @@ function png(size, pixels) {
 }
 
 const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
-const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
-const BG_TOP = hex('#FFC2D6'), BG_BOT = hex('#FF7EA8');
-const WHITE = [255, 255, 255], INK = hex('#5B4352'), BLUSH = hex('#FFB3CB');
+const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * Math.max(0, Math.min(1, t)));
+// พื้นหลังครีมชมพูอ่อน + หัวใจชมพูไล่สี มีไฮไลต์มันวาวเล็กๆ (เรียบ น่ารัก)
+const BG_TOP = hex('#FFF5F8'), BG_BOT = hex('#FFDCE8');
+const H_TOP = hex('#FFA8C5'), H_BOT = hex('#F2588D');
+const WHITE = [255, 255, 255], SHADOW = hex('#F4B9CC');
 
-// สีของจุด (u,v) ในพิกัดปกติ 0..1
 function colorAt(u, v) {
   let col = mix(BG_TOP, BG_BOT, v);
+  const s = 0.27;
+  // เงานุ่มๆ ใต้หัวใจ
+  const sx = (u - 0.5) / 0.2, sy = (v - 0.83) / 0.035;
+  const sd = sx * sx + sy * sy;
+  if (sd < 1) col = mix(col, SHADOW, (1 - sd) * 0.7);
   // หัวใจ: (x²+y²−1)³ − x²y³ ≤ 0
-  const s = 0.29, x = (u - 0.5) / s, y = -(v - 0.53) / s;
-  const heart = (x * x + y * y - 1) ** 3 - x * x * y ** 3 <= 0;
-  if (!heart) return col;
-  col = WHITE;
-  const inEll = (cx, cy, rx, ry) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
-  if (inEll(-0.62, -0.05, 0.19, 0.11) || inEll(0.62, -0.05, 0.19, 0.11)) col = BLUSH;
-  for (const ex of [-0.4, 0.4]) {
-    if (inEll(ex, 0.22, 0.12, 0.15)) col = inEll(ex + 0.04, 0.27, 0.045, 0.045) ? WHITE : INK;
-  }
-  const r = Math.hypot(x, y - 0.05);
-  if (y < 0.0 && Math.abs(r - 0.2) < 0.05) col = INK;
+  const x = (u - 0.5) / s, y = -(v - 0.5) / s;
+  const f = (x * x + y * y - 1) ** 3 - x * x * y ** 3;
+  if (f > 0) return col;
+  col = mix(H_TOP, H_BOT, (1.25 - y) / 2.3);
+  // ไฮไลต์มันวาวด้านซ้ายบน
+  const hx = (x + 0.52) * Math.cos(0.6) - (y - 0.62) * Math.sin(0.6);
+  const hy = (x + 0.52) * Math.sin(0.6) + (y - 0.62) * Math.cos(0.6);
+  const hd = (hx / 0.3) ** 2 + (hy / 0.15) ** 2;
+  if (hd < 1) col = mix(col, WHITE, 0.75 * (1 - hd ** 2));
+  const dx = x + 0.12, dy = y - 0.78;
+  if (dx * dx + dy * dy < 0.065 ** 2) col = mix(col, WHITE, 0.8);
   return col;
 }
 

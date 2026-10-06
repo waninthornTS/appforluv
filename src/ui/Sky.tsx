@@ -2,6 +2,7 @@
 import { memo, useEffect } from 'react';
 import { TH_DAYS, TH_MONTHS_S } from '../lib/date';
 import { periodOf, SKY, useNow } from '../lib/sky';
+import { setSoundPrefs, useSoundPrefs } from '../lib/sound';
 
 // ดาวตำแหน่งคงที่ (ไม่สุ่มใหม่ทุกครั้งที่เปิด)
 const STARS = Array.from({ length: 34 }, (_, i) => ({ x: (i * 53.7) % 100, y: (i * 29.3) % 70, s: 1.5 + (i % 3), d: (i % 7) * 0.4 }));
@@ -22,6 +23,15 @@ export const SkyBackground = memo(function SkyBackground() {
   );
 });
 
+function MusicButton() {
+  const { music } = useSoundPrefs();
+  return (
+    <button className={`music-btn ${music ? 'on' : ''}`} onClick={() => setSoundPrefs({ music: !music })} aria-label={music ? 'ปิดเพลง' : 'เปิดเพลง'} aria-pressed={music}>
+      {music ? '🎵' : '🔇'}
+    </button>
+  );
+}
+
 export function TopBar() {
   const now = useNow();
   const hh = String(now.getHours()).padStart(2, '0');
@@ -34,6 +44,7 @@ export function TopBar() {
         <span className="clock-sep">·</span>
         <span>วัน{TH_DAYS[now.getDay()]} {now.getDate()} {TH_MONTHS_S[now.getMonth()]}</span>
       </div>
+      <MusicButton />
     </div>
   );
 }

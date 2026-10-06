@@ -4,6 +4,7 @@ import { Character, HEART_SVG } from '../../characters/Character';
 import type { CharKey } from '../../characters/svg';
 import { PROFILE } from '../../lib/store';
 import type { Period } from '../../lib/sky';
+import { blip, sfx } from '../../lib/sound';
 
 // คำพูดเวลาแตะ ({o} = ชื่ออีกคน)
 const LINES: Record<CharKey, string[]> = {
@@ -46,7 +47,13 @@ function Person({ who, name, other }: { who: CharKey; name: string; other: strin
   const [hop, setHop] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const { shown, done } = useTypewriter(line);
+  // เสียงพูดทีละตัวอักษร (ข้ามช่องว่าง/อีโมจิ)
+  useEffect(() => {
+    const ch = shown.slice(-1);
+    if (shown && !done && /[p{L}p{N}]/u.test(ch)) blip(who);
+  }, [shown, done, who]);
   const tap = () => {
+    sfx('boop');
     const pool = LINES[who];
     let next = pool[Math.floor(Math.random() * pool.length)].replace('{o}', other);
     if (next === line) next = pool[(pool.indexOf(next) + 1) % pool.length].replace('{o}', other);

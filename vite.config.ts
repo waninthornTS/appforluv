@@ -11,8 +11,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/apple-touch-icon.png'],
       manifest: {
-        name: 'Ploy & Dream',
-        short_name: 'Ploy & Dream',
+        name: 'P',
+        short_name: 'P',
         description: 'โลกใบเล็กของ Ploy & Dream — วันครบรอบ ไดอารี่ ปฏิทิน และทริปเที่ยว',
         lang: 'th',
         start_url: './',
