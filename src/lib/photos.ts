@@ -1,4 +1,6 @@
-// รูปภาพ: ย่อขนาดก่อนเก็บ (ประหยัดพื้นที่ iPhone) แล้วเก็บเป็น Blob ใน IndexedDB
+// รูปภาพ: ย่อขนาดก่อนเก็บ (ประหยัดพื้นที่ iPhone) แล้วเก็บใน IndexedDB
+// ⚠️ เก็บเป็น ArrayBuffer ไม่ใช่ Blob — Safari บน iPhone มีบั๊กเก็บ Blob ใน IndexedDB
+//    (บันทึกไม่ได้ / เปิดแอปใหม่แล้วรูปเสีย) ArrayBuffer ใช้ได้เสถียรทุกเครื่อง
 import { useEffect, useState } from 'react';
 import { db, uid } from './db';
 import { useDataVersion } from './signal';
@@ -29,10 +31,40 @@ export async function compressImage(file: Blob, max = MAX_SIDE): Promise<Blob> {
   return new Promise((resolve, reject) => c.toBlob(b => (b ? resolve(b) : reject(new Error('แปลงรูปไม่ได้'))), 'image/jpeg', QUALITY));
 }
 
-export async function savePhoto(file: Blob): Promise<string> {
-  const blob = await compressImage(file);
+/** เก็บรูปลงเครื่องเป็น ArrayBuffer */
+export async function storePhoto(id: string, blob: Blob, createdAt = Date.now()) {
+  const data = await blob.arrayBuffer();
+  await db.put('photos', { id, data, type: blob.type || 'image/jpeg', createdAt } satisfies PhotoRec);
+}
+
+/** อ่านรูปจากเครื่อง (รองรับข้อมูลแบบเก่าที่เก็บเป็น Blob ด้วย และแปลงให้อัตโนมัติ) */
+export async function getPhotoBlob(id: string): Promise<Blob | null> {
+  const rec = await db.get<PhotoRec>('photos', id);
+  if (!rec) return null;
+  if (rec.data) return new Blob([rec.data], { type: rec.type || 'image/jpeg' });
+  if (rec.blob) {
+    try {
+      const data = await rec.blob.arrayBuffer();
+      await db.put('photos', { id, data, type: rec.blob.type || 'image/jpeg', createdAt: rec.createdAt } satisfies PhotoRec);
+      return new Blob([data], { type: rec.blob.type || 'image/jpeg' });
+    } catch {
+      return null; // รูปเก่าในเครื่องเสีย → ให้ไปโหลดจากออนไลน์แทน
+    }
+  }
+  return null;
+}
+
+export async function savePhoto(file: File): Promise<string> {
+  let blob: Blob;
+  try {
+    blob = await compressImage(file);
+  } catch (e) {
+    // ย่อรูปไม่ได้ (เช่น ไฟล์แปลกๆ) → ใช้ไฟล์เดิมถ้าเป็นรูปที่เบราว์เซอร์แสดงได้
+    if (/^image\/(jpeg|png|webp|gif)$/.test(file.type) && file.size < 15 * 1024 * 1024) blob = file;
+    else throw e;
+  }
   const id = uid();
-  await db.put('photos', { id, blob, createdAt: Date.now() } satisfies PhotoRec);
+  await storePhoto(id, blob);
   queuePhoto(id);
   return id;
 }
@@ -40,8 +72,21 @@ export async function savePhoto(file: Blob): Promise<string> {
 export async function photoURL(id: string): Promise<string> {
   const hit = urlCache.get(id);
   if (hit) return hit;
-  const rec = await db.get<PhotoRec>('photos', id);
-  const blob = rec?.blob ?? await downloadPhoto(id); // ยังไม่มีในเครื่อง → โหลดจากออนไลน์
+  const blob = (await getPhotoBlob(id)) ?? (await downloadPhoto(id)); // ยังไม่มีในเครื่อง → โหลดจากออนไลน์
+  if (!blob) return '';
+  const url = URL.createObjectURL(blob);
+  urlCache.set(id, url);
+  return url;
+}
+
+/** รูปแสดงไม่ขึ้น → ทิ้งของในเครื่อง แล้วโหลดใหม่จากออนไลน์ (ครั้งเดียวต่อรูป กันวนซ้ำ) */
+const repaired = new Set<string>();
+export async function repairPhoto(id: string): Promise<string> {
+  if (repaired.has(id)) return '';
+  repaired.add(id);
+  const u = urlCache.get(id);
+  if (u) { URL.revokeObjectURL(u); urlCache.delete(id); }
+  const blob = await downloadPhoto(id);
   if (!blob) return '';
   const url = URL.createObjectURL(blob);
   urlCache.set(id, url);
@@ -62,9 +107,11 @@ export function usePhotoURL(id?: string) {
   const [url, setUrl] = useState(() => (id && urlCache.get(id)) || '');
   useEffect(() => {
     let alive = true;
-    if (id) photoURL(id).then(u => { if (alive) setUrl(u); });
+    if (id) photoURL(id).then(u => { if (alive) setUrl(u); }).catch(() => {});
     else setUrl('');
     return () => { alive = false; };
   }, [id, url ? 0 : v]);
-  return url;
+  // เรียกเมื่อ <img> แสดงไม่ขึ้น
+  const repair = () => { if (id) repairPhoto(id).then(u => { if (u) setUrl(u); }).catch(() => {}); };
+  return { url, repair };
 }

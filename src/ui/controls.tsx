@@ -28,8 +28,8 @@ export function HeartsInput({ value, onChange }: { value: number; onChange: (v: 
 export const Hearts = ({ n }: { n?: number }) => (n ? <span className="hearts">{'♥'.repeat(n)}<span style={{ opacity: 0.25 }}>{'♥'.repeat(5 - n)}</span></span> : null);
 
 export function Photo({ id, className, onClick }: { id: string; className?: string; onClick?: () => void }) {
-  const url = usePhotoURL(id);
-  return url ? <img src={url} alt="" className={className} onClick={onClick} loading="lazy" decoding="async" /> : null;
+  const { url, repair } = usePhotoURL(id);
+  return url ? <img src={url} alt="" className={className} onClick={onClick} onError={repair} decoding="async" /> : null;
 }
 
 /**

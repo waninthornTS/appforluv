@@ -76,8 +76,11 @@ async function runOp(c: SupabaseClient, op: Op) {
     if (error) throw error;
   } else if (op.kind === 'photo') {
     const rec = await db.get<PhotoRec>('photos', op.id);
-    if (!rec) return; // รูปถูกลบไปแล้ว ข้ามได้
-    const { error } = await c.storage.from('photos').upload(photoPath(op.id), rec.blob, { upsert: true, contentType: 'image/jpeg' });
+    let body: Blob | undefined;
+    if (rec?.data) body = new Blob([rec.data], { type: rec.type || 'image/jpeg' });
+    else if (rec?.blob) body = new Blob([await rec.blob.arrayBuffer().catch(() => new ArrayBuffer(0))], { type: 'image/jpeg' });
+    if (!body || !body.size) return; // รูปถูกลบหรือเสียไปแล้ว ข้ามได้
+    const { error } = await c.storage.from('photos').upload(photoPath(op.id), body, { upsert: true, contentType: 'image/jpeg' });
     if (error) throw error;
   } else {
     const { error } = await c.storage.from('photos').remove([photoPath(op.id)]);
@@ -158,8 +161,10 @@ export async function downloadPhoto(id: string): Promise<Blob | null> {
   const c = await sb();
   const { data, error } = await c.storage.from('photos').download(photoPath(id));
   if (error || !data) return null;
-  await db.put('photos', { id, blob: data, createdAt: Date.now() } satisfies PhotoRec);
-  return data;
+  // เก็บเป็น ArrayBuffer (Safari บน iPhone เก็บ Blob ใน IndexedDB ไม่เสถียร)
+  const buf = await data.arrayBuffer();
+  await db.put('photos', { id, data: buf, type: 'image/jpeg', createdAt: Date.now() } satisfies PhotoRec);
+  return new Blob([buf], { type: 'image/jpeg' });
 }
 
 // ---------- ครั้งแรกที่เปิดซิงก์: ส่งข้อมูลเดิมในเครื่องขึ้นออนไลน์ ----------

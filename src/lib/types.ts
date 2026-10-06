@@ -55,7 +55,8 @@ export interface AboutItem extends Base {
   text: string;
 }
 
-export interface PhotoRec { id: string; blob: Blob; createdAt: number }
+/** รูปในเครื่อง: data (ArrayBuffer) คือรูปแบบใหม่, blob คือรูปแบบเก่า */
+export interface PhotoRec { id: string; data?: ArrayBuffer; type?: string; blob?: Blob; createdAt: number }
 
 export interface Collections {
   memories: Memory;

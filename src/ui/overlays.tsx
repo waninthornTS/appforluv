@@ -80,8 +80,8 @@ const lightbox = createStore<{ ids: string[]; index: number } | null>(null);
 export const openLightbox = (ids: string[], index = 0) => lightbox.set({ ids, index });
 
 function LightImg({ id }: { id: string }) {
-  const url = usePhotoURL(id);
-  return url ? <img src={url} alt="" /> : <div />;
+  const { url, repair } = usePhotoURL(id);
+  return url ? <img src={url} alt="" onError={repair} /> : <div />;
 }
 function Lightbox() {
   const lb = useStore(lightbox);
