@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { fmtDate, monthLabel } from '../../lib/date';
+import { T } from '../../lib/i18n';
 import { entries, MEM_CATS } from '../../lib/meta';
 import { useCollection } from '../../lib/store';
 import type { MemoryCat } from '../../lib/types';
@@ -27,14 +28,14 @@ export default function DiaryPage() {
 
   return (
     <>
-      <header className="page-head"><div><h1>ไดอารี่ของเรา 📔</h1></div></header>
+      <header className="page-head"><div><h1>{T('ไดอารี่ของเรา 📔', 'Our diary 📔')}</h1></div></header>
       <div className="stats">
-        <div className="card stat"><b>{sorted.filter(m => m.cat === 'movie').length}</b><span>🎬 หนังที่ดูด้วยกัน</span></div>
-        <div className="card stat"><b>{sorted.length}</b><span>💌 ความทรงจำ</span></div>
-        <div className="card stat"><b>{sorted.reduce((n, m) => n + m.photos.length, 0)}</b><span>📸 รูปภาพ</span></div>
+        <div className="card stat"><b>{sorted.filter(m => m.cat === 'movie').length}</b><span>🎬 {T('หนังที่ดูด้วยกัน', 'Movies together')}</span></div>
+        <div className="card stat"><b>{sorted.length}</b><span>💌 {T('ความทรงจำ', 'Memories')}</span></div>
+        <div className="card stat"><b>{sorted.reduce((n, m) => n + m.photos.length, 0)}</b><span>📸 {T('รูปภาพ', 'Photos')}</span></div>
       </div>
       <div className="chips" style={{ marginTop: 16 }}>
-        <button className={`filter-chip ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>ทั้งหมด</button>
+        <button className={`filter-chip ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>{T('ทั้งหมด', 'All')}</button>
         {entries(MEM_CATS).map(([k, c]) => (
           <button key={k} className={`filter-chip ${filter === k ? 'active' : ''}`} onClick={() => setFilter(k)}>{c.emoji} {c.label}</button>
         ))}
@@ -42,7 +43,7 @@ export default function DiaryPage() {
 
       {all && (list.length ? groups.map(([key, items]) => (
         <div key={key}>
-          <div className="month-label">{key ? monthLabel(key) : 'ไม่ระบุวันที่'}</div>
+          <div className="month-label">{key ? monthLabel(key) : T('ไม่ระบุวันที่', 'No date')}</div>
           <div className="polaroids">
             {items.map(m => (
               <button key={m.id} className="polaroid" onClick={() => openMemoryDetail(m.id)}>
@@ -61,10 +62,10 @@ export default function DiaryPage() {
       )) : (
         <div className="card empty" style={{ marginTop: 14 }}>
           <div className="emo">{filter === 'all' || filter === 'movie' ? '🍿' : MEM_CATS[filter].emoji}</div>
-          <p>ยังไม่มีบันทึก{filter === 'all' ? '' : 'หมวดนี้'}<br />กดปุ่ม ＋ ด้านล่างเพื่อเพิ่มความทรงจำแรกกัน</p>
+          <p>{filter === 'all' ? T('ยังไม่มีบันทึก', 'No memories yet') : T('ยังไม่มีบันทึกหมวดนี้', 'Nothing in this category yet')}<br />{T('กดปุ่ม ＋ ด้านล่างเพื่อเพิ่มความทรงจำแรกกัน', 'Tap ＋ below to add your first memory')}</p>
         </div>
       ))}
-      <Fab onClick={() => openMemoryForm(undefined, filter !== 'all' ? { cat: filter } : {})} />
+      <Fab onClick={() => openMemoryForm(undefined, filter !== 'all' ? { cat: filter } : {})} label={T('เพิ่ม', 'Add')} />
     </>
   );
 }

@@ -45,7 +45,7 @@ export interface Trip extends Base {
   budget?: number | '';
   note?: string;
   photos: string[];
-  checklist: CheckItem[];
+  checklist?: CheckItem[]; // เลิกใช้แล้ว (เก็บไว้ให้ข้อมูลเก่าอ่านได้)
 }
 
 export type AboutCat = 'likeDo' | 'dislikeDo' | 'likeEat' | 'dislikeEat';

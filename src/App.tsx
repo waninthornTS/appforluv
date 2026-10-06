@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState, type ComponentType, type LazyExoticComponent } from 'react';
+import { useLang } from './lib/i18n';
 import { initSync } from './lib/sync';
 import { OverlayHost } from './ui/overlays';
 import { SkyBackground, TopBar } from './ui/Sky';
@@ -21,6 +22,7 @@ const readTab = (): Tab => {
 initSync();
 
 export default function App() {
+  const lang = useLang(); // เปลี่ยนภาษาแล้ววาดใหม่ทั้งแอป
   const [tab, setTab] = useState(readTab);
   useEffect(() => {
     const on = () => setTab(readTab());
@@ -42,13 +44,13 @@ export default function App() {
   return (
     <>
       <SkyBackground />
-      <TopBar />
-      <main className="view" key={tab}>
+      <TopBar key={`top-${lang}`} />
+      <main className="view" key={`${tab}-${lang}`}>
         <Suspense fallback={<div className="page-loading"><div className="spinner" /></div>}>
           <Page />
         </Suspense>
       </main>
-      <TabBar active={tab} />
+      <TabBar key={`tabs-${lang}`} active={tab} />
       <OverlayHost />
     </>
   );

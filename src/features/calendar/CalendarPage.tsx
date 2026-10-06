@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { addDays, countdown, diffDays, fmtDate, parse, TH_DAYS_S, TH_MONTHS, toStr, todayStr } from '../../lib/date';
+import { addDays, countdown, daysShort, diffDays, fmtDate, monthsLong, monthsShort, parse, toStr, todayStr, yearOf } from '../../lib/date';
+import { T } from '../../lib/i18n';
 import { useCollection } from '../../lib/store';
 import { Fab } from '../../ui/TabBar';
 import { openMemoryDetail } from '../diary/sheets';
@@ -24,7 +25,7 @@ function Item({ i, date }: { i: CalItem; date?: string }) {
   const body = (
     <>
       {date
-        ? <div className="datebox"><b>{+date.slice(8)}</b><span>{fmtDate(date, { year: false }).split(' ')[1]}</span></div>
+        ? <div className="datebox"><b>{+date.slice(8)}</b><span>{monthsShort()[+date.slice(5, 7) - 1]}</span></div>
         : <div className={`ico ${i.color === 'red' ? 'pink' : i.color}`}>{i.emo}</div>}
       <div className="grow">
         <div className="t ellipsis">{date ? `${i.emo} ` : ''}{i.title}</div>
@@ -73,18 +74,18 @@ export default function CalendarPage() {
 
   return (
     <>
-      <header className="page-head"><div><h1>ปฏิทินของเรา 🗓️</h1></div></header>
+      <header className="page-head"><div><h1>{T('ปฏิทินของเรา 🗓️', 'Our calendar 🗓️')}</h1></div></header>
       <section className="card">
         <div className="cal-head">
-          <button className="icon-btn" onClick={() => nav(-1)} aria-label="เดือนก่อน">‹</button>
+          <button className="icon-btn" onClick={() => nav(-1)} aria-label={T('เดือนก่อน', 'Previous month')}>‹</button>
           <div className="center">
-            <h2>{TH_MONTHS[cur.m]} {cur.y + 543}</h2>
-            <button className="link today-btn" onClick={() => { const n = new Date(); setCur({ y: n.getFullYear(), m: n.getMonth() }); setSel(todayStr()); }}>กลับไปวันนี้</button>
+            <h2>{monthsLong()[cur.m]} {yearOf(cur.y)}</h2>
+            <button className="link today-btn" onClick={() => { const n = new Date(); setCur({ y: n.getFullYear(), m: n.getMonth() }); setSel(todayStr()); }}>{T('กลับไปวันนี้', 'Back to today')}</button>
           </div>
-          <button className="icon-btn" onClick={() => nav(1)} aria-label="เดือนถัดไป">›</button>
+          <button className="icon-btn" onClick={() => nav(1)} aria-label={T('เดือนถัดไป', 'Next month')}>›</button>
         </div>
         <div className="cal-grid">
-          {TH_DAYS_S.map(d => <div key={d} className="cal-dow">{d}</div>)}
+          {daysShort().map(d => <div key={d} className="cal-dow">{d}</div>)}
           {cells.map(d => {
             const items = map.get(d) || [];
             const dt = parse(d);
@@ -103,8 +104,8 @@ export default function CalendarPage() {
           })}
         </div>
         <div className="legend">
-          <span><i className="dot-pink" />นัดเดท</span><span><i className="dot-mint" />ทริป</span><span><i className="dot-red" />ครบรอบ</span>
-          <span><i className="dot-yellow" />วันสำคัญ/วันเกิด</span><span><i className="dot-lav" />ไดอารี่</span>
+          <span><i className="dot-pink" />{T('นัดเดท', 'Dates')}</span><span><i className="dot-mint" />{T('ทริป', 'Trips')}</span><span><i className="dot-red" />{T('ครบรอบ', 'Anniversary')}</span>
+          <span><i className="dot-yellow" />{T('วันสำคัญ/วันเกิด', 'Special/Birthday')}</span><span><i className="dot-lav" />{T('ไดอารี่', 'Diary')}</span>
         </div>
       </section>
 
@@ -112,20 +113,20 @@ export default function CalendarPage() {
         <div className="section-title"><h2>{fmtDate(sel, { weekday: true })}</h2><span className="chip">{countdown(diffDays(today, sel))}</span></div>
         {selItems.length
           ? <div className="list">{selItems.map((i, n) => <Item key={n} i={i} />)}</div>
-          : <div className="card empty" style={{ padding: 18 }}><p>ยังไม่มีอะไรในวันนี้</p></div>}
+          : <div className="card empty" style={{ padding: 18 }}><p>{T('ยังไม่มีอะไรในวันนี้', 'Nothing on this day yet')}</p></div>}
         <div className="btn-row" style={{ marginTop: 12 }}>
-          <button className="btn" onClick={addEvent}>💕 เพิ่มนัด</button>
-          <button className="btn btn-mint" onClick={() => openTripForm(undefined, { startDate: sel })}>✈️ เพิ่มทริป</button>
+          <button className="btn" onClick={addEvent}>💕 {T('เพิ่มนัด', 'Add date')}</button>
+          <button className="btn btn-mint" onClick={() => openTripForm(undefined, { startDate: sel })}>✈️ {T('เพิ่มทริป', 'Add trip')}</button>
         </div>
       </section>
 
       <section className="section">
-        <div className="section-title"><h2>60 วันข้างหน้า</h2></div>
+        <div className="section-title"><h2>{T('60 วันข้างหน้า', 'Next 60 days')}</h2></div>
         {upcoming.length
           ? <div className="list">{upcoming.map(({ i, d }, n) => <Item key={n} i={i} date={d} />)}</div>
-          : <div className="card empty" style={{ padding: 18 }}><p>ว่างเลย ชวนกันไปเดทหน่อยมั้ย 👀</p></div>}
+          : <div className="card empty" style={{ padding: 18 }}><p>{T('ว่างเลย ชวนกันไปเดทหน่อยมั้ย 👀', 'All free — how about a date? 👀')}</p></div>}
       </section>
-      <Fab onClick={addEvent} />
+      <Fab onClick={addEvent} label={T('เพิ่ม', 'Add')} />
     </>
   );
 }

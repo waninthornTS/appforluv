@@ -1,6 +1,7 @@
 // พื้นหลังท้องฟ้าทั้งแอป + นาฬิกาด้านบน (เปลี่ยนตาม เช้า / กลางวัน / เย็น / กลางคืน)
 import { memo, useEffect } from 'react';
-import { TH_DAYS, TH_MONTHS_S } from '../lib/date';
+import { daysLong, monthsShort } from '../lib/date';
+import { isEn, T } from '../lib/i18n';
 import { periodOf, SKY, useNow } from '../lib/sky';
 
 // ดาวตำแหน่งคงที่ (ไม่สุ่มใหม่ทุกครั้งที่เปิด)
@@ -30,9 +31,9 @@ export function TopBar() {
     <div className="topbar">
       <div className="clock">
         <span>{SKY[periodOf(now.getHours())].icon}</span>
-        <b>{hh}<i className="colon">:</i>{mm} น.</b>
+        <b>{hh}<i className="colon">:</i>{mm}{T(' น.', '')}</b>
         <span className="clock-sep">·</span>
-        <span>วัน{TH_DAYS[now.getDay()]} {now.getDate()} {TH_MONTHS_S[now.getMonth()]}</span>
+        <span>{isEn() ? `${daysLong()[now.getDay()].slice(0, 3)} ${now.getDate()} ${monthsShort()[now.getMonth()]}` : `วัน${daysLong()[now.getDay()]} ${now.getDate()} ${monthsShort()[now.getMonth()]}`}</span>
       </div>
     </div>
   );

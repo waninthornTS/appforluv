@@ -2,13 +2,18 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Character, HEART_SVG } from '../../characters/Character';
 import type { CharKey } from '../../characters/svg';
+import { isEn, T } from '../../lib/i18n';
 import { PROFILE } from '../../lib/store';
 import type { Period } from '../../lib/sky';
 
 // คำพูดเวลาแตะ ({o} = ชื่ออีกคน)
-const LINES: Record<CharKey, string[]> = {
+const LINES_TH: Record<CharKey, string[]> = {
   ploy: ['วันนี้กินข้าวยัง?', 'เดี๋ยวจัดการให้เอง 😎', 'วางแผนทริปไว้แล้วนะ ✈️', '{o} น่ารักจัง', 'วันนี้เหนื่อยมั้ย?', 'ไปดูหนังกันมั้ย 🎬', 'อย่านอนดึกนะ', 'รักนะ 💕'],
   dream: ['{o}~ 🥺', 'น้องหมีคิดถึง {o} 🧸', 'ไปกินขนมกันน้า 🍰', 'ง่วงแล้ววว 😴', 'อยากไปเที่ยวด้วยกัน ✈️', 'หิวชานมไข่มุก 🧋', 'คิดถึงจัง~', 'รักนะ 💕'],
+};
+const LINES_EN: Record<CharKey, string[]> = {
+  ploy: ['Have you eaten yet?', "Leave it to me 😎", 'Trip plan is ready ✈️', '{o} is so cute', 'Tired today?', 'Movie night? 🎬', "Don't stay up late", 'Love you 💕'],
+  dream: ['{o}~ 🥺', 'Teddy misses {o} 🧸', "Let's get dessert 🍰", 'So sleepy~ 😴', "Let's travel together ✈️", 'Craving bubble tea 🧋', 'Miss you~', 'Love you 💕'],
 };
 
 const STARS = Array.from({ length: 14 }, (_, i) => ({ l: (i * 37) % 100, t: (i * 23) % 55 + 4, d: i * 0.3 }));
@@ -47,7 +52,7 @@ function Person({ who, name, other }: { who: CharKey; name: string; other: strin
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const { shown, done } = useTypewriter(line);
   const tap = () => {
-    const pool = LINES[who];
+    const pool = (isEn() ? LINES_EN : LINES_TH)[who];
     let next = pool[Math.floor(Math.random() * pool.length)].replace('{o}', other);
     if (next === line) next = pool[(pool.indexOf(next) + 1) % pool.length].replace('{o}', other);
     setLine(next);
@@ -68,7 +73,7 @@ function Person({ who, name, other }: { who: CharKey; name: string; other: strin
 
 export const Scene = memo(function Scene({ sky, days }: { sky: Period; days: number }) {
   return (
-    <section className={`scene sky-${sky}`} aria-label="Ploy และ Dream">
+    <section className={`scene sky-${sky}`} aria-label={T('Ploy และ Dream', 'Ploy and Dream')}>
       <div className="sun" />
       {sky === 'night' && STARS.map((s, i) => <i key={i} className="star" style={{ left: `${s.l}%`, top: `${s.t}%`, animationDelay: `${s.d}s` }} />)}
       {sky === 'night' && GOLD.map(([x, y], i) => (
