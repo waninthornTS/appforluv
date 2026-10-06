@@ -9,16 +9,12 @@ import '@fontsource/mali/latin-600.css';
 import '@fontsource/mali/latin-700.css';
 import './styles/app.css';
 import App from './App';
-import { initSound } from './lib/sound';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
   </StrictMode>,
 );
-
-// เสียงกดปุ่ม + เพลงกล่องดนตรี
-initSound();
 
 // ใช้งานออฟไลน์ได้ + อัปเดตเวอร์ชันใหม่อัตโนมัติ
 registerSW({ immediate: true });

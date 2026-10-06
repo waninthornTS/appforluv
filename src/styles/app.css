@@ -860,23 +860,3 @@ html[data-sky=night] .card.passport { box-shadow: 0 5px 0 #4A3EA8, 0 12px 26px r
 .sync-dot.syncing { background: #F2A93B; box-shadow: 0 0 0 4px rgba(242, 169, 59, .2); animation: twinkle 1s infinite; }
 .sync-dot.offline { background: #B8A99A; box-shadow: none; }
 .sync-dot.error { background: #FF5C7A; box-shadow: 0 0 0 4px rgba(255, 92, 122, .2); }
-
-/* ---------- ปุ่มเพลง + ตั้งค่าเสียง ---------- */
-.topbar { position: relative; }
-.music-btn {
-  position: absolute; right: 16px; top: calc(var(--safe-t) + 10px);
-  width: 36px; height: 36px; border-radius: 50%; font-size: 16px; display: grid; place-items: center;
-  background: var(--cream); border: 2.5px solid var(--beige); box-shadow: 0 3px 0 var(--beige-d);
-  transition: transform .1s, box-shadow .1s;
-}
-.music-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--beige-d); }
-.music-btn.on { animation: musicNod 1.6s ease-in-out infinite; }
-@keyframes musicNod { 50% { transform: rotate(-10deg) scale(1.05); } }
-.sound-card { margin-top: 22px; padding: 6px 14px; }
-.setting-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 0; text-align: left; font-weight: 700; font-size: 15px; color: var(--ink); }
-.setting-row + .setting-row { border-top: 2px dashed var(--beige); }
-.setting-row .sub { display: block; font-size: 12px; font-weight: 500; color: var(--ink-soft); }
-.toggle { flex: none; width: 50px; height: 30px; border-radius: 999px; background: var(--beige); position: relative; transition: background .2s; box-shadow: inset 0 2px 0 rgba(0, 0, 0, .06); }
-.toggle i { position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, .15); transition: transform .25s cubic-bezier(.3, 1.4, .5, 1); }
-.toggle.on { background: var(--leaf); }
-.toggle.on i { transform: translateX(20px); }

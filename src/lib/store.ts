@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { db, uid } from './db';
 import { notifyChange, useDataVersion } from './signal';
-import { sfx } from './sound';
 import { queueDelete, queueUpsert } from './sync';
 import type { Base, CollectionName, Collections } from './types';
 
@@ -49,14 +48,12 @@ export const coll = {
     const rec = { ...item, id: item.id || uid(), createdAt: item.createdAt || now, updatedAt: now } as Collections[N];
     await db.put(name, rec);
     notifyChange();
-    sfx('save');
     queueUpsert(name, rec);
     return rec;
   },
   async remove(name: CollectionName, id: string) {
     await db.del(name, id);
     notifyChange();
-    sfx('delete');
     queueDelete(name, id);
   },
 };

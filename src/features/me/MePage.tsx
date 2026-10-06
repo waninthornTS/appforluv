@@ -9,7 +9,6 @@ import { Seg } from '../../ui/controls';
 import { confirmSheet, toast } from '../../ui/overlays';
 import { openAboutSheet } from './AboutSheet';
 import { useSync } from '../../lib/sync';
-import { setSoundPrefs, useSoundPrefs } from '../../lib/sound';
 
 let lastWho: Who = 'A';
 
@@ -35,23 +34,6 @@ function PrefCard({ who, cat, items }: { who: Who; cat: AboutCat; items: AboutIt
       ) : (
         <button className="pref-empty" onClick={() => openAboutSheet(who, cat)}>ยังไม่มีรายการ · แตะเพื่อเพิ่ม</button>
       )}
-    </section>
-  );
-}
-
-function SoundCard() {
-  const { music, sfx } = useSoundPrefs();
-  const Switch = ({ on, onChange, label, sub, emoji }: { on: boolean; onChange: (v: boolean) => void; label: string; sub: string; emoji: string }) => (
-    <button className="setting-row" onClick={() => onChange(!on)} role="switch" aria-checked={on}>
-      <span className="pref-ico">{emoji}</span>
-      <span className="grow">{label}<span className="sub">{sub}</span></span>
-      <span className={`toggle ${on ? 'on' : ''}`}><i /></span>
-    </button>
-  );
-  return (
-    <section className="card sound-card">
-      <Switch emoji="🎵" label="เพลงประกอบ" sub="เพลงกล่องดนตรีเบาๆ" on={music} onChange={v => setSoundPrefs({ music: v })} />
-      <Switch emoji="🔔" label="เสียงตอนกด" sub="เสียงปุ่ม บันทึก และตัวละครพูด" on={sfx} onChange={v => setSoundPrefs({ sfx: v })} />
     </section>
   );
 }
@@ -119,7 +101,6 @@ export default function MePage() {
       {about && entries(ABOUT_CATS).map(([k]) => <PrefCard key={k} who={who} cat={k} items={mine.filter(a => a.cat === k)} />)}
       {about && <SameCard about={about} />}
 
-      <SoundCard />
       <SyncFooter />
       <p className="center small muted" style={{ marginTop: 28 }}>Ploy 💗 Dream · Our Little World v2</p>
     </>
