@@ -1,14 +1,13 @@
 // แผงเพิ่ม "ชอบ / ไม่ชอบ" — เลือกคน เลือกหมวด พิมพ์เอง หรือแตะคำแนะนำ เพิ่มได้หลายรายการต่อเนื่อง
 import { useRef, useState, type FormEvent } from 'react';
-import { T } from '../../lib/i18n';
-import { ABOUT_CATS, aboutSuggest, entries } from '../../lib/meta';
+import { ABOUT_CATS, ABOUT_SUGGEST, entries } from '../../lib/meta';
 import { coll, PROFILE, useCollection } from '../../lib/store';
 import type { AboutCat, Who } from '../../lib/types';
 import { Seg } from '../../ui/controls';
 import { openSheet, toast } from '../../ui/overlays';
 
 export function openAboutSheet(who: Who, cat: AboutCat) {
-  openSheet({ title: T('เพิ่มสิ่งที่ชอบ / ไม่ชอบ', 'Add likes / dislikes'), render: close => <AboutSheet initialWho={who} initialCat={cat} close={close} /> });
+  openSheet({ title: 'เพิ่มสิ่งที่ชอบ / ไม่ชอบ', render: close => <AboutSheet initialWho={who} initialCat={cat} close={close} /> });
 }
 
 function AboutSheet({ initialWho, initialCat, close }: { initialWho: Who; initialCat: AboutCat; close: () => void }) {
@@ -20,13 +19,13 @@ function AboutSheet({ initialWho, initialCat, close }: { initialWho: Who; initia
   const input = useRef<HTMLInputElement>(null);
 
   const existing = new Set((about || []).filter(a => a.who === who && a.cat === cat).map(a => a.text));
-  const suggestions = aboutSuggest(cat).filter(s => !existing.has(s));
+  const suggestions = ABOUT_SUGGEST[cat].filter(s => !existing.has(s));
   const c = ABOUT_CATS[cat];
 
   const add = async (value: string) => {
     const t = value.trim();
     if (!t) return;
-    if (existing.has(t)) return toast(T('มีอยู่แล้วน้า', 'Already on the list'));
+    if (existing.has(t)) return toast('มีอยู่แล้วน้า');
     await coll.save('about', { who, cat, text: t });
     setAdded(cur => [t, ...cur].slice(0, 6));
     setText('');
@@ -48,13 +47,13 @@ function AboutSheet({ initialWho, initialCat, close }: { initialWho: Who; initia
       <form className="composer" onSubmit={submit}>
         <span className={`composer-ico ${c.color}`}>{c.emoji}</span>
         <input ref={input} value={text} onChange={e => setText(e.target.value)} maxLength={40}
-          placeholder={T(`พิมพ์เอง ${c.ph}`, `Type your own, ${c.ph}`)} autoComplete="off" enterKeyHint="done" />
-        <button className="btn btn-primary btn-sm" disabled={!text.trim()}>{T('เพิ่ม', 'Add')}</button>
+          placeholder={`พิมพ์เอง ${c.ph}`} autoComplete="off" enterKeyHint="done" />
+        <button className="btn btn-primary btn-sm" disabled={!text.trim()}>เพิ่ม</button>
       </form>
 
       {suggestions.length > 0 && (
         <>
-          <div className="hint-label">{T('แตะเพื่อเพิ่มเร็วๆ', 'Tap to add quickly')}</div>
+          <div className="hint-label">แตะเพื่อเพิ่มเร็วๆ</div>
           <div className="suggest">
             {suggestions.map(s => <button key={s} type="button" className={`sug ${c.color}`} onClick={() => add(s)}>＋ {s}</button>)}
           </div>
@@ -62,10 +61,10 @@ function AboutSheet({ initialWho, initialCat, close }: { initialWho: Who; initia
       )}
 
       {added.length > 0 && (
-        <div className="added-note">✅ {T('เพิ่มแล้ว', 'Added')}: {added.join(', ')}</div>
+        <div className="added-note">✅ เพิ่มแล้ว: {added.join(', ')}</div>
       )}
 
-      <div className="sheet-actions"><button className="btn btn-ghost btn-block" type="button" onClick={close}>{T('เสร็จแล้ว', 'Done')}</button></div>
+      <div className="sheet-actions"><button className="btn btn-ghost btn-block" type="button" onClick={close}>เสร็จแล้ว</button></div>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 // หน้าต่างลอยทั้งหมดของแอป: bottom sheet, ยืนยัน, toast, ดูรูปเต็มจอ, หัวใจลอย
 // เรียกใช้แบบ imperative ได้จากทุกที่ เช่น openSheet({...}), toast('...'), confirmSheet({...})
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { T } from '../lib/i18n';
 import { createStore, useStore } from '../lib/signal';
 import { usePhotoURL } from '../lib/photos';
 
@@ -33,14 +32,14 @@ function Sheet({ entry }: { entry: SheetEntry }) {
       <div className="sheet-backdrop" onClick={close} />
       <div className="sheet" role="dialog" aria-modal="true" aria-label={entry.title}>
         <div className="sheet-handle" />
-        <div className="sheet-head"><h3>{entry.title}</h3><button className="icon-btn" onClick={close} aria-label={T('ปิด', 'Close')}>✕</button></div>
+        <div className="sheet-head"><h3>{entry.title}</h3><button className="icon-btn" onClick={close} aria-label="ปิด">✕</button></div>
         <div className="sheet-body">{entry.render(close)}</div>
       </div>
     </div>
   );
 }
 
-export function confirmSheet({ title = T('แน่ใจนะ?', 'Are you sure?'), message = '', emoji = '🥺', ok = T('ยืนยัน', 'Confirm'), danger = true }) {
+export function confirmSheet({ title = 'แน่ใจนะ?', message = '', emoji = '🥺', ok = 'ยืนยัน', danger = true }) {
   return new Promise<boolean>(resolve => {
     let answer = false;
     openSheet({
@@ -51,7 +50,7 @@ export function confirmSheet({ title = T('แน่ใจนะ?', 'Are you sure
           <div className="big">{emoji}</div>
           <p>{message}</p>
           <div className="btn-row">
-            <button className="btn btn-ghost" onClick={close}>{T('ยกเลิก', 'Cancel')}</button>
+            <button className="btn btn-ghost" onClick={close}>ยกเลิก</button>
             <button className={`btn ${danger ? 'btn-danger' : 'btn-primary'}`} onClick={() => { answer = true; close(); }}>{ok}</button>
           </div>
         </div>
@@ -95,7 +94,7 @@ function Lightbox() {
       <div className="track" ref={track} onClick={e => { if (e.target === track.current) close(); }}>
         {lb.ids.map(id => <LightImg key={id} id={id} />)}
       </div>
-      <button className="close" onClick={close} aria-label={T('ปิด', 'Close')}>✕</button>
+      <button className="close" onClick={close} aria-label="ปิด">✕</button>
     </div>
   );
 }

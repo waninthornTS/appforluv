@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { addDays, countdown, diffDays, fmtDate, nextYearly, todayStr, ymd } from '../../lib/date';
-import { T } from '../../lib/i18n';
 import { EVENT_TYPES, MEM_CATS } from '../../lib/meta';
 import { usePeriod } from '../../lib/sky';
 import { PROFILE, useCollection } from '../../lib/store';
@@ -13,14 +12,14 @@ function milestones(today: string) {
   const days = diffDays(PROFILE.startDate, today) + 1; // วันแรกที่คบ = วันที่ 1
   const list: { emo: string; t: string; date: string }[] = [];
   const n100 = Math.max(100, Math.ceil(days / 100) * 100);
-  list.push({ emo: '💯', t: T(`ครบ ${n100.toLocaleString()} วัน`, `${n100.toLocaleString()} days`), date: addDays(PROFILE.startDate, n100 - 1) });
+  list.push({ emo: '💯', t: `ครบ ${n100.toLocaleString()} วัน`, date: addDays(PROFILE.startDate, n100 - 1) });
   const ann = nextYearly(PROFILE.startDate, today);
   const years = +ann.slice(0, 4) - +PROFILE.startDate.slice(0, 4);
-  if (years > 0) list.push({ emo: '💍', t: T(`ครบรอบ ${years} ปี`, `${years}-year anniversary`), date: ann });
+  if (years > 0) list.push({ emo: '💍', t: `ครบรอบ ${years} ปี`, date: ann });
   const n1000 = Math.ceil(days / 1000) * 1000;
-  if (n1000 > n100) list.push({ emo: '🏆', t: T(`ครบ ${n1000.toLocaleString()} วัน`, `${n1000.toLocaleString()} days`), date: addDays(PROFILE.startDate, n1000 - 1) });
-  list.push({ emo: '🎂', t: T(`วันเกิด ${PROFILE.nameA}`, `${PROFILE.nameA}'s birthday`), date: nextYearly(PROFILE.birthA, today) });
-  list.push({ emo: '🎂', t: T(`วันเกิด ${PROFILE.nameB}`, `${PROFILE.nameB}'s birthday`), date: nextYearly(PROFILE.birthB, today) });
+  if (n1000 > n100) list.push({ emo: '🏆', t: `ครบ ${n1000.toLocaleString()} วัน`, date: addDays(PROFILE.startDate, n1000 - 1) });
+  list.push({ emo: '🎂', t: `วันเกิด ${PROFILE.nameA}`, date: nextYearly(PROFILE.birthA, today) });
+  list.push({ emo: '🎂', t: `วันเกิด ${PROFILE.nameB}`, date: nextYearly(PROFILE.birthB, today) });
   return list.map(m => ({ ...m, left: diffDays(today, m.date) })).sort((a, b) => a.left - b.left);
 }
 
@@ -39,7 +38,7 @@ export default function HomePage() {
       sub: [e.time, e.place].filter(Boolean).join(' · '), href: '#calendar',
     })),
     ...(trips || []).filter(t => t.startDate && (t.endDate || t.startDate) >= today && t.status !== 'done').map(t => ({
-      key: t.id, date: t.startDate!, title: T(`ทริป ${t.place}`, `Trip: ${t.place}`), emo: '✈️', color: 'mint' as Color, sub: t.scope === 'international' ? T('ต่างประเทศ', 'Abroad') : T('ในประเทศ', 'Thailand'), href: '#travel',
+      key: t.id, date: t.startDate!, title: `ทริป ${t.place}`, emo: '✈️', color: 'mint' as Color, sub: t.scope === 'international' ? 'ต่างประเทศ' : 'ในประเทศ', href: '#travel',
     })),
   ].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3), [events, trips, today]);
 
@@ -54,8 +53,8 @@ export default function HomePage() {
       {isIOS && !standalone && !hideHint && (
         <div className="card install-hint">
           <div style={{ fontSize: 30 }}>📲</div>
-          <div className="small">{T('ติดตั้งเป็นแอป: กดปุ่ม ', 'Install as an app: tap ')}<b>{T('แชร์', 'Share')}</b>{T(' ด้านล่าง แล้วเลือก ', ' below, then choose ')}<b>{T('“เพิ่มไปยังหน้าจอโฮม”', '“Add to Home Screen”')}</b></div>
-          <button className="x" aria-label={T('ปิด', 'Close')} onClick={() => { try { localStorage.setItem('hideInstallHint', '1'); } catch { /* ignore */ } setHideHint(true); }}>✕</button>
+          <div className="small">ติดตั้งเป็นแอป: กดปุ่ม <b>แชร์</b> ด้านล่าง แล้วเลือก <b>“เพิ่มไปยังหน้าจอโฮม”</b></div>
+          <button className="x" aria-label="ปิด" onClick={() => { try { localStorage.setItem('hideInstallHint', '1'); } catch { /* ignore */ } setHideHint(true); }}>✕</button>
         </div>
       )}
 
@@ -68,16 +67,16 @@ export default function HomePage() {
       <Scene sky={sky} days={days} />
 
       <section className="card counter">
-        <div className="label">{T('เรารักกันมาแล้ว', "We've been in love for")}</div>
-        <div className="num">{days.toLocaleString()} <small>{T('วัน', 'days')}</small></div>
+        <div className="label">เรารักกันมาแล้ว</div>
+        <div className="num">{days.toLocaleString()} <small>วัน</small></div>
         <div className="ymd">
-          <div><b>{span.y}</b><span>{T('ปี', 'yrs')}</span></div><div><b>{span.m}</b><span>{T('เดือน', 'mos')}</span></div><div><b>{span.d}</b><span>{T('วัน', 'days')}</span></div>
+          <div><b>{span.y}</b><span>ปี</span></div><div><b>{span.m}</b><span>เดือน</span></div><div><b>{span.d}</b><span>วัน</span></div>
         </div>
-        <p className="small muted" style={{ marginTop: 10, position: 'relative' }}>{T('ตั้งแต่ ', 'Since ')}{fmtDate(PROFILE.startDate, { long: true, weekday: true })}</p>
+        <p className="small muted" style={{ marginTop: 10, position: 'relative' }}>ตั้งแต่ {fmtDate(PROFILE.startDate, { long: true, weekday: true })}</p>
       </section>
 
       <section className="section">
-        <div className="section-title"><h2>{T('วันสำคัญที่กำลังมา', 'Coming up')}</h2></div>
+        <div className="section-title"><h2>วันสำคัญที่กำลังมา</h2></div>
         <div className="hscroll">
           {milestones(today).map(m => (
             <div key={m.t} className="card milestone">
@@ -89,7 +88,7 @@ export default function HomePage() {
       </section>
 
       <section className="section">
-        <div className="section-title"><h2>{T('นัดถัดไปของเรา', 'Our next plans')}</h2><a href="#calendar">{T('ดูปฏิทิน', 'Calendar')}</a></div>
+        <div className="section-title"><h2>นัดถัดไปของเรา</h2><a href="#calendar">ดูปฏิทิน</a></div>
         {upcoming.length ? (
           <div className="list">
             {upcoming.map(u => (
@@ -100,11 +99,11 @@ export default function HomePage() {
               </a>
             ))}
           </div>
-        ) : events && <a className="card empty" href="#calendar" style={{ display: 'block' }}><div className="emo">🗓️</div><p>{T('ยังไม่มีนัดเลย ลองเพิ่มนัดเดทดูสิ', 'No plans yet — add a date!')}</p></a>}
+        ) : events && <a className="card empty" href="#calendar" style={{ display: 'block' }}><div className="emo">🗓️</div><p>ยังไม่มีนัดเลย ลองเพิ่มนัดเดทดูสิ</p></a>}
       </section>
 
       <section className="section">
-        <div className="section-title"><h2>{T('ความทรงจำล่าสุด', 'Latest memories')}</h2><a href="#diary">{T('ทั้งหมด', 'See all')}</a></div>
+        <div className="section-title"><h2>ความทรงจำล่าสุด</h2><a href="#diary">ทั้งหมด</a></div>
         {recent.length ? (
           <div className="hscroll" style={{ paddingTop: 14 }}>
             {recent.map(m => (
@@ -115,7 +114,7 @@ export default function HomePage() {
               </button>
             ))}
           </div>
-        ) : memories && <a className="card empty" href="#diary" style={{ display: 'block' }}><div className="emo">🎬</div><p>{T('วันนี้ไปดูหนังเรื่องอะไรมา? มาจดไว้กัน', 'What movie did we watch today? Write it down!')}</p></a>}
+        ) : memories && <a className="card empty" href="#diary" style={{ display: 'block' }}><div className="emo">🎬</div><p>วันนี้ไปดูหนังเรื่องอะไรมา? มาจดไว้กัน</p></a>}
       </section>
     </>
   );
