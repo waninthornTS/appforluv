@@ -3,7 +3,6 @@
   "private": true,
   "version": "2.0.0",
   "type": "module",
-  "description": "Ploy & Dream — แอปคู่รักน่ารักๆ (PWA สำหรับ iPhone)",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",

@@ -13,7 +13,6 @@ export default defineConfig({
       manifest: {
         name: 'P',
         short_name: 'P',
-        description: 'โลกใบเล็กของ Ploy & Dream — วันครบรอบ ไดอารี่ ปฏิทิน และทริปเที่ยว',
         lang: 'th',
         start_url: './',
         scope: './',
