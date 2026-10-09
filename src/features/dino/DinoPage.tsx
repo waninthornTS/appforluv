@@ -74,14 +74,14 @@ export default function DinoPage() {
   return <DinoHome key={d.id} d={d} all={all} now={now} />;
 }
 
-function Head({ d, title, sub }: { d?: Dino; title: string; sub: string }) {
+function Head({ d, title, sub }: { d?: Dino; title: string; sub?: string }) {
   const sound = useSound();
   const len = [...title].length;
   return (
     <header className="dino-head">
       <a className="round" href="#home" aria-label="กลับหน้าแรก">‹</a>
       <button className={`round snd ${sound ? 'on' : ''}`} onClick={() => setSound(!sound)} aria-label={sound ? 'ปิดเสียง' : 'เปิดเสียง'}>{sound ? '🔊' : '🔇'}</button>
-      <div className="name-box"><div className="nm ellipsis" style={{ fontSize: len > 12 ? 20 : len > 8 ? 24 : undefined }}>{title}</div><div className="sp ellipsis">{sub}</div></div>
+      <div className="name-box"><div className="nm ellipsis" style={{ fontSize: len > 12 ? 20 : len > 8 ? 24 : undefined }}>{title}</div>{sub && <div className="sp ellipsis">{sub}</div>}</div>
       <span className="round ghost" />
       {d ? <button className="round pen" onClick={() => openNameSheet(d)} aria-label="ตั้งชื่อ">✏️</button> : <span className="round ghost" />}
     </header>
@@ -330,7 +330,7 @@ function NoDino() {
   const start = () => startEgg([]);
   return (
     <div className="dino-page">
-      <Head title="เลี้ยงไดโน" sub="เลี้ยงด้วยกันตัวเดียว ซิงก์ทั้งสองเครื่อง" />
+      <Head title="เลี้ยงไดโน" />
       <Room kind="home" night={isNight()} className="egg-room">
         <div className="egg mystery"><DinoSprite species="trex" stage="egg" size={230} anim="none" /></div>
       </Room>
