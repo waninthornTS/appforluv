@@ -3,10 +3,10 @@
 -- วิธีใช้: Supabase Dashboard → SQL Editor → New query → วางทั้งไฟล์ → Run
 -- =========================================================
 
--- ตารางเดียวเก็บทุกอย่าง (ไดอารี่ นัด ทริป ชอบ/ไม่ชอบ) เป็น JSON
+-- ตารางเดียวเก็บทุกอย่าง (ไดอารี่ นัด ทริป ชอบ/ไม่ชอบ ไดโน) เป็น JSON
 create table if not exists public.items (
   id          text primary key,
-  coll        text not null check (coll in ('memories', 'events', 'trips', 'about')),
+  coll        text not null check (coll in ('memories', 'events', 'trips', 'about', 'dino')),
   data        jsonb not null default '{}'::jsonb,
   deleted     boolean not null default false,
   updated_at  timestamptz not null default now()

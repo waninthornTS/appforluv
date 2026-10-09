@@ -58,11 +58,36 @@ export interface AboutItem extends Base {
 /** รูปในเครื่อง: data (ArrayBuffer) คือรูปแบบใหม่, blob คือรูปแบบเก่า */
 export interface PhotoRec { id: string; data?: ArrayBuffer; type?: string; blob?: Blob; createdAt: number }
 
+// ---------- เลี้ยงไดโน (เลี้ยงด้วยกันตัวเดียว ซิงก์สองเครื่อง) ----------
+export type DinoSpecies = 'trex' | 'styra' | 'pachy' | 'galli' | 'diplo' | 'elas' | 'ptero' | 'flame' | 'galaxy' | 'phoenix' | 'crystal' | 'lava';
+/** ค่าพลัง ณ เวลา at (0..100) แล้วค่อยๆ ลดลงตามเวลาจริง */
+export interface Meter { v: number; at: number }
+export interface Dino extends Base {
+  species: DinoSpecies;
+  name?: string;
+  status: 'egg' | 'alive' | 'grown' | 'star'; // star = จากไปเป็นดาวแล้ว
+  warm: { A: number; B: number }; // อุ่นไข่ ต้องครบทั้งสองคน
+  hatchedAt?: number;
+  endedAt?: number; // เวลาที่โตครบ หรือกลายเป็นดาว
+  food: Meter;
+  fun: Meter;
+  bath: Meter;
+  energy: Meter;
+  poops: number[]; // เวลาที่อึจะโผล่ (ms)
+  sleep?: { since: number } | null;
+  sickSince?: number | null;
+  curedAt?: number;
+  everSick?: boolean;
+  bathDays: string[]; // YYYY-MM-DD ที่ได้อาบน้ำ
+  workoutDays: string[]; // YYYY-MM-DD ที่ได้ออกกำลัง
+}
+
 export interface Collections {
   memories: Memory;
   events: CalEvent;
   trips: Trip;
   about: AboutItem;
+  dino: Dino;
 }
 export type CollectionName = keyof Collections;
 

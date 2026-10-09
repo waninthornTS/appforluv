@@ -5,17 +5,19 @@ import { SkyBackground, TopBar } from './ui/Sky';
 import { TabBar, type Tab, TABS } from './ui/TabBar';
 
 // โหลดแต่ละหน้าเมื่อเปิดเท่านั้น (แอปเปิดเร็วขึ้น)
-const pages: Record<Tab, LazyExoticComponent<ComponentType>> = {
+type Route = Tab | 'dino';
+const pages: Record<Route, LazyExoticComponent<ComponentType>> = {
   home: lazy(() => import('./features/home/HomePage')),
   diary: lazy(() => import('./features/diary/DiaryPage')),
   calendar: lazy(() => import('./features/calendar/CalendarPage')),
   travel: lazy(() => import('./features/travel/TravelPage')),
   me: lazy(() => import('./features/me/MePage')),
+  dino: lazy(() => import('./features/dino/DinoPage')), // เปิดจากไอคอนไดโนมุมขวาบนของหน้าแรก
 };
 
-const readTab = (): Tab => {
-  const h = location.hash.slice(1) as Tab;
-  return TABS.includes(h) ? h : 'home';
+const readTab = (): Route => {
+  const h = location.hash.slice(1);
+  return h === 'dino' || TABS.includes(h as Tab) ? (h as Route) : 'home';
 };
 
 initSync();
@@ -33,7 +35,7 @@ export default function App() {
   useEffect(() => {
     const t = setTimeout(() => {
       import('./features/diary/DiaryPage'); import('./features/calendar/CalendarPage');
-      import('./features/travel/TravelPage'); import('./features/me/MePage');
+      import('./features/travel/TravelPage'); import('./features/me/MePage'); import('./features/dino/DinoPage');
     }, 1500);
     return () => clearTimeout(t);
   }, []);
@@ -42,7 +44,7 @@ export default function App() {
   return (
     <>
       <SkyBackground />
-      <TopBar />
+      {tab !== 'dino' && <TopBar />}{/* หน้าเลี้ยงไดโนไม่ต้องมีแถบเวลา */}
       <main className="view" key={tab}>
         <Suspense fallback={<div className="page-loading"><div className="spinner" /></div>}>
           <Page />

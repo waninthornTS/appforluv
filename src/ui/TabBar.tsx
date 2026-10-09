@@ -17,7 +17,7 @@ const ITEMS: { tab: Tab; label: string; icon: ReactElement }[] = [
   { tab: 'me', label: 'เรา', icon: <path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z" /> },
 ];
 
-export function TabBar({ active }: { active: Tab }) {
+export function TabBar({ active }: { active: string }) {
   return (
     <nav className="tabbar" aria-label="เมนูหลัก">
       {ITEMS.map(it => (

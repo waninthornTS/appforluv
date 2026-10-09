@@ -860,3 +860,77 @@ html[data-sky=night] .card.passport { box-shadow: 0 5px 0 #4A3EA8, 0 12px 26px r
 .sync-dot.syncing { background: #F2A93B; box-shadow: 0 0 0 4px rgba(242, 169, 59, .2); animation: twinkle 1s infinite; }
 .sync-dot.offline { background: #B8A99A; box-shadow: none; }
 .sync-dot.error { background: #FF5C7A; box-shadow: 0 0 0 4px rgba(255, 92, 122, .2); }
+
+/* ---------- ไอคอนไดโนมุมขวาบน (หน้าแรก) → เกมเลี้ยงไดโน ---------- */
+.dino-btn { position: relative; flex: none; width: 54px; height: 54px; }
+.dino-btn .disc {
+  position: absolute; inset: 0; border-radius: 50%; overflow: hidden; display: grid; place-items: end center;
+  background: radial-gradient(circle at 50% 120%, #8FD47E 0 38%, #CBEFFF 39%); border: 3px solid var(--cream);
+  box-shadow: 0 4px 0 var(--beige-d), 0 8px 16px rgba(60, 40, 90, .18);
+}
+.dino-btn .disc .dino-sprite { margin-bottom: 1px; animation: dinoPeek 3.6s ease-in-out infinite; transform-origin: 50% 100%; }
+.dino-btn .disc .emo { font-size: 28px; line-height: 1; margin-bottom: 9px; }
+.dino-btn:active .disc { transform: translateY(2px); box-shadow: 0 2px 0 var(--beige-d); }
+.dino-btn .dot {
+  position: absolute; top: -3px; right: -3px; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 12px; font-weight: 700; color: #fff; background: var(--pink-d); border: 2px solid #fff; animation: beat 1.4s ease-in-out infinite;
+}
+@keyframes dinoPeek { 0%, 70%, 100% { transform: rotate(0); } 78% { transform: rotate(-8deg); } 86% { transform: rotate(7deg); } }
+
+/* ---------- ตัวไดโน (SVG) + ท่าทางขยับ — ใช้ทั้งหน้าแรกและหน้าเกม ---------- */
+.dino-sprite { display: inline-block; flex: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.dino-sprite svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.dino-sprite.is-star { filter: grayscale(.3) brightness(1.1) opacity(.8) drop-shadow(0 0 12px #FFE58A); }
+.dz-anim-idle .dz-eye { animation: dzBlink 4.6s infinite; }
+.dz-anim-idle .dz-tail { animation: dzWag 2.4s ease-in-out infinite; }
+.dz-anim-idle .dz-bodyg { animation: dzBreathe 2.8s ease-in-out infinite; }
+.dz-anim-idle .dz-headg { animation: dzNod 3.8s ease-in-out infinite; }
+.dz-anim-idle .dz-wing { animation: dzFlap 1.6s ease-in-out infinite; }
+.dz-anim-run .dz-leg-a { animation: dzStep .26s ease-in-out infinite alternate; }
+.dz-anim-run .dz-leg-b { animation: dzStep .26s ease-in-out infinite alternate-reverse; }
+.dz-anim-run .dz-tail { animation: dzWag .5s ease-in-out infinite; }
+.dz-anim-run .dz-headg { animation: dzBob .26s ease-in-out infinite alternate; }
+.dz-anim-run .dz-wing { animation: dzFlap .3s ease-in-out infinite; }
+.dz-chomp { animation: dzChomp .32s ease-in-out infinite alternate; }
+@keyframes dzBlink { 0%, 94%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+@keyframes dzWag { 50% { transform: rotate(7deg); } }
+@keyframes dzBreathe { 50% { transform: scale(1.015, 1.035); } }
+@keyframes dzNod { 50% { transform: rotate(-2.5deg); } }
+@keyframes dzFlap { 50% { transform: rotate(-9deg) scaleY(.92); } }
+@keyframes dzStep { from { transform: rotate(-24deg); } to { transform: rotate(24deg); } }
+@keyframes dzBob { to { transform: translateY(-4px) rotate(-3deg); } }
+@keyframes dzChomp { to { transform: scaleY(.25); } }
+
+.dz-m-sick .dz-all { filter: saturate(.6) sepia(.18) hue-rotate(35deg) brightness(.97); }
+
+/* ---------- ไดโนแบบรูป 3D (เจนจาก Gemini) — ซ้อนเฟรมแล้วสลับแบบจางเข้า + โยก/หายใจ ให้ดูมีชีวิต ---------- */
+.dz-photo { position: relative; display: inline-block; }
+.dz-photo .dz-body { position: absolute; inset: 0; transform-origin: 50% 100%; }
+.dz-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; transition: opacity .08s linear;
+  filter: drop-shadow(0 5px 4px rgba(60, 40, 30, .16)); -webkit-user-drag: none; user-select: none; }
+.dz-photo img.off { opacity: 0; }
+.dino-sprite.flip { transform: scaleX(-1); }
+.dz-photo.dz-anim-idle .dz-body { animation: phIdle 3.4s ease-in-out infinite; }
+.dz-photo.dz-anim-run .dz-body { animation: phRun .34s ease-in-out infinite alternate; }
+.dz-photo.dz-m-eat .dz-body, .dz-photo.dz-p-chew .dz-body { animation: phChew .3s ease-in-out infinite alternate; }
+.dz-photo.dz-m-happy .dz-body { animation: phHappy .8s ease-in-out infinite; }
+.dz-photo.dz-m-sick .dz-body { animation: phSick 3s ease-in-out infinite; }
+.dz-photo.dz-m-sleep .dz-body, .dz-photo.dz-p-sleep .dz-body { animation: phSleep 3.6s ease-in-out infinite; }
+.dz-photo.dz-p-bath .dz-body { animation: phSplash 1.1s ease-in-out infinite; }
+.dz-photo.dz-p-eatdown .dz-body { animation: none; }
+.dz-photo.dz-m-sad img { filter: saturate(.75) brightness(.96) drop-shadow(0 5px 4px rgba(60, 40, 30, .16)); }
+@keyframes phIdle { 0%, 100% { transform: rotate(0) scale(1); } 25% { transform: rotate(-1.4deg) scale(1.012, 1.03); } 50% { transform: rotate(0) scale(1, 1.005); } 75% { transform: rotate(1.2deg) scale(1.012, 1.025); } }
+@keyframes phRun { from { transform: rotate(1.6deg) scale(1, 1); } to { transform: rotate(-1.6deg) scale(1.012, .988); } }
+@keyframes phChew { to { transform: scale(1.025, .965) translateY(1px); } }
+@keyframes phHappy { 0%, 100% { transform: translateY(0) scale(1); } 40% { transform: translateY(-8px) scale(.98, 1.03); } 70% { transform: translateY(0) scale(1.04, .96); } }
+@keyframes phSick { 0%, 100% { transform: rotate(0) scale(1); } 50% { transform: rotate(-2.5deg) scale(1.01, .985); } }
+@keyframes phSleep { 50% { transform: scale(1.02, 1.045); } }
+@keyframes phSplash { 0%, 100% { transform: rotate(-2deg) translateY(0); } 50% { transform: rotate(2deg) translateY(-4px); } }
+.egg-crack { position: absolute; left: 22%; right: 22%; top: 44%; height: 14%; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 30'%3E%3Cpath d='M2 15 l14 9 l12 -12 l14 13 l14 -12 l14 12 l14 -10 l14 8' fill='none' stroke='%235B4636' stroke-width='4' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+.egg-crack.c2::after { content: ''; position: absolute; left: 35%; top: -170%; width: 30%; height: 140%;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 40'%3E%3Cpath d='M15 2 l-6 10 l8 8 l-6 10 l6 8' fill='none' stroke='%235B4636' stroke-width='3.4' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+/* เปลี่ยนท่าแบบจางเข้า-จางออก ไม่กระพริบ */
+/* รูปใหม่อยู่ข้างใต้ทึบเต็มที่ รูปเก่าซ้อนข้างบนแล้วค่อยๆ จางหาย — ตัวไม่โปร่งแว้บระหว่างเปลี่ยน */
+.dz-photo img.fprev { z-index: 2; animation: phOut .2s ease-out forwards; }
+@keyframes phOut { to { opacity: 0; } }

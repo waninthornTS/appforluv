@@ -5,6 +5,7 @@ import { usePeriod } from '../../lib/sky';
 import { PROFILE, useCollection } from '../../lib/store';
 import type { Color } from '../../lib/types';
 import { Photo } from '../../ui/controls';
+import { DinoButton } from '../dino/DinoButton';
 import { openMemoryDetail } from '../diary/sheets';
 import { Scene } from './Scene';
 
@@ -62,6 +63,7 @@ export default function HomePage() {
         <div className="grow">
           <h1 className="ellipsis">{PROFILE.nameA} <span className="amp">♥</span> {PROFILE.nameB}</h1>
         </div>
+        <DinoButton />
       </header>
 
       <Scene sky={sky} days={days} />
