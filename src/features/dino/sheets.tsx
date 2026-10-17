@@ -72,7 +72,7 @@ function HistoryRow({ d }: { d: Dino }) {
     <div className="card dino-hist">
       <DinoSprite species={d.species} stage={v.stage} size={46} className={d.status === 'star' ? 'is-star' : ''} />
       <div className="grow">
-        <div className="t ellipsis">{nameOf(d)} {d.status === 'grown' ? '👑' : '⭐'}</div>
+        <div className="t ellipsis">{nameOf(d)} {d.status === 'grown' ? '🌳' : '⭐'}</div>
         <div className="s">{SPECIES[d.species].name} · เลี้ยงด้วยกัน {v.day} วัน{d.endedAt ? ` · ${fmtDate(toStr(new Date(d.endedAt)))}` : ''}</div>
       </div>
     </div>

@@ -157,7 +157,7 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
   };
 
   const stage = v.stage;
-  const sub = v.grownUp ? `${info.name} · 👑 อยู่ด้วยกัน ${v.age} วัน` : `${info.name} · ${STAGE_NAME[stage]} วันที่ ${v.day}/${GROW_DAYS}`;
+  const sub = v.grownUp ? `${info.name} · อยู่ด้วยกัน ${v.age} วัน` : `${info.name} · ${STAGE_NAME[stage]} วันที่ ${v.day}/${GROW_DAYS}`;
   const sleeping = v.sleeping;
   const n = needs(v, now);
   const hour = new Date(now).getHours();
@@ -237,7 +237,6 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
           <Actor a={a} species={d.species} stage={stage} mood={mood} pose={pose} react={fx?.kind === 'hug' ? 'squish' : fx?.kind === 'pet' ? 'joy' : ''}
             className={fx?.kind === 'sparkle' ? '' : v.m.bath <= 0 ? 'grubby rotten' : v.m.bath < 30 ? 'grubby' : ''}
             onTap={() => { if (!fx) { play('pet', 1300); sfx.pet(); } }}>
-            {v.grownUp && <span className="actor-crown">👑</span>}
             {v.m.bath <= 0 && fx?.kind !== 'sparkle' && <><span className="stink-lines"><i /><i /><i /></span><span className="body-fly">🪰</span></>}
             {fx?.kind === 'pet' && <span className="pet-hearts" key={`p${fx.k}`}><i>💗</i><i>💕</i><i>💗</i></span>}
             {fx?.kind === 'hug' && <div className="hug-ring" key={`h${fx.k}`}><span className="big-heart">💗</span>{Array.from({ length: 12 }, (_, i) => <i key={i} style={{ '--a': `${i * 30}deg`, '--d': `${(i % 3) * .12}s` } as React.CSSProperties}>{['💗', '💖', '💕'][i % 3]}</i>)}</div>}
@@ -351,7 +350,6 @@ function EndedView({ d, v, all }: { d: Dino; v: DinoView; all: Dino[] }) {
         {grown
           ? <div className="actor-layer">
               <Actor a={a} species={d.species} stage="adult" mood={joy ? 'happy' : 'normal'} pose={joy ? 'happy' : undefined} react={joy ? 'joy' : ''} onTap={pet}>
-                <span className="actor-crown">👑</span>
                 {joy > 0 && <span className="pet-hearts" key={`p${joy}`}><i>💗</i><i>💕</i><i>💗</i></span>}
               </Actor>
             </div>

@@ -146,7 +146,6 @@
 
 /* ---------- จบการเลี้ยง ---------- */
 .dino-room.ended .pet { animation: petBounce 2.4s ease-in-out infinite; }
-.dino-room.ended .crown { position: absolute; left: 50%; top: 22px; z-index: 5; font-size: 42px; transform: translateX(-50%); animation: petBounce 1.6s ease-in-out infinite; }
 .dino-room.ended .big-star { position: absolute; right: 30px; top: 26px; z-index: 5; font-size: 40px; filter: drop-shadow(0 0 12px #FFE58A); animation: twinkle 2.5s ease-in-out infinite; }
 .dino-end-card { margin-top: 14px; text-align: center; }
 .dino-end-card .big { font-size: 40px; line-height: 1.1; }
@@ -155,10 +154,7 @@
 .new-egg:active .dino-sprite { transform: scale(.92); }
 .new-egg.in-home { right: auto; left: 5%; bottom: 13%; align-items: flex-start; }
 .new-egg.in-home .dino-sprite { margin: 0 0 0 6px; }
-.actor-crown { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); font-size: 30px; line-height: 1; pointer-events: none; animation: crownBob 1.6s ease-in-out infinite; }
-@keyframes crownBob { 50% { transform: translateX(-50%) translateY(-4px); } }
 .dino-room.ended.has-egg .pet { left: 36%; }
-.dino-room.ended.has-egg .crown { left: 36%; }
 .new-egg { position: absolute; right: 5%; bottom: 14%; z-index: 25; padding: 0; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .new-egg .dino-sprite { margin-right: 6px; transform-origin: 50% 95%; animation: newEggRock 2.6s ease-in-out infinite; }
 @keyframes newEggRock { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-6deg); } 92% { transform: rotate(6deg); } }

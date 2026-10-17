@@ -24,7 +24,7 @@ export const COMMON: DinoSpecies[] = ['trex', 'styra', 'pachy', 'galli', 'diplo'
 export const RARE: DinoSpecies[] = ['galaxy', 'phoenix', 'crystal', 'lava'];
 
 export const STAGE_NAME: Record<Stage, string> = { egg: 'ไข่', baby: 'วัยเด็ก', teen: 'วัยรุ่น', adult: 'โตเต็มวัย' };
-export const STAGE_EMOJI: Record<Stage, string> = { egg: '🥚', baby: '🐣', teen: '🦖', adult: '👑' };
+export const STAGE_EMOJI: Record<Stage, string> = { egg: '🥚', baby: '🐣', teen: '🦖', adult: '🦕' };
 
 // ---------- อาหาร ----------
 // diet: กินเนื้อ / กินพืช / กินได้ทุกตัว — ตรงกับที่ไดโนชอบจะอิ่มและดีใจกว่า
