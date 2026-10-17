@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/apple-touch-icon.png'],
+      includeAssets: ['icons/bear-apple-touch.png'],
       manifest: {
         name: 'P',
         short_name: 'P',
@@ -21,9 +21,10 @@ export default defineConfig({
         background_color: '#FFF6F9',
         theme_color: '#FFF6F9',
         icons: [
-          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          // ชื่อไฟล์ใหม่ (หมี) จะได้ไม่ติดรูปหัวใจเก่าที่เครื่องเก็บไว้
+          { src: 'icons/bear-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icons/bear-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icons/bear-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {

@@ -383,7 +383,6 @@ function GardenView({ all }: { all: Dino[] }) {
             <span className="stone"><i>✿</i></span><span className="g-name">{nameOf(g)}</span>
           </button>
         ))}</div>}
-        {!mine.length && !graves.length && <div className="garden-empty">🌱 เลี้ยงให้โตครบ {GROW_DAYS} วัน<br />แล้วจะได้มาวิ่งเล่นที่นี่น้า</div>}
       </div>
     </div>
   );
