@@ -16,8 +16,8 @@ export const SPECIES: Record<DinoSpecies, SpeciesInfo> = {
   flame: { name: 'ไดเมโทรดอน', how: 'สุ่มได้จากไข่ใบใหม่', diet: 'meat' },
   galaxy: { name: 'พาราซอโรโลฟัสกาแล็กซี', rare: true, how: 'เลี้ยงจนโตครบ 3 ตัว', diet: 'plant' },
   phoenix: { name: 'เทอโรซอร์ฟีนิกซ์', rare: true, how: 'เลี้ยงจนโตโดยไม่ป่วยเลย', diet: 'any' },
-  crystal: { name: 'ไดโนคริสตัล', rare: true, how: 'อาบน้ำให้ทุกวันจนโต (14 วัน)', diet: 'plant' },
-  lava: { name: 'แองคิโลซอรัสลาวา', rare: true, how: 'เล่นด้วยทุกวันจนโต (14 วัน)', diet: 'plant' },
+  crystal: { name: 'ไดโนคริสตัล', rare: true, how: 'อาบน้ำให้ทุกวันจนโต (10 วัน)', diet: 'plant' },
+  lava: { name: 'แองคิโลซอรัสลาวา', rare: true, how: 'เล่นด้วยทุกวันจนโต (10 วัน)', diet: 'plant' },
 };
 
 export const COMMON: DinoSpecies[] = ['trex', 'styra', 'pachy', 'galli', 'diplo', 'elas', 'ptero', 'flame'];
@@ -48,10 +48,13 @@ export function taste(species: DinoSpecies, f: Food): -1 | 0 | 1 {
   return f.diet === diet ? 1 : -1;
 }
 
+// กินแต่ละมื้ออิ่มแค่นิดเดียว (ไม่อิ่มง่ายๆ ต้องป้อนหลายชิ้น)
+const FILL = .6;
+
 /** ค่าที่ได้จริงเมื่อกิน (ชอบ = อิ่ม/สุขเพิ่ม, ไม่ชอบ = อิ่มน้อยและงอนนิดๆ) */
 export function foodGain(species: DinoSpecies, f: Food) {
   const t = taste(species, f);
-  if (t === 1) return { food: Math.round(f.food * 1.2), fun: f.fun + 8, energy: f.energy };
-  if (t === -1) return { food: Math.round(f.food * .5), fun: -4, energy: f.energy };
-  return { food: f.food, fun: f.fun, energy: f.energy };
+  if (t === 1) return { food: Math.round(f.food * 1.2 * FILL), fun: f.fun + 8, energy: f.energy };
+  if (t === -1) return { food: Math.round(f.food * .5 * FILL), fun: -4, energy: f.energy };
+  return { food: Math.round(f.food * FILL), fun: f.fun, energy: f.energy };
 }

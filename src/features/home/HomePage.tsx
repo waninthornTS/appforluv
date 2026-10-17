@@ -1,10 +1,14 @@
 import { useMemo, useState } from 'react';
-import { addDays, countdown, diffDays, fmtDate, nextYearly, todayStr, ymd } from '../../lib/date';
+import { addDays, countdown, diffDays, fmtDate, nextYearly, parse, toStr, ymd } from '../../lib/date';
 import { EVENT_TYPES, MEM_CATS } from '../../lib/meta';
 import { usePeriod } from '../../lib/sky';
 import { PROFILE, useCollection } from '../../lib/store';
 import type { Color } from '../../lib/types';
 import { Photo } from '../../ui/controls';
+import { AnnivShow } from '../celebrate/Anniversary';
+import { LetterButton, SimDateBar } from '../celebrate/Celebrate';
+import { specialOf, useToday } from '../celebrate/days';
+import { LETTER } from '../celebrate/letter';
 import { DinoButton } from '../dino/DinoButton';
 import { openMemoryDetail } from '../diary/sheets';
 import { Scene } from './Scene';
@@ -19,6 +23,11 @@ function milestones(today: string) {
   if (years > 0) list.push({ emo: '💍', t: `ครบรอบ ${years} ปี`, date: ann });
   const n1000 = Math.ceil(days / 1000) * 1000;
   if (n1000 > n100) list.push({ emo: '🏆', t: `ครบ ${n1000.toLocaleString()} วัน`, date: addDays(PROFILE.startDate, n1000 - 1) });
+  // ครบรอบทุกเดือน (วันที่ตรงกับวันที่เริ่มคบ)
+  const s = parse(PROFILE.startDate), t = parse(today);
+  const nm = new Date(t.getFullYear(), t.getMonth() + (t.getDate() > s.getDate() ? 1 : 0), s.getDate());
+  const months = (nm.getFullYear() - s.getFullYear()) * 12 + nm.getMonth() - s.getMonth();
+  if (months > 0 && months % 12) list.push({ emo: '💕', t: `ครบรอบ ${months} เดือน`, date: toStr(nm) });
   list.push({ emo: '🎂', t: `วันเกิด ${PROFILE.nameA}`, date: nextYearly(PROFILE.birthA, today) });
   list.push({ emo: '🎂', t: `วันเกิด ${PROFILE.nameB}`, date: nextYearly(PROFILE.birthB, today) });
   return list.map(m => ({ ...m, left: diffDays(today, m.date) })).sort((a, b) => a.left - b.left);
@@ -26,7 +35,10 @@ function milestones(today: string) {
 
 export default function HomePage() {
   const sky = usePeriod();
-  const today = todayStr();
+  const today = useToday(); // ตอนทดสอบในคอมจำลองวันที่ได้
+  const sp = specialOf(today);
+  const special = sp?.kind === 'birthday' ? null : sp; // วันเกิดยังไม่ใช้ตอนนี้ — ตกแต่งเฉพาะวันครบรอบ
+  const [reading, setReading] = useState(false); // กำลังเปิดจดหมาย
   const events = useCollection('events');
   const trips = useCollection('trips');
   const memories = useCollection('memories');
@@ -63,10 +75,15 @@ export default function HomePage() {
         <div className="grow">
           <h1 className="ellipsis">{PROFILE.nameA} <span className="amp">♥</span> {PROFILE.nameB}</h1>
         </div>
-        <DinoButton />
+        <div className="head-icons">
+          <LetterButton today={today} letter={LETTER} onOpen={() => setReading(true)} />
+          <DinoButton />
+        </div>
       </header>
 
-      <Scene sky={sky} days={days} />
+      {import.meta.env.DEV && <SimDateBar today={today} />}
+      <Scene sky={sky} days={days} special={special} />
+      {reading && <AnnivShow letter={LETTER} onClose={() => setReading(false)} />}
 
       <section className="card counter">
         <div className="label">เรารักกันมาแล้ว</div>

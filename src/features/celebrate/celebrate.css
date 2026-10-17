@@ -1,0 +1,268 @@
+/* =========================================================
+   วันพิเศษ — วันเกิด / ครบรอบ บนหน้าแรก
+   ========================================================= */
+
+/* ---------- ไอคอนจดหมายที่ล็อกไว้ (หน้าแรก) ---------- */
+.letter-btn { position: relative; flex: none; width: 46px; height: 40px; padding: 0; transition: transform .15s; }
+.letter-btn:active { transform: scale(.9); }
+.letter-ico { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 3px 0 rgba(160, 110, 130, .25)); }
+.letter-btn.locked .letter-ico { filter: saturate(.7) drop-shadow(0 3px 0 rgba(160, 110, 130, .25)); }
+.letter-btn.shake .letter-ico { animation: celShake .6s ease; }
+.letter-btn.fresh .letter-ico { animation: celWiggle 2s ease-in-out infinite; }
+.letter-btn .lock { position: absolute; right: -5px; bottom: -4px; font-size: 14px; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .3)); }
+.letter-btn .dot { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 11px; font-weight: 700; color: #fff; background: var(--pink-d); border: 2px solid #fff; animation: beat 1.4s ease-in-out infinite; }
+.bd-x { position: absolute; top: calc(var(--safe-t) + 12px); right: 14px; z-index: 5; width: 36px; height: 36px; border-radius: 50%; color: #fff; font-size: 16px; background: rgba(255, 255, 255, .18); }
+.bd-btns { display: flex; gap: 10px; align-items: center; margin-top: 18px; }
+.bd-btns .cel-close { margin: 0; }
+@keyframes celFlicker { to { transform: scale(.88, 1.08) rotate(3deg); } }
+
+@keyframes celPop { from { transform: scale(.85); opacity: 0; } }
+@keyframes celWiggle { 0%, 80%, 100% { transform: rotate(0); } 86% { transform: rotate(-12deg); } 93% { transform: rotate(10deg); } }
+@keyframes celBounce { 50% { transform: translateY(-5px); } }
+
+/* ---------- ตกแต่งฉาก ---------- */
+.cel-decor { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.cel-decor .bunting { position: absolute; left: -2%; right: -2%; top: 6px; height: 44px; display: flex; justify-content: space-between; padding: 0 3%;
+  background: radial-gradient(ellipse 60% 26px at 50% -6px, transparent 98%, transparent) ; }
+.cel-decor .bunting::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 20px; border-bottom: 2px solid rgba(255, 255, 255, .85); border-radius: 0 0 50% 50%; }
+.cel-decor .bunting span { position: relative; width: 26px; height: 30px; margin-top: calc(6px + (5 - (var(--i) - 5) * (var(--i) - 5) / 5) * 2px);
+  clip-path: polygon(0 0, 100% 0, 50% 100%); display: grid; place-items: start center; padding-top: 3px;
+  font: 700 12px/1 'Mali', sans-serif; color: #fff; animation: celSway 2.6s ease-in-out infinite; animation-delay: calc(var(--i) * -.2s); transform-origin: 50% 0; }
+.cel-decor.bday .bunting span:nth-child(4n+1) { background: #FF8DB3; } .cel-decor.bday .bunting span:nth-child(4n+2) { background: #FFC94D; }
+.cel-decor.bday .bunting span:nth-child(4n+3) { background: #6CC6F5; } .cel-decor.bday .bunting span:nth-child(4n) { background: #9EDB8C; }
+.cel-decor.love .bunting span { background: #FFB8CF; color: #F2548A; font-size: 13px; }
+.cel-decor.love .bunting span:nth-child(odd) { background: #fff; }
+@keyframes celSway { 50% { transform: rotate(5deg); } }
+.cel-decor .balloon { position: absolute; width: 30px; height: 36px; border-radius: 50% 50% 48% 48%; background: radial-gradient(circle at 34% 30%, rgba(255, 255, 255, .7) 0 12%, var(--c) 13%);
+  display: grid; place-items: center; color: #fff; font-size: 14px; animation: celFloat 3.4s ease-in-out infinite; }
+.cel-decor .balloon::after { content: ''; position: absolute; top: 100%; left: 50%; width: 1px; height: 54px; background: rgba(255, 255, 255, .8); }
+.cel-decor.love .balloon { border-radius: 50%; clip-path: path('M15 34 C-6 18 2 0 15 9 C28 0 36 18 15 34Z'); }
+@keyframes celFloat { 50% { transform: translateY(-9px) rotate(3deg); } }
+.cel-decor .petal { position: absolute; top: -12px; width: 10px; height: 8px; border-radius: 60% 0 60% 0; background: #FFB8CF; opacity: .9; animation: celFall linear infinite; }
+@keyframes celFall { to { transform: translate(-30px, 330px) rotate(300deg); opacity: .2; } }
+.party-hat { position: absolute; left: 50%; top: 0; z-index: 3; width: 34px; height: 40px; transform: translate(-50%, -4px) rotate(-8deg); pointer-events: none;
+  background: repeating-linear-gradient(135deg, #FF8DB3 0 7px, #FFE07A 7px 13px); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.party-hat::after { content: ''; position: absolute; left: 50%; top: -2px; width: 12px; height: 12px; border-radius: 50%; background: #fff; transform: translateX(-50%); }
+.party-hat-wrap { position: absolute; left: 0; right: 0; top: 0; height: 0; }
+
+/* ---------- หน้าเฉลิมฉลอง ---------- */
+.cel-overlay { position: fixed; inset: 0; z-index: 90; overflow-y: auto; display: flex; flex-direction: column; align-items: center;
+  padding: calc(var(--safe-t) + 24px) 20px calc(var(--safe-b, 0px) + 30px); animation: viewIn .4s ease; }
+.cel-overlay.k-birthday { background: radial-gradient(circle at 50% 30%, #FFF6D8 0%, #FFD9E6 55%, #E9D9FF 100%); }
+.cel-overlay:not(.k-birthday) { background: radial-gradient(circle at 50% 30%, #FFF0F5 0%, #FFC9DA 55%, #D9C9FF 100%); }
+.cel-overlay.gift { justify-content: center; }
+.cel-gift-wrap { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.cel-hello { font-family: 'Itim', 'Mali', sans-serif; font-size: 26px; line-height: 1.5; color: #8A4B63; text-align: center; animation: celPop .6s cubic-bezier(.3, 1.5, .5, 1); }
+.cel-tap { font-size: 14px; color: #A76B82; animation: tdPulseC 1.4s ease-in-out infinite; }
+@keyframes tdPulseC { 50% { opacity: .45; } }
+
+.cel-giftbox { position: relative; width: 150px; height: 150px; animation: celShake 2.2s ease-in-out infinite; }
+.cel-giftbox .box { position: absolute; left: 10px; right: 10px; bottom: 0; height: 100px; border-radius: 12px; background: linear-gradient(90deg, transparent 43%, #FFE07A 43% 57%, transparent 57%), #FF7FA8; box-shadow: inset 0 -10px 0 rgba(0, 0, 0, .08), 0 10px 20px rgba(200, 60, 110, .3); }
+.cel-giftbox .lid { position: absolute; left: 0; right: 0; top: 22px; height: 34px; z-index: 1; border-radius: 10px; background: linear-gradient(90deg, transparent 43%, #FFE07A 43% 57%, transparent 57%), #FF9EBE; box-shadow: 0 4px 0 rgba(0, 0, 0, .08); }
+.cel-giftbox .bow { position: absolute; left: 50%; top: -26px; width: 64px; height: 30px; transform: translateX(-50%); }
+.cel-giftbox .bow::before, .cel-giftbox .bow::after { content: ''; position: absolute; top: 0; width: 30px; height: 28px; border-radius: 50% 50% 10% 50%; background: #FFE07A; border: 3px solid #F5C73E; }
+.cel-giftbox .bow::before { left: 0; transform: rotate(-20deg); } .cel-giftbox .bow::after { right: 0; transform: scaleX(-1) rotate(-20deg); }
+@keyframes celShake { 0%, 70%, 100% { transform: rotate(0); } 75% { transform: rotate(-6deg); } 80% { transform: rotate(6deg); } 85% { transform: rotate(-4deg); } 90% { transform: rotate(3deg); } }
+
+.cel-env { position: relative; width: 180px; height: 124px; animation: celFloat 2.6s ease-in-out infinite; }
+.cel-env .body { position: absolute; inset: 0; border-radius: 12px; background: #FFF7EE; border: 3px solid #fff; box-shadow: 0 10px 22px rgba(200, 60, 110, .25);
+  background-image: linear-gradient(32deg, transparent 49%, #F6DCCB 50%, transparent 51%), linear-gradient(-32deg, transparent 49%, #F6DCCB 50%, transparent 51%); }
+.cel-env .flap { position: absolute; left: 3px; right: 3px; top: 3px; height: 70px; background: #FFE3EC; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.cel-env .seal { position: absolute; left: 50%; top: 54px; transform: translateX(-50%); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 16px; background: #F2548A; box-shadow: 0 3px 0 #C93A6C; }
+.cel-env .paper { display: none; }
+
+.cel-confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.cel-confetti i { position: absolute; top: -20px; width: 8px; height: 13px; border-radius: 2px; background: var(--c); transform: rotate(var(--r)); animation: celConfetti linear infinite; }
+.cel-confetti i.heart { width: 14px; height: 13px; border-radius: 0; clip-path: path('M7 13 C-3 6 1 -1 7 3.5 C13 -1 17 6 7 13Z'); }
+@keyframes celConfetti { to { transform: translate(-40px, 110vh) rotate(calc(var(--r) + 540deg)); } }
+
+.cel-body { position: relative; z-index: 1; width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; text-align: center; animation: celPop .5s cubic-bezier(.3, 1.4, .5, 1); }
+.cel-big { margin: 6px 0 0; white-space: pre-line; font-family: 'Itim', 'Mali', sans-serif; font-weight: 400; font-size: 40px; line-height: 1.25; color: #E2457D;
+  text-shadow: 0 3px 0 #fff, 0 6px 14px rgba(226, 69, 125, .25); }
+.cel-sub { margin: 10px 0 6px; font-size: 15px; color: #8A4B63; }
+.cel-hint { margin-top: 10px; font-size: 13px; color: #A76B82; }
+
+.cel-cake-wrap { margin: 20px 0 6px; }
+.cel-cake { position: relative; width: 200px; height: 190px; margin: 0 auto; }
+.cel-cake .candles { position: absolute; left: 50%; bottom: 128px; transform: translateX(-50%); display: flex; gap: 14px; z-index: 2; }
+.cel-cake .candle { position: relative; width: 12px; height: 38px; border-radius: 4px; background: repeating-linear-gradient(160deg, #fff 0 5px, #FF9EBE 5px 10px); }
+.cel-cake .flame { position: absolute; left: 50%; bottom: 100%; width: 14px; height: 20px; margin-left: -7px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: radial-gradient(circle at 50% 70%, #FFF7C2 0 25%, #FFC93D 45%, #FF8A3D 75%); box-shadow: 0 0 16px 4px rgba(255, 190, 70, .6); animation: celFlicker .35s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+@keyframes celFlicker { to { transform: scale(.88, 1.08) rotate(3deg); } }
+.cel-cake .smoke { position: absolute; left: 50%; bottom: 100%; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: rgba(160, 150, 170, .5); opacity: 0; }
+.cel-cake .candle.out .flame { animation: celBlow .35s ease-in forwards; }
+.cel-cake .candle.out .smoke { animation: celSmoke 1.4s ease-out forwards; }
+@keyframes celBlow { to { transform: scale(0) translateY(-6px); opacity: 0; } }
+@keyframes celSmoke { 0% { opacity: .8; } to { opacity: 0; transform: translate(6px, -40px) scale(2.4); } }
+.cel-cake .topper { position: absolute; left: 50%; bottom: 128px; transform: translate(-50%, -52px); z-index: 1; font-family: 'Itim', sans-serif; font-size: 18px; color: #fff;
+  background: #F2548A; border: 3px solid #fff; border-radius: 999px; padding: 0 10px; line-height: 1.6; box-shadow: 0 3px 0 #C93A6C; display: none; }
+.cel-cake .tier { position: absolute; left: 50%; transform: translateX(-50%); border-radius: 14px; overflow: hidden; }
+.cel-cake .t2 { bottom: 78px; width: 130px; height: 52px; background: #FFF2D9; box-shadow: inset 0 -6px 0 #F2D9B0; }
+.cel-cake .t1 { bottom: 18px; width: 186px; height: 64px; background: #FFB8CF; box-shadow: inset 0 -8px 0 #F28FB0; }
+.cel-cake .drip { position: absolute; left: 0; right: 0; top: 0; height: 18px; background: radial-gradient(circle at 10px 12px, #fff 9px, transparent 10px) 0 0 / 24px 18px repeat-x, linear-gradient(#fff, #fff) 0 0 / 100% 8px no-repeat; }
+.cel-cake .t2 .drip { background: radial-gradient(circle at 10px 12px, #FF8DB3 9px, transparent 10px) 0 0 / 24px 18px repeat-x, linear-gradient(#FF8DB3, #FF8DB3) 0 0 / 100% 8px no-repeat; }
+.cel-cake .dots { position: absolute; left: 0; right: 0; top: 30px; height: 20px; background: radial-gradient(circle, #FFE07A 3px, transparent 4px) 6px 0 / 22px 20px repeat-x; }
+.cel-cake .plate { position: absolute; left: 50%; bottom: 6px; width: 214px; height: 18px; transform: translateX(-50%); border-radius: 50%; background: #fff; box-shadow: 0 6px 12px rgba(150, 80, 110, .18); }
+
+.cel-heart-wrap { margin: 20px 0 6px; }
+.cel-heart { font-size: 96px; line-height: 1; transform: scale(var(--s)); transition: transform .25s cubic-bezier(.3, 1.8, .5, 1); filter: drop-shadow(0 8px 14px rgba(226, 69, 125, .35)); animation: beat 1.4s ease-in-out infinite; }
+.cel-heart.full { animation: celPop .5s ease, beat 1s ease-in-out infinite .5s; }
+
+.cel-letters { width: 100%; display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+.cel-env-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 20px; background: rgba(255, 255, 255, .85); border: 2.5px solid #fff; box-shadow: 0 5px 0 #E7A5BC; text-align: left; color: #8A4B63; font-size: 18px; }
+.cel-env-row .e { font-size: 30px; animation: celWiggle 2.4s ease-in-out infinite; }
+.cel-env-row .grow { flex: 1; }
+.cel-env-row b { display: block; font-size: 15px; }
+.cel-env-row small { font-size: 12px; color: #A76B82; }
+.cel-paper { position: relative; padding: 22px 20px 16px; border-radius: 18px; text-align: left; color: #6B4A3A; animation: celUnfold .5s cubic-bezier(.3, 1.3, .5, 1);
+  background: repeating-linear-gradient(#FFFDF7 0 31px, #F6E4D6 31px 32px); border: 2.5px solid #fff; box-shadow: 0 6px 0 #E7C9B5, 0 12px 24px rgba(150, 80, 110, .15); }
+.cel-paper p { margin: 0; font-family: 'Itim', 'Mali', sans-serif; font-size: 19px; line-height: 32px; white-space: pre-wrap; }
+.cel-paper .from { margin-top: 10px; text-align: right; font-size: 13px; color: #E2457D; }
+@keyframes celUnfold { from { transform: scaleY(.3) rotate(-2deg); opacity: 0; } }
+.cel-photos { display: grid; gap: 6px; margin-top: 12px; }
+.cel-photos.n2 { grid-template-columns: 1fr 1fr; } .cel-photos.n3 { grid-template-columns: 1fr 1fr 1fr; }
+.cel-photos img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; border: 3px solid #fff; transform: rotate(-1.5deg); box-shadow: 0 4px 10px rgba(0, 0, 0, .12); }
+.cel-photos.n1 img { aspect-ratio: 4 / 3; }
+.cel-close { margin-top: 24px; padding: 14px 34px; border-radius: 999px; font-size: 17px; font-weight: 700; color: #fff; background: linear-gradient(180deg, #FF8DB3, #F2548A); box-shadow: 0 4px 0 #C93A6C; }
+.cel-close:active { transform: translateY(3px); box-shadow: 0 1px 0 #C93A6C; }
+
+/* ---------- แถบจำลองวันที่ (dev) ---------- */
+.cel-sim { margin-bottom: 14px; padding: 10px 12px; border-radius: 16px; border: 2px dashed #B79BEA; background: rgba(255, 255, 255, .85); font-size: 12px; color: #6A4FB0; }
+.cel-sim .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.cel-sim-pill { display: block; margin: 0 0 12px auto; padding: 4px 12px; border-radius: 999px; border: 1.5px dashed #B79BEA; background: rgba(255, 255, 255, .85); font-size: 12px; color: #6A4FB0; }
+.cel-sim .x { float: right; border: 0 !important; background: none !important; text-decoration: underline; }
+.cel-sim button, .cel-sim input { padding: 4px 10px; border-radius: 999px; border: 1.5px solid #D8C8F5; background: #fff; font: inherit; font-size: 12px; color: #6A4FB0; }
+.cel-sim button.on { background: #6A4FB0; color: #fff; border-color: #6A4FB0; }
+
+/* ---------- เรื่องเล่าวันครบรอบ ---------- */
+.an-show { position: fixed; inset: 0; z-index: 95; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center;
+  padding: calc(var(--safe-t) + 16px) 18px calc(var(--safe-b, 0px) + 24px); user-select: none; -webkit-user-select: none;
+  background: linear-gradient(180deg, #FFE3EC 0%, #FFD0E1 45%, #E9D9FF 100%); animation: viewIn .45s ease; }
+.an-show .bd-x { color: #8A4B63; background: rgba(255, 255, 255, .7); }
+.an-hearts { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.an-hearts i { position: absolute; bottom: -30px; font-style: normal; color: rgba(242, 84, 138, .25); animation: anRise linear infinite; }
+@keyframes anRise { to { transform: translateY(-115vh) rotate(25deg); } }
+.an-dots { position: relative; z-index: 2; display: flex; gap: 6px; margin: 6px 0 14px; }
+.an-dots i { width: 22px; height: 5px; border-radius: 3px; background: rgba(138, 75, 99, .18); transition: .3s; }
+.an-dots i.done { background: rgba(242, 84, 138, .55); }
+.an-dots i.on { background: #F2548A; width: 34px; }
+.an-stage { position: relative; z-index: 2; width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; animation: anIn .6s cubic-bezier(.3, 1.2, .5, 1); }
+@keyframes anIn { from { opacity: 0; transform: translateY(24px) scale(.96); } }
+.an-cap { margin: 14px 0 0; text-align: center; font-family: 'Itim', 'Mali', sans-serif; font-size: 22px; line-height: 1.5; color: #8A4B63; animation: anIn .8s .3s both; }
+.an-chat-wrap > .an-cap { margin: 0 0 14px; }
+.an-phone-wrap > .an-cap { margin: 0 0 38px; }
+.an-skip { position: relative; z-index: 2; margin-top: auto; padding-top: 16px; font-size: 13px; color: #B07A90; animation: tdPulseC 1.6s ease-in-out infinite; }
+
+/* โทรศัพท์สั่น */
+.an-phone-wrap { display: flex; flex-direction: column; align-items: center; }
+.an-phone { position: relative; width: 300px; height: 300px; border-radius: 26px; overflow: visible; }
+.an-phone img { width: 100%; height: 100%; object-fit: cover; border-radius: 26px; border: 4px solid #fff; box-shadow: 0 14px 30px rgba(138, 75, 99, .25); animation: anVibe .5s ease-in-out infinite; }
+@keyframes anVibe { 0%, 60%, 100% { transform: rotate(0); } 10%, 30%, 50% { transform: rotate(-1.4deg) translateX(-2px); } 20%, 40% { transform: rotate(1.4deg) translateX(2px); } }
+.an-phone-css { display: block; width: 150px; height: 280px; margin: 0 auto; border-radius: 26px; background: #FFB8CF; border: 6px solid #fff; animation: anVibe .5s ease-in-out infinite; }
+.an-noti { position: absolute; left: 50%; top: -18px; transform: translateX(-50%); white-space: nowrap; padding: 8px 14px; border-radius: 16px; font-size: 14px; color: #6B4A3A;
+  background: rgba(255, 255, 255, .95); box-shadow: 0 6px 16px rgba(138, 75, 99, .2); animation: anNoti .6s 1s cubic-bezier(.3, 1.6, .5, 1) both; }
+@keyframes anNoti { from { opacity: 0; transform: translate(-50%, -16px) scale(.8); } }
+.an-buzz { position: absolute; top: 46%; font-size: 30px; font-weight: 700; color: #F2548A; animation: tdPulseC .5s ease-in-out infinite; }
+.an-buzz.l { left: -26px; } .an-buzz.r { right: -26px; }
+
+/* แชตแรก */
+.an-chat-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; }
+.an-chat { width: 290px; border-radius: 30px; overflow: hidden; background: #FFFDFB; border: 6px solid #fff; box-shadow: 0 14px 30px rgba(138, 75, 99, .25); }
+.an-chat-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px; background: #FFE3EC; color: #6B4A3A; }
+.an-chat-head small { margin-left: auto; font-size: 11px; color: #3E9C78; }
+.an-chat .av { width: 30px; height: 30px; flex: none; border-radius: 50%; overflow: hidden; background: #fff; border: 2px solid #fff; display: block; }
+.an-chat .av .char-img, .an-chat .av .char-holder { width: 100%; height: 190%; object-fit: cover; object-position: 50% 4%; }
+.an-chat-body { min-height: 300px; padding: 14px 12px; display: flex; flex-direction: column; gap: 10px;
+  background: radial-gradient(circle, rgba(242, 84, 138, .08) 1.5px, transparent 2px) 0 0 / 18px 18px; }
+.an-msg { display: flex; align-items: flex-end; gap: 6px; animation: anMsg .4s cubic-bezier(.3, 1.6, .5, 1); }
+.an-msg.me { justify-content: flex-end; }
+.an-msg .b { max-width: 70%; padding: 9px 14px; border-radius: 18px; font-size: 16px; line-height: 1.5; }
+.an-msg.me .b { background: #F2548A; color: #fff; border-bottom-right-radius: 6px; }
+.an-msg.you .b { background: #fff; color: #6B4A3A; border-bottom-left-radius: 6px; box-shadow: 0 2px 6px rgba(0, 0, 0, .08); }
+.an-msg.typing .b { display: flex; gap: 4px; padding: 13px 14px; }
+.an-msg.typing .b i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .5; animation: anDot 1s ease-in-out infinite; }
+.an-msg.typing .b i:nth-child(2) { animation-delay: .15s; } .an-msg.typing .b i:nth-child(3) { animation-delay: .3s; }
+@keyframes anDot { 50% { transform: translateY(-4px); opacity: 1; } }
+@keyframes anMsg { from { opacity: 0; transform: translateY(10px) scale(.85); } }
+
+/* ฉากรูป (เดต) */
+.an-pic-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; }
+.an-tag { padding: 4px 14px; border-radius: 999px; margin-bottom: 12px; font-size: 13px; font-weight: 700; color: #fff; background: #F2548A; box-shadow: 0 3px 0 #C93A6C; }
+.an-pic { position: relative; width: 320px; max-width: 100%; aspect-ratio: 1; border-radius: 26px; overflow: hidden; border: 5px solid #fff; box-shadow: 0 16px 34px rgba(138, 75, 99, .28); transform: rotate(-1.5deg); }
+.an-pic img { width: 100%; height: 100%; object-fit: cover; animation: anKen 5s ease-out both; }
+@keyframes anKen { from { transform: scale(1.12); } }
+.an-pic-fb { display: flex; justify-content: center; align-items: flex-end; height: 100%; background: #FFF1F6; }
+.an-pic-fb .char-img, .an-pic-fb .char-holder { width: 110px; height: 150px; }
+.an-pic-fb i { position: absolute; top: 14px; right: 18px; font-style: normal; font-size: 40px; }
+.an-card { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%) rotate(-3deg); white-space: nowrap; padding: 10px 16px; border-radius: 14px;
+  font-family: 'Itim', 'Mali', sans-serif; font-size: 20px; color: #E2457D; background: #FFF6F9; border: 3px solid #FFB8CF; box-shadow: 0 6px 14px rgba(0, 0, 0, .15);
+  animation: anNoti .7s .8s cubic-bezier(.3, 1.6, .5, 1) both; }
+.an-yes { position: absolute; right: 10px; top: 12px; transform: rotate(10deg); padding: 4px 14px; border-radius: 12px; font-family: 'Itim', sans-serif; font-size: 24px;
+  color: #fff; background: #F2548A; border: 3px solid #fff; box-shadow: 0 6px 16px rgba(226, 69, 125, .45); animation: anStamp .5s cubic-bezier(.3, 1.8, .5, 1) both; }
+@keyframes anStamp { from { opacity: 0; transform: rotate(10deg) scale(2.2); } }
+
+/* จดหมายตอนจบ */
+.an-letter { width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.an-letter .cel-paper { width: 100%; margin-top: 16px; }
+.an-again { padding: 12px 18px; border-radius: 999px; font-size: 15px; color: #8A4B63; background: rgba(255, 255, 255, .75); border: 1.5px solid #fff; }
+.an-float { position: absolute; top: 16%; left: 50%; font-size: 30px; animation: anBob 1.6s ease-in-out infinite; filter: drop-shadow(0 0 10px rgba(255, 220, 80, .9)); }
+@keyframes anBob { 0%, 100% { transform: translate(-50%, 0) rotate(-12deg); } 50% { transform: translate(-50%, -8px) rotate(12deg); } }
+
+/* ---------- รูปในความทรงจำ (โพลารอยด์ซ้อนกัน) ---------- */
+.an-table { position: relative; z-index: 2; width: 330px; max-width: 100%; height: 420px; margin-top: max(24px, 9vh); }
+.an-slot { position: absolute; inset: 0; display: flex; align-items: flex-start; justify-content: center; }
+.an-polaroid { position: absolute; left: 50%; top: 0; width: 300px; padding: 12px 12px 52px; border-radius: 4px; background: #FFFDF8;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .04), 0 16px 34px rgba(110, 60, 80, .28); transform: translateX(-50%) rotate(var(--tilt, 0deg));
+  animation: anDrop .9s cubic-bezier(.25, 1.25, .45, 1) both; }
+.an-slot .an-polaroid { position: relative; left: auto; transform: rotate(var(--tilt, 0deg)); }
+@keyframes anDrop { from { opacity: 0; transform: translateY(-70px) rotate(calc(var(--tilt, 0deg) * -3)) scale(1.08); } }
+.an-polaroid.pile { animation: none; transform: translateX(-50%) rotate(var(--tilt, 0deg)) scale(.95); filter: brightness(.97); }
+.an-polaroid .tape { position: absolute; left: 50%; top: -12px; z-index: 3; width: 84px; height: 24px; transform: translateX(-50%) rotate(-3deg);
+  background: rgba(255, 214, 228, .78); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
+.an-photo { position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 2px; background: #EFE6DC; }
+.an-photo img { width: 100%; height: 100%; object-fit: cover; display: block; animation: anDevelop 2.4s ease-out both; }
+.an-photo.still img { animation: none; filter: sepia(.12) saturate(.95); }
+@keyframes anDevelop {
+  0% { filter: sepia(.9) brightness(1.7) contrast(.5) blur(3px); }
+  60% { filter: sepia(.35) brightness(1.08) contrast(.95) blur(0); }
+  100% { filter: sepia(.12) saturate(1.02) brightness(1) contrast(1); }
+}
+.an-photo .grain { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: .35;
+  background: radial-gradient(circle at 50% 45%, transparent 55%, rgba(80, 40, 20, .35) 100%),
+    repeating-radial-gradient(circle at 30% 20%, rgba(0, 0, 0, .05) 0 1px, transparent 1px 3px); }
+.an-photo .an-buzz { top: 44%; z-index: 2; color: #fff; text-shadow: 0 0 8px rgba(242, 84, 138, .9); }
+.an-photo .an-buzz.l { left: 14px; } .an-photo .an-buzz.r { right: 14px; }
+.an-photo .an-float { z-index: 2; top: 12%; }
+.an-photo .an-card { z-index: 2; font-size: 17px; bottom: 10px; }
+.an-photo .an-yes { z-index: 2; }
+.sc-phone .an-photo img { animation: anDevelop 2.4s ease-out both, anVibe .5s ease-in-out infinite; }
+/* ร้านนม: ตัวละครจากในแอปยืนสองข้างโต๊ะ */
+.an-milk-chars { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.an-milk-chars .c { position: absolute; bottom: 3%; width: 38%; }
+.an-milk-chars .c.a { left: 1%; } .an-milk-chars .c.b { right: 1%; }
+.an-milk-chars .char-img, .an-milk-chars .char-holder { width: 100%; height: auto; filter: drop-shadow(0 6px 6px rgba(40, 20, 30, .3)); }
+.an-milk-chars .c.a .char-img { transform: rotate(3deg); } .an-milk-chars .c.b .char-img { transform: rotate(-3deg); }
+.an-photo:not(.still) .an-milk-chars .c { animation: anIn .7s .5s cubic-bezier(.3, 1.4, .5, 1) both; }
+/* แชตแรกวางบนโต๊ะเหมือนหน้าจอมือถือ */
+.an-slot .an-chat { animation: anDrop .8s cubic-bezier(.25, 1.25, .45, 1) both; --tilt: 1.5deg; transform: rotate(1.5deg); }
+
+/* ---------- ขนาดรูปพอดีจอ (มือถือ/จอใหญ่) ---------- */
+.an-show { --pw: min(calc(100vw - 44px), calc(100dvh - 230px), 560px); }
+.an-table { width: calc(var(--pw) + 24px); height: calc(var(--pw) + 74px); max-width: none; margin: auto 0; }
+.an-polaroid { width: var(--pw); padding: calc(var(--pw) * .04) calc(var(--pw) * .04) calc(var(--pw) * .16); }
+.an-polaroid .tape { width: calc(var(--pw) * .3); height: calc(var(--pw) * .08); top: calc(var(--pw) * -.04); }
+.an-slot .an-chat { width: var(--pw); }
+.an-chat-body { min-height: calc(var(--pw) * .95); }
+.an-msg .b { font-size: clamp(15px, calc(var(--pw) * .055), 20px); }
+.an-photo .an-card { font-size: clamp(15px, calc(var(--pw) * .06), 22px); }
+.an-photo .an-yes { font-size: clamp(22px, calc(var(--pw) * .085), 34px); }
+.an-photo .an-buzz { font-size: clamp(28px, calc(var(--pw) * .1), 44px); }
+.an-skip { margin-top: 0; padding-top: 10px; }
+/* จอมือถือทรงสูง: รูปเป็นแนวตั้ง 3:4 ให้เต็มจอขึ้น */
+@media (max-aspect-ratio: 3/5) {
+  .an-show { --pw: min(calc(100vw - 28px), calc((100dvh - 190px) / 1.46), 560px); }
+  .an-photo { aspect-ratio: 3 / 4; }
+  .an-table { height: calc(var(--pw) * 1.46 + 30px); }
+  .an-chat-body { min-height: calc(var(--pw) * 1.15); }
+}

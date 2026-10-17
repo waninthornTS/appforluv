@@ -1,15 +1,11 @@
-// ฉากหน้าแรก: Ploy & Dream ยืนบนเนินหญ้า ท้องฟ้าเปลี่ยนตามเวลา แตะตัวละครแล้วจะพูด
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+// ฉากหน้าแรก: Ploy & Dream ยืนบนเนินหญ้า ท้องฟ้าเปลี่ยนตามเวลา กดปุ่มหัวใจด้านขวาแล้วสองคนกอดกัน
+import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Character, HEART_SVG } from '../../characters/Character';
-import type { CharKey } from '../../characters/svg';
 import { PROFILE } from '../../lib/store';
+import type { Who } from '../../lib/types';
 import type { Period } from '../../lib/sky';
-
-// คำพูดเวลาแตะ ({o} = ชื่ออีกคน)
-const LINES: Record<CharKey, string[]> = {
-  ploy: ['วันนี้กินข้าวยัง?', 'เดี๋ยวจัดการให้เอง 😎', 'วางแผนทริปไว้แล้วนะ ✈️', '{o} น่ารักจัง', 'วันนี้เหนื่อยมั้ย?', 'ไปดูหนังกันมั้ย 🎬', 'อย่านอนดึกนะ', 'รักนะ 💕'],
-  dream: ['{o}~ 🥺', 'น้องหมีคิดถึง {o} 🧸', 'ไปกินขนมกันน้า 🍰', 'ง่วงแล้ววว 😴', 'อยากไปเที่ยวด้วยกัน ✈️', 'หิวชานมไข่มุก 🧋', 'คิดถึงจัง~', 'รักนะ 💕'],
-};
+import { SceneDecor } from '../celebrate/Celebrate';
+import type { Special } from '../celebrate/days';
 
 const STARS = Array.from({ length: 14 }, (_, i) => ({ l: (i * 37) % 100, t: (i * 23) % 55 + 4, d: i * 0.3 }));
 const GOLD = [[8, 30], [30, 12], [62, 22], [86, 40], [48, 8]];
@@ -23,50 +19,40 @@ const Flower = ({ color, style }: { color: string; style: React.CSSProperties })
   </svg>
 );
 
-// แสดงข้อความทีละตัวแบบในเกม (ตัดตามตัวอักษรที่มองเห็น ไม่ตัดสระ/วรรณยุกต์ไทยแยก)
-const graphemes = (t: string) => {
-  const Seg = (Intl as unknown as { Segmenter?: new (l: string, o: object) => { segment: (s: string) => Iterable<{ segment: string }> } }).Segmenter;
-  return Seg ? [...new Seg('th', { granularity: 'grapheme' }).segment(t)].map(x => x.segment) : [...t];
-};
+// ปุ่มหัวใจด้านขวาของฉาก: กดแล้วสองคนเดินเข้าไปกอดกันแบบนุ่มๆ ด้วย CSS (ป้ายชื่ออยู่ที่เดิม ขยับแค่ตัว)
+const HUG_MS = 3000;
 
-function useTypewriter(text: string, speed = 45) {
-  const [n, setN] = useState(0);
-  const parts = useMemo(() => graphemes(text), [text]);
-  useEffect(() => {
-    setN(0);
-    if (!text) return;
-    const t = setInterval(() => setN(v => (v >= parts.length ? v : v + 1)), speed);
-    return () => clearInterval(t);
-  }, [text, parts, speed]);
-  return { shown: parts.slice(0, n).join(''), done: n >= parts.length };
-}
-
-function Person({ who, name, other }: { who: CharKey; name: string; other: string }) {
-  const [line, setLine] = useState('');
-  const [hop, setHop] = useState(0);
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const { shown, done } = useTypewriter(line);
-  const tap = () => {
-    const pool = LINES[who];
-    let next = pool[Math.floor(Math.random() * pool.length)].replace('{o}', other);
-    if (next === line) next = pool[(pool.indexOf(next) + 1) % pool.length].replace('{o}', other);
-    setLine(next);
-    setHop(n => n + 1);
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => setLine(''), 2600);
-  };
+function Person({ who, name }: { who: Who; name: string }) {
   return (
-    <button className={`char-wrap ${line ? 'love' : ''}`} data-who={who === 'ploy' ? 'A' : 'B'} onClick={tap} aria-label={name}>
-      <div className={`bubble ${line ? 'show' : ''}`} aria-live="polite">
-        <span className="speaker">{name}</span>{shown}{line && done && <span className="next">▼</span>}
+    <div className="char-wrap" data-who={who}>
+      <div className="char-body">
+        <Character who={who === 'A' ? 'ploy' : 'dream'} />
+        <i className="blush" />
       </div>
-      <div key={hop} className={hop ? 'hop' : ''}><Character who={who} /></div>
       <span className="name-tag">{name}</span>
-    </button>
+    </div>
   );
 }
 
-export const Scene = memo(function Scene({ sky, days }: { sky: Period; days: number }) {
+/** หัวใจลอยขึ้นตอนกอด */
+function HugHearts() {
+  const bits = useMemo(() => Array.from({ length: 9 }, (_, i) => ({ x: (Math.random() - .5) * 150, d: .5 + Math.random() * 1.4, i })), []);
+  return (
+    <div className="act-fx" aria-hidden="true">
+      {bits.map(b => <i key={b.i} style={{ '--x': `${b.x}px`, animationDelay: `${b.d}s` } as CSSProperties}>{['💗', '💕', '💖'][b.i % 3]}</i>)}
+    </div>
+  );
+}
+
+export const Scene = memo(function Scene({ sky, days, special }: { sky: Period; days: number; special?: Special | null }) {
+  const [hug, setHug] = useState(0); // เวลาที่กดกอด (0 = ไม่ได้กอด)
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  const play = () => {
+    if (hug) return;
+    setHug(Date.now());
+    timer.current = setTimeout(() => setHug(0), HUG_MS);
+  };
   return (
     <section className={`scene sky-${sky}`} aria-label="Ploy และ Dream">
       <div className="sun" />
@@ -75,11 +61,8 @@ export const Scene = memo(function Scene({ sky, days }: { sky: Period; days: num
         <svg key={i} className="gstar" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${i * 0.5}s` }} viewBox="0 0 10 10"><path d={STAR_PATH} fill="#FFE08A" /></svg>
       ))}
       <div className="cloud c1" /><div className="cloud c2" />
+      {special && <SceneDecor s={special} />}
       <div className="ground" />
-      <svg className="bench" viewBox="0 0 60 38" aria-hidden="true">
-        <rect x="3" y="3" width="54" height="7" rx="2.5" fill="#B5784A" /><rect x="3" y="12" width="54" height="7" rx="2.5" fill="#A56B40" />
-        <rect x="1" y="21" width="58" height="6" rx="2.5" fill="#8C5A36" /><rect x="7" y="26" width="5" height="12" rx="1.5" fill="#6E4127" /><rect x="48" y="26" width="5" height="12" rx="1.5" fill="#6E4127" />
-      </svg>
       <Flower color="#FFB3CB" style={{ left: '5%', bottom: 34 }} />
       <Flower color="#E9D8FF" style={{ left: '13%', bottom: 18, width: 15 }} />
       <Flower color="#FFC9DA" style={{ right: '4%', bottom: 12 }} />
@@ -87,13 +70,24 @@ export const Scene = memo(function Scene({ sky, days }: { sky: Period; days: num
         <path d="M12 22 V11" stroke="#3F8F4A" strokeWidth="2.2" />
         <path d="M12 12 Q4 12 3 4 Q11 4 12 12Z M12 10 Q19 9 21 2 Q13 2 12 10Z" fill="#6CC46A" />
       </svg>
-      <div className="couple">
-        <Person who="ploy" name={PROFILE.nameA} other={PROFILE.nameB} />
+      <div className={`couple ${hug ? 'do-hug' : ''}`} key={hug}>
+        <Person who="A" name={PROFILE.nameA} />
         <div className="center-heart">
           <span dangerouslySetInnerHTML={{ __html: HEART_SVG }} />
           <div className="dday">D+{days.toLocaleString()}</div>
         </div>
-        <Person who="dream" name={PROFILE.nameB} other={PROFILE.nameA} />
+        <Person who="B" name={PROFILE.nameB} />
+        {hug > 0 && <HugHearts />}
+      </div>
+      <div className="act-btns">
+        <button className={hug ? 'on' : ''} onClick={play} aria-label="กอด">
+          {/* วาดหัวใจเอง (อิโมจิแต่ละเครื่องวางไม่ตรงกลาง) */}
+          <svg className="act-heart" viewBox="0 .6 24 24" aria-hidden="true">
+            <defs><linearGradient id="actHeart" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#FF9CC2" /><stop offset="1" stopColor="#F2548A" /></linearGradient></defs>
+            <path d="M12 21.2C11.6 21 3 15.6 3 9.1 3 6.2 5.2 4 7.9 4c1.7 0 3.2.9 4.1 2.3C12.9 4.9 14.4 4 16.1 4 18.8 4 21 6.2 21 9.1c0 6.5-8.6 11.9-9 12.1Z" fill="url(#actHeart)" />
+            <ellipse cx="8.2" cy="8.4" rx="2.2" ry="1.3" fill="#fff" opacity=".75" transform="rotate(-30 8.2 8.4)" />
+          </svg>
+        </button>
       </div>
     </section>
   );

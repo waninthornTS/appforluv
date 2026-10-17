@@ -44,10 +44,11 @@ export function DinoSprite({ species, stage, size, mood = 'normal', anim = 'idle
 }) {
   const px = Math.round(size * SCALE[stage]);
   useEffect(() => preload(species), [species]);
-  const key = pose || (anim === 'run' ? 'run' : moodKey(mood));
+  // เดินอยู่ก็ใช้รูปเดิม (ขยับด้วย CSS) — สลับไปรูปท่าวิ่งที่วาดแยกทุกครั้งที่ออกเดิน/หยุด ทำให้ภาพกระพริบ
+  const key = pose || moodKey(mood);
   const main = photoOf(species, stage, key) || photoOf(species, stage, '');
-  // เฟรมที่สอง (กะพริบตา) เฉพาะตอนยืนเฉยๆ — ตอนเดินใช้รูปเดียวแล้วขยับนุ่มๆ ด้วย CSS ไม่สลับรูป จะได้ไม่กระพริบ
-  const alt = !key && mood === 'normal' && anim === 'idle' ? photoOf(species, stage, 'blink') : undefined;
+  // ไม่สลับรูปกะพริบตาแล้ว — รูปกะพริบวาดแยกจากรูปหลัก สลับไปมาแล้วภาพกระตุก ไม่สมูท
+  const alt: string | undefined = undefined;
   // เปลี่ยนท่า = รูปเก่าค่อยๆ จางออก รูปใหม่ค่อยๆ ชัด
   // (จำรูปเก่าไว้ตั้งแต่ตอน render เลย ไม่รอ effect — ไม่งั้นจะมีเฟรมที่รูปใหม่โผล่เดี่ยวๆ ก่อนแล้วรูปเก่าเด้งกลับมา)
   const [shown, setShown] = useState(main);

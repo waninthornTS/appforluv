@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { coll } from '../../lib/store';
 import type { Dino, DinoSpecies } from '../../lib/types';
 import { openSheet } from '../../ui/overlays';
+import { GROW_DAYS } from './logic';
 import { COMMON, RARE, SPECIES, STAGE_NAME, type Stage } from './species';
 import { photo } from './Sprite';
 
 const KEY = 'dino-dev-original';
 const DAY = 864e5;
-const AGO: Record<Exclude<Stage, 'egg'>, number> = { baby: 0, teen: 4, adult: 10 }; // ฟักมาแล้วกี่วัน → วันที่ 1 / 5 / 11
+const AGO: Record<Exclude<Stage, 'egg'>, number> = { baby: 0, teen: 4, adult: 8 }; // ฟักมาแล้วกี่วัน → วันที่ 1 / 5 / 9
 const POSES: [string, string][] = [['egg', 'ไข่'], ['baby', 'วัยเด็ก'], ['teen', 'วัยรุ่น'], ['adult', 'โต'], ['blink', 'กะพริบตา'],
   ['happy', 'ดีใจ'], ['eat', 'กิน'], ['sleep', 'นอน'], ['sick', 'ป่วย'], ['run', 'เดิน']];
 
@@ -63,6 +64,7 @@ function DevSpecies({ d, close }: { d: Dino; close: () => void }) {
           <button key={st} className="btn btn-primary" onClick={() => apply(st)}>{STAGE_NAME[st]}</button>
         ))}
       </div>
+      <button className="btn btn-ghost btn-block" onClick={() => save({ hatchedAt: Date.now() - GROW_DAYS * DAY })}>⏩ ข้ามไปให้โตครบ {GROW_DAYS} วันเลย</button>
       {orig?.id === d.id && (
         <button className="btn btn-ghost btn-block" onClick={restore}>↩️ คืนตัวเดิม ({SPECIES[orig.species].name})</button>
       )}

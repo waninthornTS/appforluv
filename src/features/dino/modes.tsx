@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as R
 import type { Dino, DinoSpecies } from '../../lib/types';
 import { burstHearts } from '../../ui/overlays';
 import type { Mood } from './art';
-import { wakeAt } from './logic';
+import { foodLeft, meter, pantryOf, sleepEnd } from './logic';
 import { Actor, FoodPic, foodPicUrl, Room, useActor, useWander } from './rooms';
 import { FOODS, foodGain, taste, type Food, type Stage } from './species';
 import { sfx } from './sfx';
@@ -125,7 +125,7 @@ export function FeedScene({ d, stage, night, onEat }: { d: Dino; stage: Stage; n
             {crumbs > 0 && busy && <span className="crumbs mouth" key={crumbs} style={{ [a.face === 'left' ? 'left' : 'right']: `${Math.round(mp[0] * 100) - 8}%`, top: `${Math.round(mp[1] * 100) + 2}%` } as CSSProperties}><i /><i /><i /><i /><i /></span>}
           </Actor>
         </div>
-        {!busy && !ghost && <div className="room-hint">ลากอาหารไปป้อนที่ปาก หรือแตะเมนูเลย 🍽️</div>}
+        {!busy && !ghost && <div className="room-hint">{foodLeft(d) > 0 ? 'ลากอาหารไปป้อนที่ปาก หรือแตะเมนูเลย 🍽️' : 'อาหารหมดแล้ว ไปวิ่งหาอาหารกันน้า 🏃'}</div>}
       </Room>
       {ghost && (
         <div className={`food-ghost ${ghost.fly ? 'fly' : ''}`} style={{ left: ghost.x, top: ghost.y, transform: `translate(-50%, -50%) scale(${ghost.s})`, opacity: ghost.o ?? 1 }}>
@@ -135,9 +135,11 @@ export function FeedScene({ d, stage, night, onEat }: { d: Dino; stage: Stage; n
       <div className="food-grid">
         {FOODS.map(f => {
           const g = foodGain(d.species, f), tt = taste(d.species, f);
+          const left = pantryOf(d)[f.id] || 0;
           return (
-            <button key={f.id} className={`food-card ${tt === 1 ? 'fav' : tt === -1 ? 'meh' : ''} ${ghost?.f.id === f.id && !ghost.fly ? 'lifted' : ''}`}
-              onPointerDown={e => startDrag(f, e)} disabled={busy} style={{ touchAction: 'none' }}>
+            <button key={f.id} className={`food-card ${tt === 1 ? 'fav' : tt === -1 ? 'meh' : ''} ${left ? '' : 'empty'} ${ghost?.f.id === f.id && !ghost.fly ? 'lifted' : ''}`}
+              onPointerDown={e => startDrag(f, e)} disabled={busy || !left} style={{ touchAction: 'none' }}>
+              <span className="count">×{left}</span>
               {tt === 1 && <span className="badge">ชอบ 💖</span>}
               {tt === -1 && <span className="badge meh">ไม่ค่อยชอบ</span>}
               <span className="fe"><FoodPic f={f} /></span>
@@ -271,7 +273,7 @@ export function BedScene({ d, stage, sleeping, onSleep, onWake }: { d: Dino; sta
       <button className={`m-lamp ${sleeping ? 'off' : ''}`} onClick={lamp} aria-label={sleeping ? 'เปิดไฟ' : 'ปิดไฟ'}><span className="glow" /><span className="shade" /><span className="stem" /><span className="table" /></button>
       {sleeping
         ? <><span className="zzz z1">z</span><span className="zzz z2">z</span><span className="zzz z3">Z</span>
-            <div className="room-hint dark">ฝันดีนะ 🌙 · ตื่น {hhmm(wakeAt(d.sleep!.since))} น.</div></>
+            <div className="room-hint dark">ชาร์จพลัง ⚡{Math.round(meter(d, 'energy', Date.now()))}% · ตื่น {hhmm(sleepEnd(d.sleep!))} น.</div></>
         : <div className="room-hint">💡 แตะโคมไฟ แล้วไดโนจะไปนอนเอง</div>}
     </Room>
   );

@@ -315,7 +315,6 @@ h1, h2, h3 { line-height: 1.25; }
 .scene.sky-night .ground { background: radial-gradient(ellipse at 50% 0%, #8FCB80 0%, #63A85C 45%, #3F7C45 100%); }
 .flower { position: absolute; width: 18px; z-index: 1; }
 .sprout { position: absolute; left: 50%; bottom: 8px; width: 22px; margin-left: -11px; z-index: 1; }
-.bench { position: absolute; right: 2%; bottom: 40px; width: 52px; z-index: 1; transform: rotate(-6deg); }
 .gstar { position: absolute; width: 10px; animation: twinkle 3s ease-in-out infinite; filter: drop-shadow(0 0 4px rgba(255, 224, 138, .8)); }
 .scene:not(.sky-night) .gstar { display: none; }
 
@@ -934,3 +933,36 @@ html[data-sky=night] .card.passport { box-shadow: 0 5px 0 #4A3EA8, 0 12px 26px r
 /* รูปใหม่อยู่ข้างใต้ทึบเต็มที่ รูปเก่าซ้อนข้างบนแล้วค่อยๆ จางหาย — ตัวไม่โปร่งแว้บระหว่างเปลี่ยน */
 .dz-photo img.fprev { z-index: 2; animation: phOut .2s ease-out forwards; }
 @keyframes phOut { to { opacity: 0; } }
+
+.page-head .head-icons { display: flex; align-items: center; gap: 10px; }
+
+
+/* ---------- ฉากหน้าแรก: ปุ่มหัวใจมุมขวาล่าง (แทนที่ม้านั่ง) กดแล้วสองคนกอดกัน (ขยับแค่ตัว ป้ายชื่ออยู่ที่เดิม) ---------- */
+.act-btns { position: absolute; right: 10px; bottom: 44px; z-index: 4; display: flex; flex-direction: column; gap: 10px; }
+.act-btns button { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; padding: 0;
+  background: rgba(255, 252, 243, .88); border: 2px solid #fff; box-shadow: 0 3px 0 rgba(160, 120, 140, .35), 0 6px 12px rgba(40, 20, 60, .18);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); transition: transform .2s; }
+.act-btns button .act-heart { display: block; width: 23px; height: 23px; animation: beat 1.6s ease-in-out infinite; }
+.act-btns button:active { transform: scale(.9); }
+.act-btns button.on { background: #FFE3EC; transform: scale(1.08); }
+.scene .couple { padding-right: 46px; }
+@media (max-width: 420px) {
+  .char-img { width: 124px; height: 168px; }
+  .char-wrap { width: 124px; }
+  .center-heart { width: 56px; margin-bottom: 100px; }
+}
+.char-body { position: relative; }
+.char-body .blush { position: absolute; left: 16%; right: 16%; top: 40%; height: 18%; border-radius: 50%; opacity: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 22% 60%, rgba(255, 110, 150, .55), transparent 35%), radial-gradient(ellipse at 78% 60%, rgba(255, 110, 150, .55), transparent 35%); }
+.couple .center-heart { transition: opacity .3s, transform .3s; }
+.couple.do-hug .center-heart { opacity: 0; transform: scale(.6); }
+.couple .char-wrap[data-who=B] { z-index: 1; }
+.couple.do-hug .char-wrap[data-who=A] .char-body { animation: hugA 3s cubic-bezier(.45, 0, .3, 1) both; }
+.couple.do-hug .char-wrap[data-who=B] .char-body { animation: hugB 3s cubic-bezier(.45, 0, .3, 1) both; }
+@keyframes hugA { 0%, 100% { transform: none; } 22% { transform: translateX(46px) rotate(5deg); } 34%, 58% { transform: translateX(52px) rotate(8deg) scale(1.03, .97); } 46%, 70% { transform: translateX(50px) rotate(6deg); } 82% { transform: translateX(46px) rotate(5deg); } }
+@keyframes hugB { 0%, 100% { transform: none; } 22% { transform: translateX(-46px) rotate(-5deg); } 34%, 58% { transform: translateX(-52px) rotate(-8deg) scale(1.03, .97); } 46%, 70% { transform: translateX(-50px) rotate(-6deg); } 82% { transform: translateX(-46px) rotate(-5deg); } }
+.couple.do-hug .blush { animation: blushIn 3s ease both; }
+@keyframes blushIn { 0%, 15%, 100% { opacity: 0; } 30%, 80% { opacity: 1; } }
+.couple .act-fx { position: absolute; left: 0; right: 46px; bottom: 50%; height: 0; pointer-events: none; z-index: 3; }
+.act-fx i { position: absolute; left: 50%; bottom: 0; font-style: normal; font-size: 18px; opacity: 0; animation: fxRise 1.8s ease-out both; }
+@keyframes fxRise { 0% { opacity: 0; transform: translate(0, 10px) scale(.5); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), -110px) scale(1.15); } }

@@ -31,7 +31,7 @@ function NameForm({ d, close }: { d: Dino; close: () => void }) {
 }
 
 const STAGES: Stage[] = ['egg', 'baby', 'teen', 'adult'];
-const STAGE_DAYS: Record<Stage, string> = { egg: 'ฟักด้วยกัน', baby: 'วันที่ 1–3', teen: 'วันที่ 4–9', adult: 'วันที่ 10–14' };
+const STAGE_DAYS: Record<Stage, string> = { egg: 'ฟักด้วยกัน', baby: 'วันที่ 1–3', teen: 'วันที่ 4–7', adult: 'วันที่ 8–10' };
 const seenSpecies = (all: Dino[]) => new Set(all.filter(d => d.status !== 'egg').map(d => d.species));
 const ended = (all: Dino[]) => all.filter(d => d.status === 'grown' || d.status === 'star').sort((a, b) => (b.endedAt || 0) - (a.endedAt || 0));
 

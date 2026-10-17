@@ -143,21 +143,6 @@
 .egg-room .egg { position: absolute; left: 50%; bottom: 22px; z-index: 3; transform: translateX(-50%); transform-origin: 50% 95%; animation: eggWobble .7s ease, eggIdle 2.6s ease-in-out .7s infinite; }
 @keyframes eggWobble { 20% { transform: translateX(-50%) rotate(-9deg); } 45% { transform: translateX(-50%) rotate(7deg); } 70% { transform: translateX(-50%) rotate(-4deg); } }
 @keyframes eggIdle { 0%, 80%, 100% { transform: translateX(-50%) rotate(0); } 85% { transform: translateX(-50%) rotate(-5deg); } 92% { transform: translateX(-50%) rotate(5deg); } }
-.dino-egg-card { margin-top: 14px; text-align: center; }
-.dino-egg-card b { font-size: 16px; }
-.dino-egg-card p { margin-top: 2px; }
-.warm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-.warm-btn {
-  display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px; border-radius: 20px;
-  background: #fff; border: 2.5px solid var(--beige); box-shadow: 0 4px 0 var(--beige-d); transition: transform .1s, box-shadow .1s;
-}
-.warm-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--beige-d); }
-.warm-btn .who { font-weight: 700; font-size: 15px; }
-.warm-btn.A .who { color: #4F7FC2; }
-.warm-btn.B .who { color: #E2557F; }
-.warm-btn .hearts i { font-style: normal; font-size: 18px; color: #EADFCB; margin: 0 1px; transition: color .2s; }
-.warm-btn .hearts i.on { color: #FF7EA8; }
-.warm-btn.done { background: #FFF0F5; border-color: #FFB3CB; box-shadow: 0 4px 0 #E2557F; }
 
 /* ---------- จบการเลี้ยง ---------- */
 .dino-room.ended .pet { animation: petBounce 2.4s ease-in-out infinite; }
@@ -166,6 +151,39 @@
 .dino-end-card { margin-top: 14px; text-align: center; }
 .dino-end-card .big { font-size: 40px; line-height: 1.1; }
 .dino-end-card b { font-size: 17px; }
+/* ไข่ใบใหม่มาส่ง (ข้างตัวที่โตแล้ว) — แตะไข่ = รับเลี้ยง */
+.new-egg:active .dino-sprite { transform: scale(.92); }
+.new-egg.in-home { right: auto; left: 5%; bottom: 13%; align-items: flex-start; }
+.new-egg.in-home .dino-sprite { margin: 0 0 0 6px; }
+.actor-crown { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); font-size: 30px; line-height: 1; pointer-events: none; animation: crownBob 1.6s ease-in-out infinite; }
+@keyframes crownBob { 50% { transform: translateX(-50%) translateY(-4px); } }
+.dino-room.ended.has-egg .pet { left: 36%; }
+.dino-room.ended.has-egg .crown { left: 36%; }
+.new-egg { position: absolute; right: 5%; bottom: 14%; z-index: 25; padding: 0; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.new-egg .dino-sprite { margin-right: 6px; transform-origin: 50% 95%; animation: newEggRock 2.6s ease-in-out infinite; }
+@keyframes newEggRock { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-6deg); } 92% { transform: rotate(6deg); } }
+.new-egg-tag { padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; color: #E2557F; background: rgba(255, 255, 255, .95); box-shadow: 0 3px 8px rgba(80, 40, 60, .15); animation: tagBob 1.8s ease-in-out infinite; }
+@keyframes tagBob { 50% { transform: translateY(-4px); } }
+.dino-end-card .egg-note { margin-top: 10px; padding: 8px 12px; border-radius: 14px; background: #FFF4F7; color: var(--ink); font-size: 13px; }
+/* ปุ่มสวนไดโน (มุมขวาล่างของห้อง) */
+.garden-btn { position: absolute; right: 10px; bottom: 10px; z-index: 7; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; padding: 0;
+  font-size: 22px; line-height: 1; background: rgba(255, 255, 255, .92); border: 2.5px solid #fff; box-shadow: 0 3px 0 #9CCB86, 0 6px 12px rgba(40, 60, 30, .18); }
+.garden-btn:active { transform: scale(.9); }
+/* สวนไดโน */
+.dino-room.garden { height: max(440px, calc(100dvh - 215px - var(--safe-b, 0px))); background: linear-gradient(180deg, #BFE9FF 0%, #E2F6FF 50%, #A6DC86 50%, #7FC567 100%); cursor: default; }
+.garden-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; z-index: 0; pointer-events: none; user-select: none; }
+.garden-css { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.garden-css .g-hill { position: absolute; left: -20%; right: -20%; bottom: 36%; height: 30%; border-radius: 50% 50% 0 0; background: #B7E39A; }
+.garden-css .g-tree { position: absolute; bottom: 44%; width: 70px; height: 70px; border-radius: 50%; background: #6DBE5A; box-shadow: 18px 10px 0 #5DAF4C; }
+.garden-css .g-tree.t1 { left: 8%; } .garden-css .g-tree.t2 { right: 14%; bottom: 47%; transform: scale(.8); }
+/* ชั้นตัวละครสูงกว่าห้อง → ระยะเดินลึกขึ้นไปถึงรั้ว (ใช้สนามหญ้าได้เต็มๆ) */
+.garden .actor-layer { top: auto; height: 170%; pointer-events: none; }
+.garden .actor-layer .actor { cursor: pointer; pointer-events: auto; }
+.g-name { position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); padding: 1px 9px; border-radius: 999px; white-space: nowrap; pointer-events: none;
+  font-family: 'Itim', 'Mali', sans-serif; font-size: 13px; line-height: 1.6; color: var(--ink); background: rgba(255, 255, 255, .88); box-shadow: 0 2px 6px rgba(40, 60, 30, .15); }
+.garden-empty { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); z-index: 6; padding: 12px 18px; border-radius: 18px; text-align: center; font-weight: 700; font-size: 14px; line-height: 1.7; color: var(--ink); background: rgba(255, 255, 255, .9); white-space: nowrap; }
+.garden-names { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 10px; }
+.garden-names .chip { font-family: 'Itim', 'Mali', sans-serif; font-weight: 400; font-size: 14px; }
 
 
 /* ---------- ชีต: ตั้งชื่อ / สมุดไดโน ---------- */
@@ -389,7 +407,7 @@
 .mroom-bath .room-hint { top: auto; bottom: 10px; }
 
 /* ---------- เครื่องมือทดสอบ (เฉพาะ npm run dev) ---------- */
-.dev-chip { position: absolute; bottom: 10px; right: 10px; z-index: 6; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;
+.dev-chip { position: absolute; bottom: 10px; left: 10px; z-index: 6; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;
   color: #6A4FB0; background: rgba(255, 255, 255, .85); border: 1.5px dashed #B79BEA; }
 .dev-sp h4 { margin: 14px 0 8px; text-align: center; }
 .dev-sp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
@@ -407,3 +425,95 @@
 /* ---------- ปุ่มเปิด/ปิดเสียง ---------- */
 .dino-head .round.snd { font-size: 17px; opacity: .8; }
 .dino-head .round.snd.on { opacity: 1; background: linear-gradient(180deg, #E3F4FF, #BFE3FA); border-color: #fff; box-shadow: 0 3px 0 #7FB8DE; }
+
+/* ---------- คลังอาหาร: จำนวนที่เหลือบนเมนู ---------- */
+.food-card { position: relative; }
+.food-card .count { position: absolute; top: 4px; right: 6px; font-size: 11px; font-weight: 800; color: var(--ink-soft); }
+.food-card.empty { opacity: .4; filter: grayscale(.8); }
+.food-card.empty .badge { display: none; }
+
+/* ---------- มินิเกมวิ่งหาอาหาร ---------- */
+.run-pick, .run-stats, .run-result { margin-top: 12px; text-align: center; }
+.run-pick .small { margin: 4px 0 0; }
+.run-who { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.run-who-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px 12px; border-radius: 22px; background: #FFF4F7; border: 2.5px solid #fff; box-shadow: 0 4px 0 #F2B8CB; }
+.run-who-btn.B { background: #F2F0FF; box-shadow: 0 4px 0 #C9BEF2; }
+.run-who-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #F2B8CB; }
+.run-who-btn .pic { height: 96px; display: grid; place-items: end center; }
+.run-who-btn .pic .char-img { width: auto; height: 96px; }
+.run-who-btn .nm { font-weight: 800; font-size: 16px; }
+.run-stats > b { display: block; text-align: left; }
+.run-table { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 6px 4px; margin-top: 8px; font-size: 12px; color: var(--ink-soft); align-items: center; }
+.run-table .row { display: contents; }
+.run-table .row span { padding: 7px 2px; font-size: 13px; color: var(--ink); background: #FBF7EF; }
+.run-table .row span:first-child { border-radius: 12px 0 0 12px; text-align: left; padding-left: 10px; font-weight: 700; }
+.run-table .row span:last-child { border-radius: 0 12px 12px 0; }
+.run-table .row.lead span { background: #FFF1C9; }
+.run-table .hi { font-weight: 800; font-family: ui-monospace, 'Courier New', monospace; }
+
+.runner {
+  position: relative; height: 260px; margin-top: 12px; border-radius: 26px; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer;
+  border: 4px solid var(--cream); box-shadow: 0 6px 0 var(--beige-d), 0 14px 30px rgba(60, 40, 90, .2);
+  background: linear-gradient(180deg, #CDEBFF 0%, #EAF6FF 62%, #FFF4DE 100%);
+}
+.run-floor { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1;
+  background: repeating-linear-gradient(90deg, transparent 0 30px, rgba(150, 110, 60, .22) 30px 36px, transparent 36px 48px) 0 9px / 48px 3px no-repeat,
+    repeating-linear-gradient(90deg, rgba(150, 110, 60, .16) 0 4px, transparent 4px 24px) 0 20px / 48px 3px no-repeat,
+    linear-gradient(180deg, #E9C88F 0 3px, #F6DFB2 3px); background-repeat: repeat-x; }
+.run-layer { position: absolute; left: 0; right: 0; height: 0; z-index: 2; }
+.run-obs { position: absolute; left: 0; bottom: 0; line-height: 1; white-space: nowrap; letter-spacing: -6px; will-change: transform; filter: drop-shadow(0 3px 0 rgba(120, 90, 40, .18)); }
+.run-me { position: absolute; z-index: 3; will-change: transform; transform-origin: 50% 100%; }
+.runner.go:not(.dead) .run-me:not(.air) .run-bob { animation: runBob .16s ease-in-out infinite alternate; }
+.run-me.air .run-bob { transform: rotate(-6deg); }
+.runner.dead .run-bob { animation: runHit .45s ease; }
+@keyframes runBob { to { transform: translateY(-3px) rotate(1.5deg); } }
+@keyframes runHit { 0%, 100% { transform: none; } 25% { transform: translateX(-4px) rotate(-8deg); } 60% { transform: translateX(3px) rotate(5deg); } }
+.run-cloud { position: absolute; z-index: 0; width: 56px; height: 18px; border-radius: 999px; background: #fff; opacity: .9; animation: runCloud 14s linear infinite; }
+.run-cloud::before { content: ''; position: absolute; left: 12px; top: -10px; width: 26px; height: 22px; border-radius: 50%; background: inherit; }
+.run-cloud.c1 { top: 40px; } .run-cloud.c2 { top: 84px; animation-duration: 20s; animation-delay: -8s; transform: scale(.7); } .run-cloud.c3 { top: 26px; animation-duration: 24s; animation-delay: -16s; }
+.runner:not(.go) .run-cloud, .runner.dead .run-cloud { animation-play-state: paused; }
+@keyframes runCloud { from { left: 105%; } to { left: -20%; } }
+.run-hud { position: absolute; top: 12px; left: 14px; right: 14px; z-index: 4; display: flex; align-items: center; gap: 10px; font-family: ui-monospace, 'Courier New', monospace; font-weight: 800; font-size: 16px; color: #6B5A7E; }
+.run-hud .who { font-family: 'Mali', sans-serif; font-size: 12px; padding: 2px 10px; border-radius: 999px; background: rgba(255, 255, 255, .85); margin-right: auto; }
+.run-hud .hi { opacity: .55; }
+.run-hud .sc.flash { animation: scFlash .6s steps(2) 2; }
+@keyframes scFlash { 50% { opacity: 0; } }
+.run-tip { position: absolute; left: 50%; top: 44%; z-index: 5; transform: translate(-50%, -50%); padding: 10px 18px; border-radius: 18px; text-align: center; white-space: nowrap; font-weight: 800; font-size: 16px; color: var(--ink); background: rgba(255, 255, 255, .9); box-shadow: 0 6px 16px rgba(60, 40, 90, .15); pointer-events: none; }
+.run-tip small { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink-soft); margin-top: 2px; }
+.run-tip.over { color: #E2557F; animation: tipPop .35s ease; }
+@keyframes tipPop { from { transform: translate(-50%, -50%) scale(.6); opacity: 0; } }
+.run-score-big { font-family: ui-monospace, 'Courier New', monospace; font-weight: 800; font-size: 44px; color: var(--ink); line-height: 1.2; }
+.new-best { color: #E2557F; }
+.run-result h4 { margin: 14px 0 8px; }
+.run-prize { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+.run-prize .prize { position: relative; display: grid; place-items: center; width: 58px; height: 58px; border-radius: 18px; background: #FFF4F7; font-size: 30px; animation: prizeIn .45s cubic-bezier(.3, 1.6, .5, 1) backwards; }
+.run-prize .prize .food-pic { width: 42px; height: 42px; object-fit: contain; }
+.run-prize .prize i { position: absolute; right: -4px; bottom: -4px; font-style: normal; font-size: 12px; font-weight: 800; padding: 1px 6px; border-radius: 999px; background: #F2548A; color: #fff; }
+@keyframes prizeIn { from { transform: scale(0) rotate(-20deg); } }
+.run-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.egg-room .egg.tap { cursor: pointer; touch-action: manipulation; }
+
+/* ---------- ตัวมอมแมม / เน่า (ไม่ได้อาบน้ำ) ---------- */
+.actor.grubby .actor-body::after {
+  content: ''; position: absolute; inset: 38% 24% 14%; pointer-events: none; z-index: 2;
+  background: radial-gradient(circle at 20% 40%, rgba(120, 85, 45, .45) 6px, transparent 7px), radial-gradient(circle at 70% 30%, rgba(120, 85, 45, .4) 5px, transparent 6px), radial-gradient(circle at 55% 75%, rgba(120, 85, 45, .4) 7px, transparent 8px);
+}
+.actor.rotten .dz-photo img { filter: sepia(.45) hue-rotate(38deg) saturate(.75) brightness(.92); transition: filter .6s; }
+.stink-lines { position: absolute; left: 50%; top: 2%; width: 0; height: 0; pointer-events: none; z-index: 3; }
+.stink-lines i { position: absolute; bottom: 0; width: 7px; height: 26px; border-radius: 6px; border: 2.5px solid rgba(120, 160, 70, .75); border-left-color: transparent; border-right-color: transparent; animation: stinkUp 2.2s ease-in-out infinite; }
+.stink-lines i:nth-child(1) { left: -26px; } .stink-lines i:nth-child(2) { left: -4px; animation-delay: .7s; } .stink-lines i:nth-child(3) { left: 18px; animation-delay: 1.4s; }
+@keyframes stinkUp { 0% { opacity: 0; transform: translateY(8px) skewX(10deg); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-22px) skewX(-10deg); } }
+.body-fly { position: absolute; left: 50%; top: 18%; z-index: 3; font-size: 16px; pointer-events: none; animation: bodyFly 3s ease-in-out infinite; }
+@keyframes bodyFly { 0%, 100% { transform: translate(-40px, 0) rotate(-10deg); } 25% { transform: translate(10px, -18px) rotate(15deg); } 50% { transform: translate(34px, 6px) rotate(-5deg); } 75% { transform: translate(-6px, 14px) rotate(10deg); } }
+
+/* ---------- สุสานในสวน (ตัวที่กลายเป็นดาว) ---------- */
+.graveyard { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+.graveyard .grave { pointer-events: auto; }
+.grave { position: absolute; bottom: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; padding: 0; background: none; }
+.grave .stone { position: relative; display: grid; place-items: start center; width: 44px; height: 52px; border-radius: 22px 22px 7px 7px; padding-top: 8px;
+  background: linear-gradient(180deg, #E3E1EA, #BDB9CB); box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .08), 0 3px 0 #9B97AE; }
+.grave .stone::before { content: ''; position: absolute; left: 11px; right: 11px; top: 22px; height: 3px; border-radius: 2px; background: rgba(110, 104, 136, .35); box-shadow: 0 6px 0 rgba(110, 104, 136, .25); }
+.grave .stone i { font-style: normal; font-size: 14px; line-height: 1; color: #F28BB0; }
+.grave .stone::after { content: '🌼'; position: absolute; right: -12px; bottom: -5px; font-size: 17px; }
+.grave .g-name { position: static; transform: none; margin-top: 4px; font-size: 11px; padding: 0 7px; }
+.grave:active .stone { transform: translateY(2px); }

@@ -90,7 +90,7 @@ export function Actor({ a, species, stage, size = 175, mood = 'normal', pose, re
       style={{ left: `${a.x}%`, bottom: `${6 + a.depth * 30}%`, zIndex: 20 - Math.round(a.depth * 10), transitionDuration: `${a.dur}s`, '--s': scale } as React.CSSProperties}
       onPointerDown={e => { if (onTap) { e.stopPropagation(); onTap(); } }}>
       <span className="actor-shadow" />
-      <div className="actor-body" key={a.land}>
+      <div className="actor-body">
         <DinoSprite species={species} stage={stage} size={size} mood={mood} pose={pose} anim={a.walking ? 'run' : 'idle'} flip={a.face === 'right'} />
         {children}
       </div>
@@ -99,14 +99,16 @@ export function Actor({ a, species, stage, size = 175, mood = 'normal', pose, re
 }
 
 /** เดินเล่นเองเป็นระยะตอนไม่มีใครเล่นด้วย */
-export function useWander(walkTo: (x: number, d?: number, speed?: number) => Promise<void>, enabled: boolean) {
+export function useWander(walkTo: (x: number, d?: number, speed?: number) => Promise<void>, enabled: boolean,
+  { gap = [6000, 13000], speed = .55, range = [25, 75] }: { gap?: [number, number]; speed?: number; range?: [number, number] } = {}) {
+  const [g0, g1] = gap, [r0, r1] = range;
   useEffect(() => {
     if (!enabled) return;
     let t: ReturnType<typeof setTimeout>;
     const go = () => {
-      t = setTimeout(() => { walkTo(25 + Math.random() * 50, Math.random() * .7, .55).then(go); }, 6000 + Math.random() * 7000);
+      t = setTimeout(() => { walkTo(r0 + Math.random() * (r1 - r0), Math.random() * .7, speed).then(go); }, g0 + Math.random() * (g1 - g0));
     };
     go();
     return () => clearTimeout(t);
-  }, [walkTo, enabled]);
+  }, [walkTo, enabled, g0, g1, r0, r1, speed]);
 }

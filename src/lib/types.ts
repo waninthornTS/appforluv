@@ -66,7 +66,8 @@ export interface Dino extends Base {
   species: DinoSpecies;
   name?: string;
   status: 'egg' | 'alive' | 'grown' | 'star'; // star = จากไปเป็นดาวแล้ว
-  warm: { A: number; B: number }; // อุ่นไข่ ต้องครบทั้งสองคน
+  warm: { A: number; B: number }; // (แบบเก่า) อุ่นไข่แยกคน — ตอนนี้นับรวมด้วย taps
+  taps?: number; // แตะไข่ไปแล้วกี่ครั้ง (รวมทั้งสองคน)
   hatchedAt?: number;
   endedAt?: number; // เวลาที่โตครบ หรือกลายเป็นดาว
   food: Meter;
@@ -74,13 +75,16 @@ export interface Dino extends Base {
   bath: Meter;
   energy: Meter;
   poops: number[]; // เวลาที่อึจะโผล่ (ms)
-  sleep?: { since: number } | null;
+  sleep?: { since: number; until?: number } | null; // until = ตื่นเองตอนพลังงานเต็ม (ไม่มี = กติกาเก่า)
   sickSince?: number | null;
   curedAt?: number;
   everSick?: boolean;
   bathDays: string[]; // YYYY-MM-DD ที่ได้อาบน้ำ
   workoutDays: string[]; // YYYY-MM-DD ที่ได้ออกกำลัง
+  pantry?: Record<string, number>; // คลังอาหาร (ได้จากมินิเกมวิ่ง) — ไม่มี = ของเริ่มต้น
+  games?: { A?: GameStat; B?: GameStat }; // สถิติมินิเกมของแต่ละคน
 }
+export interface GameStat { plays: number; best: number; total: number; food: number }
 
 export interface Collections {
   memories: Memory;

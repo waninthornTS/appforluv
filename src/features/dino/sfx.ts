@@ -116,6 +116,12 @@ export const sfx = {
   /** กวาดห้อง */
   sweep: play(() => { for (let i = 0; i < 3; i++) noise(i * .35, .25, { freq: 700, to: 3200, q: .7, vol: .12, fade: .06 }); }),
   /** เตะบอล */
+  /** กระโดดในมินิเกม */
+  jump: play(() => tone(380, 0, .12, { type: 'square', vol: .06, to: 760 })),
+  /** ชนสิ่งกีดขวาง */
+  bonk: play(() => { tone(260, 0, .18, { type: 'square', vol: .08, to: 90 }); noise(0, .1, { freq: 600, q: .8, vol: .12 }); }),
+  /** ทุก 100 คะแนน */
+  ding: play(() => notes([988, 1319], .07, .15, { type: 'square', vol: .045 })),
   kick: play(() => { tone(190, 0, .12, { vol: .25, to: 60 }); tone(330, .06, .3, { type: 'triangle', vol: .1, to: 660 }); }),
   /** ป้อนยา: อึก อึก แล้วขม */
   medicine: play(() => {
