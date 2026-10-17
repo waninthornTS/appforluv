@@ -1,9 +1,8 @@
 // พื้นหลังท้องฟ้าทั้งแอป + นาฬิกาด้านบน (เปลี่ยนตาม เช้า / กลางวัน / เย็น / กลางคืน)
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect } from 'react';
 import { TH_DAYS, TH_MONTHS_S } from '../lib/date';
 import { periodOf, SKY, useNow } from '../lib/sky';
-import { refreshApp } from '../lib/update';
-import { toast } from './overlays';
+import { MenuButton } from './Settings';
 
 // ดาวตำแหน่งคงที่ (ไม่สุ่มใหม่ทุกครั้งที่เปิด)
 const STARS = Array.from({ length: 34 }, (_, i) => ({ x: (i * 53.7) % 100, y: (i * 29.3) % 70, s: 1.5 + (i % 3), d: (i % 7) * 0.4 }));
@@ -28,19 +27,10 @@ export function TopBar() {
   const now = useNow();
   const hh = String(now.getHours()).padStart(2, '0');
   const mm = String(now.getMinutes()).padStart(2, '0');
-  const [busy, setBusy] = useState(false);
-  const refresh = async () => {
-    if (busy) return;
-    setBusy(true);
-    const r = await refreshApp(() => toast('มีเวอร์ชันใหม่ กำลังอัปเดต… ✨'));
-    if (r === 'latest') { toast('อัปเดตล่าสุดแล้ว ✨'); setBusy(false); }
-  };
   return (
     <div className="topbar">
+      <MenuButton />
       <div className="clock">
-        <button className={`refresh-btn ${busy ? 'spin' : ''}`} onClick={refresh} aria-label="รีเฟรช อัปเดตแอป">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" /><path d="M20.5 3.5v5h-5" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </button>
         <span>{SKY[periodOf(now.getHours())].icon}</span>
         <b>{hh}<i className="colon">:</i>{mm} น.</b>
         <span className="clock-sep">·</span>

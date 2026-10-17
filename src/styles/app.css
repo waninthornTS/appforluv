@@ -701,14 +701,24 @@ html[data-sky=night] .page-head h1 { text-shadow: 0 2px 8px rgba(0, 0, 0, .25); 
 
 /* นาฬิกาแบบหน้าจอหลักในเกม */
 .clock { background: var(--cream); border: 2.5px solid var(--beige); box-shadow: 0 4px 0 var(--beige-d); color: var(--brown); padding: 4px 16px; }
-/* ปุ่มรีเฟรชเล็กๆ ซ้ายนาฬิกา (นาฬิกายังอยู่กลางจอเหมือนเดิม) */
-.clock { position: relative; }
-.refresh-btn { position: absolute; right: calc(100% + 8px); top: 50%; width: 32px; height: 32px; margin-top: -16px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+/* ปุ่มแฮมเบอร์เกอร์มุมซ้ายบน → ชีตตั้งค่า */
+.topbar { position: relative; }
+.menu-btn { position: absolute; left: 16px; top: calc(var(--safe-t) + 11px); width: 36px; height: 36px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   background: var(--cream); border: 2.5px solid var(--beige); box-shadow: 0 3px 0 var(--beige-d); color: var(--brown); }
-html[data-sky=night] .refresh-btn { background: rgba(255, 252, 243, .92); border-color: #EADCC2; box-shadow: 0 3px 0 rgba(205, 184, 148, .8); }
-.refresh-btn svg { width: 16px; height: 16px; display: block; }
-.refresh-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--beige-d); }
-.refresh-btn.spin svg { animation: refreshSpin .8s linear infinite; }
+html[data-sky=night] .menu-btn { background: rgba(255, 252, 243, .92); border-color: #EADCC2; box-shadow: 0 3px 0 rgba(205, 184, 148, .8); }
+.menu-btn svg { width: 18px; height: 18px; display: block; }
+.menu-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--beige-d); }
+.settings { display: flex; flex-direction: column; gap: 10px; padding-bottom: 4px; }
+.set-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; border-radius: 18px; text-align: left; color: var(--ink);
+  background: var(--card, #fff); border: 1.5px solid var(--line); box-shadow: 0 3px 0 var(--beige-d, #E8DCC8); }
+.set-row:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--beige-d, #E8DCC8); }
+.set-row .ico { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--pink-l); color: var(--pink-d); }
+.set-row .ico svg { width: 20px; height: 20px; display: block; }
+.set-row .ico.spin svg { animation: refreshSpin .8s linear infinite; }
+.set-row .txt { display: flex; flex-direction: column; gap: 1px; }
+.set-row .txt b { font-size: 15px; }
+.set-row .txt small { font-size: 12px; color: var(--ink-soft); }
+.set-info { margin: 4px 0 0; text-align: center; font-size: 12px; color: var(--ink-soft); }
 @keyframes refreshSpin { to { transform: rotate(360deg); } }
 .clock b { font-size: 17px; font-weight: 700; }
 html[data-sky=night] .clock { background: rgba(255, 252, 243, .92); border-color: #EADCC2; color: var(--brown); box-shadow: 0 4px 0 rgba(205, 184, 148, .8); }

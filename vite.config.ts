@@ -5,6 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 // base: './' ทำให้อัปขึ้น GitHub Pages ได้ทุกชื่อ repo (เช่น https://<user>.github.io/<repo>/)
 export default defineConfig({
   base: './',
+  define: { __BUILD_TIME__: JSON.stringify(new Date().toISOString()) }, // เวลาที่ build (โชว์ในหน้าตั้งค่า)
   plugins: [
     react(),
     VitePWA({
