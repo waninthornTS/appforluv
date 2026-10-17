@@ -452,7 +452,7 @@
 .run-table .hi { font-weight: 800; font-family: ui-monospace, 'Courier New', monospace; }
 
 .runner {
-  position: relative; height: 260px; margin-top: 12px; border-radius: 26px; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer;
+  position: relative; height: max(320px, calc(100dvh - 165px - var(--safe-b, 0px))); margin-top: 12px; border-radius: 26px; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer;
   border: 4px solid var(--cream); box-shadow: 0 6px 0 var(--beige-d), 0 14px 30px rgba(60, 40, 90, .2);
   background: linear-gradient(180deg, #CDEBFF 0%, #EAF6FF 62%, #FFF4DE 100%);
 }
@@ -470,7 +470,7 @@
 @keyframes runHit { 0%, 100% { transform: none; } 25% { transform: translateX(-4px) rotate(-8deg); } 60% { transform: translateX(3px) rotate(5deg); } }
 .run-cloud { position: absolute; z-index: 0; width: 56px; height: 18px; border-radius: 999px; background: #fff; opacity: .9; animation: runCloud 14s linear infinite; }
 .run-cloud::before { content: ''; position: absolute; left: 12px; top: -10px; width: 26px; height: 22px; border-radius: 50%; background: inherit; }
-.run-cloud.c1 { top: 40px; } .run-cloud.c2 { top: 84px; animation-duration: 20s; animation-delay: -8s; transform: scale(.7); } .run-cloud.c3 { top: 26px; animation-duration: 24s; animation-delay: -16s; }
+.run-cloud.c1 { top: 9%; } .run-cloud.c2 { top: 24%; animation-duration: 20s; animation-delay: -8s; transform: scale(.7); } .run-cloud.c3 { top: 40%; animation-duration: 24s; animation-delay: -16s; }
 .runner:not(.go) .run-cloud, .runner.dead .run-cloud { animation-play-state: paused; }
 @keyframes runCloud { from { left: 105%; } to { left: -20%; } }
 .run-hud { position: absolute; top: 12px; left: 14px; right: 14px; z-index: 4; display: flex; align-items: center; gap: 10px; font-family: ui-monospace, 'Courier New', monospace; font-weight: 800; font-size: 16px; color: #6B5A7E; }

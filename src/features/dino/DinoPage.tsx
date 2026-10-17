@@ -192,10 +192,9 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
   if (mode === 'game') {
     return (
       <div className="dino-page">
-        <Head d={d} title="วิ่งหาอาหาร 🏃" sub={nameOf(d)} />
+        <Head d={d} title="วิ่งหาอาหาร 🏃" sub={nameOf(d)} onBack={() => setMode('room')} />
         <RunnerMode species={d.species} stage={stage} stats={gameStats(all)} canPlay={() => actions.canPlay(d, Date.now())}
           onFinish={async (who, score, prize) => !!(await run(d.id, (x, t) => actions.gameOver(x, t, who, score, prize)))} />
-        <button className="btn btn-ghost btn-block dino-back" onClick={() => setMode('room')}>กลับห้อง</button>
       </div>
     );
   }
