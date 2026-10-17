@@ -111,7 +111,10 @@ export function sickStart(d: Dino, t: number): number | null {
   return cands.length && s <= t ? s : null;
 }
 
-const growAt = (d: Dino) => +parse(addDays(dayOf(d.hatchedAt!), GROW_DAYS));
+// โตเต็มวัยตั้งแต่เริ่มวันที่ GROW_DAYS (ขึ้น "วันที่ 10/10" = ไข่ใบใหม่มาส่งเลย)
+const growAt = (d: Dino) => +parse(addDays(dayOf(d.hatchedAt!), GROW_DAYS - 1));
+/** แบบเก่า: โตแล้วจบเองตอนเที่ยงคืนหลังวันสุดท้าย */
+const atMidnight = (t: number) => { const x = new Date(t); return !x.getHours() && !x.getMinutes() && !x.getSeconds() && !x.getMilliseconds(); };
 
 export interface DinoView {
   status: Dino['status'];
@@ -138,7 +141,7 @@ export function view(d: Dino, t: number): DinoView {
   const stage: Stage = day <= 3 ? 'baby' : day <= 7 ? 'teen' : 'adult';
   if (end) {
     // ย้ายเข้าสวนแล้ว: นับวันจริงจนถึงวันที่รับไข่ใบใหม่ (แบบเก่าที่โตแล้วจบเองตอนเที่ยงคืน นับถึงวันโต)
-    const days = end.status === 'grown' ? Math.max(1, end.at === growAt(d) ? age - 1 : age) : day;
+    const days = end.status === 'grown' ? Math.max(1, atMidnight(end.at) ? age - 1 : age) : day;
     return { ...base, status: end.status, stage: end.status === 'grown' ? 'adult' : stage, day: days, age: days, endedAt: end.at, grownUp: end.status === 'grown' };
   }
   const poops = visiblePoops(d, t);
@@ -316,8 +319,9 @@ export const actions = {
 
 // ---------- ไข่ใบใหม่ ----------
 const hash = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+/** ทำครบทุกวันจนโตไหม (วันที่ 1 ถึงก่อนวันที่โตเต็มวัย — วันที่ไข่ใบใหม่มาส่งไม่ต้องนับ) */
 const coversAll = (days: string[], d: Dino) =>
-  Array.from({ length: GROW_DAYS }, (_, i) => addDays(dayOf(d.hatchedAt!), i)).every(x => days.includes(x));
+  Array.from({ length: GROW_DAYS - 1 }, (_, i) => addDays(dayOf(d.hatchedAt!), i)).every(x => days.includes(x));
 
 /** ตัวที่จบไปล่าสุด */
 export const lastEnded = (all: Dino[]) =>
