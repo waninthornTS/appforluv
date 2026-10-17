@@ -1,14 +1,8 @@
-// ปุ่มแฮมเบอร์เกอร์มุมซ้ายบน → ชีตตั้งค่า (มีปุ่มรีเฟรช/อัปเดตแอป)
-import { useState } from 'react';
-import { useSync } from '../lib/sync';
+// เมนูแฮมเบอร์เกอร์มุมซ้ายบน → เมนูสไลด์ออกมาจากทางซ้าย (ตั้งค่า + รีเฟรช/อัปเดตแอป)
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { refreshApp } from '../lib/update';
-import { openSheet, toast } from './overlays';
-
-declare const __BUILD_TIME__: string; // ใส่ตอน build (vite.config.ts define)
-
-const hhmm = (t: number) => new Date(t).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-const BUILT = new Date(__BUILD_TIME__);
-const builtText = `${BUILT.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })} ${hhmm(+BUILT)} น.`;
+import { toast } from './overlays';
 
 const RefreshIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -18,16 +12,25 @@ const RefreshIcon = () => (
 );
 
 export function MenuButton() {
+  const [open, setOpen] = useState(false);
   return (
-    <button className="menu-btn" onClick={() => openSheet({ title: 'ตั้งค่า', render: () => <Settings /> })} aria-label="ตั้งค่า">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" /></svg>
-    </button>
+    <>
+      <button className="menu-btn" onClick={() => setOpen(true)} aria-label="เมนู">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16M4 12h16M4 17.5h16" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" /></svg>
+      </button>
+      {createPortal(<Drawer open={open} onClose={() => setOpen(false)} />, document.body)}
+    </>
   );
 }
 
-function Settings() {
-  const sync = useSync();
+function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    addEventListener('keydown', esc);
+    return () => removeEventListener('keydown', esc);
+  }, [open, onClose]);
   const refresh = async () => {
     if (busy) return;
     setBusy(true);
@@ -35,12 +38,15 @@ function Settings() {
     if (r === 'latest') { toast('อัปเดตล่าสุดแล้ว ✨'); setBusy(false); }
   };
   return (
-    <div className="settings">
-      <button className="set-row" onClick={refresh} disabled={busy}>
-        <span className={`ico ${busy ? 'spin' : ''}`}><RefreshIcon /></span>
-        <span className="txt"><b>รีเฟรช / อัปเดตแอป</b><small>ดึงข้อมูลล่าสุด และอัปเดตเป็นเวอร์ชันใหม่</small></span>
-      </button>
-      <p className="set-info">เวอร์ชัน {builtText}{sync.lastSync ? ` · ซิงก์ล่าสุด ${hhmm(sync.lastSync)} น.` : ''}</p>
+    <div className={`drawer ${open ? 'open' : ''}`} aria-hidden={!open}>
+      <div className="drawer-backdrop" onClick={onClose} />
+      <nav className="drawer-panel" aria-label="เมนู">
+        <div className="drawer-head"><h3>ตั้งค่า</h3><button className="icon-btn" onClick={onClose} aria-label="ปิด">✕</button></div>
+        <button className="set-row" onClick={refresh} disabled={busy}>
+          <span className={`ico ${busy ? 'spin' : ''}`}><RefreshIcon /></span>
+          <span className="txt"><b>รีเฟรช / อัปเดตแอป</b><small>ดึงข้อมูลล่าสุด และอัปเดตเป็นเวอร์ชันใหม่</small></span>
+        </button>
+      </nav>
     </div>
   );
 }
