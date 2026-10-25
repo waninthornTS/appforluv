@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState, type ComponentType, type LazyExoticComponent } from 'react';
+import { handleSpotifyCallback } from './lib/spotify';
 import { initSync } from './lib/sync';
-import { OverlayHost } from './ui/overlays';
+import { OverlayHost, toast } from './ui/overlays';
 import { SkyBackground, TopBar } from './ui/Sky';
 import { TabBar, type Tab, TABS } from './ui/TabBar';
 
@@ -21,6 +22,11 @@ const readTab = (): Route => {
 };
 
 initSync();
+// กลับมาจากหน้าล็อกอิน Spotify (เชื่อมต่อเพื่อค้นหาเพลง)
+handleSpotifyCallback().then(r => {
+  if (r === 'ok') toast('เชื่อมต่อ Spotify แล้ว 🎵');
+  else if (r === 'fail') toast('เชื่อม Spotify ไม่สำเร็จ ลองใหม่อีกครั้งนะ');
+});
 
 export default function App() {
   const [tab, setTab] = useState(readTab);

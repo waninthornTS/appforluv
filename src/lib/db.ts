@@ -2,9 +2,9 @@
 // ใช้ชื่อฐานข้อมูลเดียวกับเวอร์ชันก่อน ข้อมูลเดิมจึงย้ายมาได้เลย
 // ถ้าอยากเปลี่ยนไปใช้ cloud (Firebase / Supabase) ให้แก้ไฟล์นี้ไฟล์เดียว
 const DB_NAME = 'our-little-world';
-// v3: เพิ่ม store 'dino' (อัปเกรดแบบเพิ่มอย่างเดียว ข้อมูลเดิมอยู่ครบ)
-const DB_VERSION = 3;
-export const STORES = ['kv', 'memories', 'events', 'trips', 'photos', 'about', 'dino'] as const;
+// v3: เพิ่ม store 'dino' / v6: เพิ่ม 'songs', 'spotify' / v7: เพิ่ม 'letters' (อัปเกรดแบบเพิ่มอย่างเดียว ข้อมูลเดิมอยู่ครบ)
+const DB_VERSION = 7;
+export const STORES = ['kv', 'memories', 'events', 'trips', 'photos', 'about', 'dino', 'songs', 'spotify', 'letters'] as const;
 export type StoreName = (typeof STORES)[number];
 
 let dbPromise: Promise<IDBDatabase> | undefined;

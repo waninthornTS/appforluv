@@ -15,7 +15,9 @@ import type { CollectionName, PhotoRec } from './types';
 // (เวอร์ชันที่ build แล้วขึ้น GitHub Pages ยังซิงก์ตามปกติ)
 const devGuard = import.meta.env.DEV && /\.supabase\.co/.test(CLOUD.url);
 export const cloudEnabled = !!(CLOUD.url && CLOUD.anonKey) && !devGuard;
-const COLLS: CollectionName[] = ['memories', 'events', 'trips', 'about', 'dino'];
+const COLLS: CollectionName[] = ['memories', 'events', 'trips', 'about', 'dino', 'songs', 'spotify', 'letters'];
+// หมวดที่เพิ่มทีหลัง (ต้องรัน supabase/*.sql ก่อน) — ส่งไม่ผ่านก็ข้ามไว้ ไม่ให้ไดอารี่/นัด/ทริปติดคิว
+const LATE_COLLS: CollectionName[] = ['dino', 'songs', 'spotify', 'letters'];
 
 // ---------- สถานะสำหรับแสดงบนหน้าจอ ----------
 export interface SyncState {
@@ -97,22 +99,22 @@ export function flush(): Promise<void> {
     await loadOutbox();
     const c = await sb();
     patch({ status: 'syncing' });
-    // ข้อมูลไดโนที่ส่งไม่ผ่าน (เช่น ยังไม่ได้รัน supabase/dino.sql) ข้ามไว้ก่อน
+    // ข้อมูลไดโน/เพลงที่ส่งไม่ผ่าน (เช่น ยังไม่ได้รัน supabase/dino.sql, songs.sql, letters.sql) ข้ามไว้ก่อน
     // ไม่ให้ไดอารี่/นัด/ทริปติดคิวอยู่ข้างหลัง — เก็บไว้ในคิวแล้วลองใหม่รอบหน้า
     const skipped = new Set<Op>();
-    let dinoError: unknown;
+    let lateError: unknown;
     try {
       for (let op: Op | undefined = outbox[0]; op; op = outbox.find(o => !skipped.has(o))) {
         try {
           await runOp(c, op);
         } catch (e) {
-          if ((op.kind === 'upsert' || op.kind === 'delete') && op.coll === 'dino') { skipped.add(op); dinoError = e; continue; }
+          if ((op.kind === 'upsert' || op.kind === 'delete') && LATE_COLLS.includes(op.coll)) { skipped.add(op); lateError = e; continue; }
           throw e;
         }
         outbox = outbox.filter(o => o !== op);
         await saveOutbox();
       }
-      if (skipped.size) throw dinoError;
+      if (skipped.size) throw lateError;
       patch({ status: 'idle', lastSync: Date.now() });
     } catch (e) {
       console.warn('sync: ส่งข้อมูลไม่สำเร็จ จะลองใหม่', e);

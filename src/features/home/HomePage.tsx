@@ -6,12 +6,14 @@ import { PROFILE, useCollection } from '../../lib/store';
 import type { Color } from '../../lib/types';
 import { Photo } from '../../ui/controls';
 import { AnnivShow } from '../celebrate/Anniversary';
-import { LetterButton, SimDateBar } from '../celebrate/Celebrate';
+import { SimDateBar } from '../celebrate/Celebrate';
+import { MailboxButton } from '../celebrate/Mailbox';
 import { specialOf, useToday } from '../celebrate/days';
 import { LETTER } from '../celebrate/letter';
 import { DinoButton } from '../dino/DinoButton';
 import { openMemoryDetail } from '../diary/sheets';
 import { Scene } from './Scene';
+import { MusicBoard } from './MusicBoard';
 
 function milestones(today: string) {
   const days = diffDays(PROFILE.startDate, today) + 1; // วันแรกที่คบ = วันที่ 1
@@ -76,7 +78,7 @@ export default function HomePage() {
           <h1 className="ellipsis">{PROFILE.nameA} <span className="amp">♥</span> {PROFILE.nameB}</h1>
         </div>
         <div className="head-icons">
-          <LetterButton today={today} letter={LETTER} onOpen={() => setReading(true)} />
+          <MailboxButton today={today} onOpenAnniv={() => setReading(true)} />
           <DinoButton />
         </div>
       </header>
@@ -84,6 +86,7 @@ export default function HomePage() {
       {import.meta.env.DEV && <SimDateBar today={today} />}
       <Scene sky={sky} days={days} special={special} />
       {reading && <AnnivShow letter={LETTER} onClose={() => setReading(false)} />}
+      <MusicBoard />
 
       <section className="card counter">
         <div className="label">เรารักกันมาแล้ว</div>

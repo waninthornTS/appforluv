@@ -7,3 +7,10 @@ export const CLOUD = {
   url: 'https://hlyrrbfqztgdluopglni.supabase.co',
   anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseXJyYmZxenRnZGx1b3BnbG5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzMDcyNjMsImV4cCI6MjEwNjg4MzI2M30.DP82icuKHS685-KtD0n_8qUv75efzjYaRRcZ9C4zqZ4', // ← วาง anon public key (ขึ้นต้นด้วย eyJ...) หรือ publishable key (ขึ้นต้นด้วย sb_publishable_...)
 };
+
+// ค้นหาเพลงจาก Spotify (กระดานเพลงหน้าแรก) — สร้างแอปที่ https://developer.spotify.com/dashboard
+// แล้ววาง Client ID ตรงนี้ (เป็นค่าที่เปิดเผยได้ ไม่ใช่รหัสลับ — ห้ามใส่ Client Secret)
+// Redirect URI ที่ต้องใส่ในแอป Spotify: https://waninthornts.github.io/appforluv/
+export const SPOTIFY = {
+  clientId: 'd287c483d9eb468bb8d2f4ea7619bdb4',
+};

@@ -157,7 +157,9 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
   };
 
   const stage = v.stage;
-  const sub = v.grownUp ? `${info.name} · อยู่ด้วยกัน ${v.age} วัน` : `${info.name} · ${STAGE_NAME[stage]} วันที่ ${v.day}/${GROW_DAYS}`;
+  const sub = `${info.name} · ${STAGE_NAME[stage]}`;
+  // วันที่เลี้ยง → ป้ายมุมขวาบนของห้อง (โตเต็มวัยแล้วนับวันที่อยู่ด้วยกันต่อ)
+  const dayTag = v.grownUp ? `อยู่ด้วยกัน ${v.age} วัน` : `วันที่ ${v.day}/${GROW_DAYS}`;
   const sleeping = v.sleeping;
   const n = needs(v, now);
   const hour = new Date(now).getHours();
@@ -221,7 +223,8 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
       <Head d={d} title={nameOf(d)} sub={sub} />
 
       <Room kind="home" night={night} className={v.dirt ? `dirt${v.dirt}` : ''} onFloorTap={(x, dep) => walkTo(x, dep)}>
-        <span className="stage-tag">{STAGE_EMOJI[stage]} {STAGE_NAME[stage]}</span>
+        <span className="stage-tag">🗓️ {dayTag}</span>
+        <span className="stage-tag right">{STAGE_EMOJI[stage]} {STAGE_NAME[stage]}</span>
         {import.meta.env.DEV && <button className="dev-chip" onClick={() => openDevSpecies(d)}>🧪 ลองพันธุ์อื่น</button>}
         <GardenButton />
         {v.dirt === 2 && !sweeping && [[12, 8, 60], [62, 4, 80], [36, 12, 50], [80, 10, 44]].map(([l, b, w], i) => <span key={i} className="stain" style={{ left: `${l}%`, bottom: `${b}%`, width: w, height: w * 0.4 }} />)}

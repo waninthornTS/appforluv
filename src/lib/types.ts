@@ -86,12 +86,40 @@ export interface Dino extends Base {
 }
 export interface GameStat { plays: number; best: number; total: number; food: number }
 
+/** เพลงบนกระดานเพลง (หน้าแรก) — ลิงก์จาก Spotify, เลือกละ 1 รายการ สองเครื่องเห็นเหมือนกัน */
+export type SpotifyKind = 'track' | 'album' | 'playlist' | 'episode' | 'show';
+export interface SongPick extends Base {
+  kind: SpotifyKind;
+  sid: string; // id ของ Spotify
+  who: Who;
+  title?: string;
+  artist?: string;
+  cover?: string;
+}
+/** การเชื่อม Spotify (ใช้ค้นหาเพลงอย่างเดียว ไม่ขอสิทธิ์อะไรในบัญชี) — มีรายการเดียว id = 'spotify' ใช้ร่วมกันทั้งสองเครื่อง */
+export interface SpotifyAuth extends Base {
+  access: string;
+  expiresAt: number;
+  refresh: string;
+}
+
+/** จดหมายในตู้จดหมาย (หน้าแรก) — ล็อกไว้จนถึงวันเปิดอ่าน, ส่งแล้วแก้ไม่ได้ (ลบได้) */
+export interface LetterDoc extends Base {
+  from: Who;
+  openDate: string; // YYYY-MM-DD เปิดอ่านได้ตั้งแต่วันนี้
+  message: string;
+  photos: string[];
+}
+
 export interface Collections {
   memories: Memory;
   events: CalEvent;
   trips: Trip;
   about: AboutItem;
   dino: Dino;
+  songs: SongPick;
+  spotify: SpotifyAuth;
+  letters: LetterDoc;
 }
 export type CollectionName = keyof Collections;
 

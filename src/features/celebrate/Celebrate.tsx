@@ -11,7 +11,7 @@ import './celebrate.css';
 
 // จำว่าเปิดอ่านจดหมายแล้วหรือยัง (ต่อเครื่อง)
 const openedKey = (id: string) => `letter-opened:${id}`;
-const wasOpened = (id: string) => { try { return localStorage.getItem(openedKey(id)) === '1'; } catch { return false; } };
+export const wasOpened = (id: string) => { try { return localStorage.getItem(openedKey(id)) === '1'; } catch { return false; } };
 export const markOpened = (ids: string[]) => { try { ids.forEach(id => localStorage.setItem(openedKey(id), '1')); } catch { /* ไม่เป็นไร */ } };
 
 // ---------- ไอคอนจดหมายที่ล็อกไว้ ----------

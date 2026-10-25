@@ -266,3 +266,42 @@
   .an-table { height: calc(var(--pw) * 1.46 + 30px); }
   .an-chat-body { min-height: calc(var(--pw) * 1.15); }
 }
+
+/* ---------- ตู้จดหมาย (มุมขวาบนหน้าแรก) ---------- */
+.mailbox-btn { position: relative; width: 46px; height: 46px; padding: 0; display: grid; place-items: center; background: none; border: 0; }
+.mailbox-ico { width: 42px; height: 42px; filter: drop-shadow(0 3px 4px rgba(60, 20, 50, .25)); }
+.mailbox-btn.fresh .mailbox-ico { animation: mailWiggle 2.4s ease-in-out infinite; transform-origin: 50% 90%; }
+@keyframes mailWiggle { 0%, 70%, 100% { transform: rotate(0); } 76% { transform: rotate(-6deg); } 84% { transform: rotate(5deg); } 92% { transform: rotate(-2deg); } }
+.mailbox-btn .dot { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #F23F5E; color: #fff; font-size: 11px; font-weight: 800; line-height: 18px; border: 2px solid #fff; }
+.mailbox { display: flex; flex-direction: column; gap: 12px; padding-bottom: 4px; }
+.mail-list { display: flex; flex-direction: column; gap: 8px; }
+.mail-item { display: flex; align-items: center; gap: 6px; }
+.mail-item.shake { animation: mailShake .45s ease; }
+@keyframes mailShake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+.mail-open { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; text-align: left; color: var(--ink);
+  background: #FFFAF2; border: 1.5px solid #F1DFC6; box-shadow: 0 3px 0 #EADCC2; }
+.mail-item.fresh .mail-open { background: #FFF4F7; border-color: #F7C6D6; box-shadow: 0 3px 0 #F2B8CB; }
+.mail-item.locked .mail-open { background: #F7F3EC; color: var(--ink-soft); }
+.mail-open .env { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 22px; background: #fff; }
+.mail-open .t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.mail-open .t b { font-size: 14.5px; }
+.mail-open .t small { font-size: 12px; color: var(--ink-soft); }
+.mail-open .ph { flex: none; font-size: 11.5px; color: var(--ink-soft); }
+.mail-open .new { flex: none; font-size: 11px; font-weight: 800; color: #fff; background: #F2548A; padding: 2px 8px; border-radius: 999px; }
+.mail-item .x { flex: none; width: 30px; height: 30px; border-radius: 50%; font-size: 12px; color: var(--ink-soft); }
+.mail-paper { position: relative; padding: 20px 18px 18px; border-radius: 18px; background: #FFFDF6; border: 1.5px solid #F1DFC6;
+  background-image: repeating-linear-gradient(180deg, transparent 0 33px, rgba(242, 184, 203, .35) 33px 34px); font-family: 'Itim', 'Mali', sans-serif; color: #5A4636; }
+.mail-paper .to { font-size: 18px; margin-bottom: 6px; color: #D2487A; }
+.mail-paper .msg { margin: 0; white-space: pre-wrap; font-size: 17px; line-height: 34px; word-break: break-word; }
+.mail-paper .sign { margin-top: 12px; text-align: right; font-size: 15px; color: var(--ink-soft); }
+.mail-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+.mail-photos button { padding: 0; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #F3EBDD; transform: rotate(-1.5deg); box-shadow: 0 3px 8px rgba(80, 50, 40, .15); border: 3px solid #fff; }
+.mail-photos button:nth-child(even) { transform: rotate(1.8deg); }
+.mail-photos img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.compose { display: flex; flex-direction: column; gap: 12px; padding-bottom: 4px; }
+.compose .who-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-soft); }
+.compose .who-row button { padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; background: #F6EEDF; color: var(--ink-soft); }
+.compose .who-row button.A.on { background: #E4F0FF; color: #3C6FB0; }
+.compose .who-row button.B.on { background: #FFE3EC; color: #D2487A; }
+.compose .who-row .to { margin-left: auto; font-weight: 700; }
+.letter-text { min-height: 150px; resize: vertical; font-family: 'Itim', 'Mali', sans-serif; font-size: 16px; line-height: 1.7; }

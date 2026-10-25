@@ -36,6 +36,7 @@
   position: absolute; left: 12px; top: 12px; z-index: 8; padding: 3px 11px; border-radius: 999px;
   font-size: 12px; font-weight: 700; background: rgba(255, 255, 255, .9); color: #6E55D6;
 }
+.stage-tag.right { left: auto; right: 12px; } /* ซ้าย = วันที่, ขวา = ช่วงวัย */
 .room-hint {
   position: absolute; left: 50%; top: 14px; transform: translateX(-50%); z-index: 9; white-space: nowrap;
   padding: 5px 14px; border-radius: 999px; font-size: 13px; font-weight: 700;
@@ -43,7 +44,7 @@
 }
 .room-hint.dark { background: rgba(40, 34, 90, .72); color: #F3EEFF; top: auto; bottom: 12px; }
 .dino-bubble {
-  position: absolute; right: 12px; top: 14px; z-index: 9; max-width: 60%;
+  position: absolute; right: 12px; top: 46px; z-index: 9; max-width: 60%; /* ใต้ป้ายวันที่มุมขวาบน */
   background: var(--cream); color: var(--brown); border: 2.5px solid var(--beige); box-shadow: 0 4px 0 var(--beige-d);
   border-radius: 18px; padding: 6px 13px; font-weight: 700; font-size: 14px; line-height: 1.35;
   animation: bubbleIn .35s cubic-bezier(.3, 1.6, .5, 1);
