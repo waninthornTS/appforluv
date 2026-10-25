@@ -1,8 +1,8 @@
 // กระดานเพลง (หน้าแรก): Ploy กับ Dream เลือกได้คนละ 1 เพลง (เลือกใหม่ = ทับเพลงเดิมของตัวเอง)
-// พิมพ์ชื่อเพลงค้นหาจาก Spotify → ทั้งสองเครื่องเห็นเหมือนกัน กดฟังได้ในแอป (บนมือถือได้ตัวอย่าง 30 วินาที)
-// กล่องสูงไม่เกินจอ: ขอบล่างอยู่เหนือแถบเมนูล่างพอดี เปิดแอปมาก็เห็นปุ่มเลือกเพลงโดยไม่ต้องเลื่อน
+// ค้นหาจาก Spotify ได้ในกล่องเลย (ไม่มีหน้าต่างเด้ง) → ทั้งสองเครื่องเห็นเหมือนกัน กดฟังได้ในแอป (บนมือถือได้ตัวอย่าง 30 วินาที)
+// กล่องสูงไม่เกินจอ: ขอบล่างอยู่เหนือแถบเมนูล่าง เปิดแอปมาก็เห็นช่องค้นหาโดยไม่ต้องเลื่อน
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { openSheet, toast } from '../../ui/overlays';
+import { toast } from '../../ui/overlays';
 import { db } from '../../lib/db';
 import { coll, PROFILE, useCollection } from '../../lib/store';
 import { searchTracks, type FoundTrack } from '../../lib/spotify';
@@ -31,6 +31,8 @@ export function MusicBoard() {
   const other = picks.find(s => s !== current);
   const box = useRef<HTMLElement>(null);
   const [maxH, setMaxH] = useState<number>();
+  const [who, setWho] = useState<Who>(readWho);
+  const search = useRef<HTMLInputElement>(null);
 
   // พื้นที่ตั้งแต่กล่องลงไปถึงเหนือแถบเมนูล่าง (คิดจากตำแหน่งจริงบนจอ รวมขอบจอ/พื้นที่เกาะของ iPhone)
   useLayoutEffect(() => {
@@ -45,20 +47,21 @@ export function MusicBoard() {
     addEventListener('resize', fit);
     return () => { clearTimeout(t); removeEventListener('resize', fit); };
   }, []);
-  // ที่พอ (หัว + ปกใหญ่ + แถวเพลงของอีกคน) ใช้ตัวเล่นแบบมีปก ไม่พอใช้แบบแถบเล็ก — แถวของอีกคนโชว์เสมอ
-  const big = !maxH || maxH >= 28 + 8 + 152 + (current ? 8 + 52 : 0) + 22;
+  // ที่พอ (หัว + ปกใหญ่ + แถวเพลงอีกคน + ช่องค้นหา) ใช้ตัวเล่นแบบมีปก ไม่พอใช้แบบแถบเล็ก
+  const big = !maxH || maxH >= 22 + 152 + (current ? 6 + 44 : 0) + 6 + 38 + 6 + 20;
   // อีกคนที่ไม่ใช่เจ้าของเพลงที่กำลังเล่น (ยังไม่ได้เลือก = แถวชวนเลือกเพลง)
   const otherWho: Who | null = current ? (current.who === 'A' ? 'B' : 'A') : null;
+
+  const pickWho = (w: Who) => { setWho(w); try { localStorage.setItem(WHO_KEY, w); } catch { /* ไม่เป็นไร */ } };
+  const askFor = (w: Who) => { pickWho(w); search.current?.focus(); };
 
   return (
     <section ref={box} className="card music">
       <div className="music-head">
         {current && <span className={`who now ${current.who}`}>🎧 {nameOf(current.who)}</span>}
         <span className="music-icon" aria-hidden="true">🎵</span>
-        {current && <button className="music-add" onClick={() => openAddSong()}>＋ เลือกเพลง</button>}
       </div>
-      {current ? <Player p={current} h={big ? 152 : 80} />
-        : <button className="music-empty" onClick={() => openAddSong()}><span>🎵</span>เลือกเพลงแรกของเรา</button>}
+      {current && <Player p={current} h={big ? 152 : 80} />}
       {other ? (
         <button className="music-row" onClick={() => setPlayId(other.id)} aria-label={`ฟังเพลงของ${nameOf(other.who)}`}>
           {other.cover ? <img src={other.cover} alt="" loading="lazy" /> : <i>🎵</i>}
@@ -66,34 +69,30 @@ export function MusicBoard() {
           <span className={`who ${other.who}`}>{nameOf(other.who)}</span>
         </button>
       ) : otherWho && (
-        <button className="music-row empty" onClick={() => openAddSong(otherWho)}>
+        <button className="music-row empty" onClick={() => askFor(otherWho)}>
           <i>＋</i>
           <span className="t"><b className="ellipsis">{nameOf(otherWho)} ยังไม่ได้เลือกเพลง</b></span>
           <span className={`who ${otherWho}`}>{nameOf(otherWho)}</span>
         </button>
       )}
+      <SongSearch who={who} onWho={pickWho} inputRef={search} onPicked={id => setPlayId(id)} />
     </section>
   );
 }
 
-// ---------- ชีตเลือกเพลง: พิมพ์ชื่อเพลงแล้วค้นหาจาก Spotify ----------
-function openAddSong(forWho?: Who) {
-  openSheet({ title: 'เลือกเพลง', render: close => <AddSong close={close} forWho={forWho} /> });
-}
-
-function AddSong({ close, forWho }: { close: () => void; forWho?: Who }) {
-  const [who, setWho] = useState<Who>(() => forWho ?? readWho());
-  const whoNow = useRef(who); // ค่าล่าสุดเสมอ (กดเลือกคนแล้วกดใส่เพลงทันทีก็ไม่พลาด)
+// ---------- ช่องค้นหาในกล่อง: พิมพ์ → รายการขึ้นต่อท้าย → แตะเพลง = ใส่เป็นเพลงของคนที่เลือกไว้ ----------
+function SongSearch({ who, onWho, inputRef, onPicked }: {
+  who: Who; onWho: (w: Who) => void; inputRef: React.RefObject<HTMLInputElement | null>; onPicked: (id: string) => void;
+}) {
   const [q, setQ] = useState('');
   const [found, setFound] = useState<FoundTrack[] | 'not-connected' | 'error' | null>(null);
   const [loading, setLoading] = useState(false);
-  const [sel, setSel] = useState<FoundTrack | null>(null);
   const seq = useRef(0);
 
   // พิมพ์หยุดแป๊บนึงค่อยค้นหา (ไม่ยิงทุกตัวอักษร)
   useEffect(() => {
     const text = q.trim();
-    if (!text) { setFound(null); setLoading(false); return; }
+    if (!text) { seq.current++; setFound(null); setLoading(false); return; }
     const n = ++seq.current;
     setLoading(true);
     const t = setTimeout(async () => {
@@ -104,44 +103,36 @@ function AddSong({ close, forWho }: { close: () => void; forWho?: Who }) {
     return () => clearTimeout(t);
   }, [q]);
 
-  const pick = (w: Who) => { whoNow.current = w; setWho(w); try { localStorage.setItem(WHO_KEY, w); } catch { /* ไม่เป็นไร */ } };
-  const save = async () => {
-    if (!sel) return;
-    const w = whoNow.current;
-    await coll.save('songs', { id: slotId(w), kind: 'track', sid: sel.sid, who: w, title: sel.title, artist: sel.artist, cover: sel.cover });
+  const choose = async (t: FoundTrack) => {
+    const id = slotId(who);
+    await coll.save('songs', { id, kind: 'track', sid: t.sid, who, title: t.title, artist: t.artist, cover: t.cover });
     // เก็บกวาดเพลงเก่าของคนนี้ (ให้เหลือคนละ 1 เพลงจริงๆ)
-    for (const s of await db.all<SongPick>('songs')) if (s.who === w && s.id !== slotId(w)) await coll.remove('songs', s.id);
-    toast('ใส่เพลงแล้ว 🎵');
-    close();
+    for (const s of await db.all<SongPick>('songs')) if (s.who === who && s.id !== id) await coll.remove('songs', s.id);
+    setQ('');
+    inputRef.current?.blur();
+    onPicked(id);
+    toast(`ใส่เพลงของ${nameOf(who)}แล้ว 🎵`);
   };
 
-  if (sel) {
-    return (
-      <div className="song-form">
-        <Player p={{ kind: 'track', sid: sel.sid }} />
-        <div className="song-who">
-          <span className="small muted">เพลงของ</span>
+  return (
+    <div className="song-search-box">
+      <div className="song-search-row">
+        <div className="who-pick" role="radiogroup" aria-label="เพลงของใคร">
           {(['A', 'B'] as const).map(w => (
-            <button key={w} type="button" className={`${w} ${who === w ? 'on' : ''}`} onClick={() => pick(w)}>{nameOf(w)}</button>
+            <button key={w} type="button" role="radio" aria-checked={who === w} className={`${w} ${who === w ? 'on' : ''}`} onClick={() => onWho(w)}>{nameOf(w)}</button>
           ))}
         </div>
-        <button className="btn btn-primary btn-block" onClick={save}>ใส่เพลงนี้</button>
-        <button className="btn btn-ghost btn-block" onClick={() => setSel(null)}>‹ เลือกเพลงอื่น</button>
+        <input ref={inputRef} className="input song-search" value={q} onChange={e => setQ(e.target.value)} placeholder="ค้นหาเพลง…" enterKeyHint="search" />
+        {q && <button type="button" className="clear" onClick={() => setQ('')} aria-label="ล้าง">✕</button>}
       </div>
-    );
-  }
-
-  return (
-    <div className="song-form">
-      <input className="input song-search" value={q} onChange={e => setQ(e.target.value)} placeholder="🔍 พิมพ์ชื่อเพลง หรือศิลปิน" autoFocus enterKeyHint="search" />
-      {loading && <div className="song-status"><div className="spinner" /></div>}
-      {!loading && found === 'not-connected' && <p className="song-status small muted">ยังไม่ได้เชื่อม Spotify — เปิดเมนู ☰ มุมซ้ายบน แล้วกด “เชื่อมต่อ Spotify”</p>}
-      {!loading && found === 'error' && <p className="song-status small muted">ค้นหาไม่ได้ตอนนี้ ลองใหม่อีกครั้งนะ</p>}
-      {!loading && Array.isArray(found) && !found.length && <p className="song-status small muted">ไม่เจอเพลงนี้ ลองพิมพ์ชื่ออื่นดูนะ</p>}
-      {!loading && Array.isArray(found) && found.length > 0 && (
+      {q.trim() && (
         <div className="song-results">
-          {found.map(t => (
-            <button key={t.sid} className="song-hit" onClick={() => setSel(t)}>
+          {loading && <div className="song-status"><div className="spinner" /></div>}
+          {!loading && found === 'not-connected' && <p className="song-status small muted">ยังไม่ได้เชื่อม Spotify — เปิดเมนู ☰ แล้วกด “เชื่อมต่อ Spotify”</p>}
+          {!loading && found === 'error' && <p className="song-status small muted">ค้นหาไม่ได้ตอนนี้ ลองใหม่อีกครั้งนะ</p>}
+          {!loading && Array.isArray(found) && !found.length && <p className="song-status small muted">ไม่เจอเพลงนี้</p>}
+          {!loading && Array.isArray(found) && found.map(t => (
+            <button key={t.sid} className="song-hit" onClick={() => choose(t)}>
               {t.thumb || t.cover ? <img src={t.thumb || t.cover} alt="" loading="lazy" /> : <i>🎵</i>}
               <span className="t"><b className="ellipsis">{t.title}</b><small className="ellipsis">{t.artist}</small></span>
             </button>
