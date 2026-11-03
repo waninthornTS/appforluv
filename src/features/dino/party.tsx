@@ -1,26 +1,18 @@
-// ห้องเลี้ยงไดโนวันเกิด Ploy/Dream: สายรุ้งกระดาษ + ดาวห้อย, เค้กบนโต๊ะ (แตะ = เป่าเทียน), กล่องของขวัญ,
+// ห้องเลี้ยงไดโนวันเกิด Ploy/Dream: สายรุ้งกระดาษ + ดาวห้อย, เค้กก้อนใหญ่บนโต๊ะ (แตะ = ไดโนเดินมาเป่าเทียน), กล่องของขวัญ,
 // หน้าต่างมีลูกโป่งลอยผ่าน (กลางวัน) / พลุเล็กๆ (กลางคืน) — แสดงเฉพาะวันเกิด
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, type CSSProperties } from 'react';
 import { burstHearts } from '../../ui/overlays';
-import { sfx } from './sfx';
 
-const RELIGHT_MS = 8000; // เป่าแล้วจุดเทียนใหม่เอง
+/** out = เวลาที่เทียนดับ (0 = เทียนติดอยู่) · onTap = แตะเค้ก (ห้องเป็นคนสั่งให้ไดโนเดินมาเป่า) */
+export function BirthdayParty({ night, out, onTap }: { night: boolean; out: number; onTap: () => void }) {
+  const cake = useRef<HTMLButtonElement>(null);
 
-export function BirthdayParty({ night, onBlow }: { night: boolean; onBlow: () => void }) {
-  const [out, setOut] = useState(0); // เวลาที่เป่าเทียน (0 = เทียนติดอยู่)
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  useEffect(() => () => clearTimeout(timer.current), []);
-
-  const blow = (e: React.PointerEvent) => {
-    e.stopPropagation();
-    if (out) return;
-    setOut(Date.now());
-    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    burstHearts(r.left + r.width / 2, r.top + 10, 14, ['🎉', '🎊', '✨', '💖', '🎂']);
-    sfx.hatch();
-    onBlow();
-    timer.current = setTimeout(() => setOut(0), RELIGHT_MS);
-  };
+  // เทียนดับ = กระดาษสี/หัวใจระเบิดออกจากเค้ก
+  useEffect(() => {
+    if (!out || !cake.current) return;
+    const r = cake.current.getBoundingClientRect();
+    burstHearts(r.left + r.width / 2, r.top + 14, 16, ['🎉', '🎊', '✨', '💖', '🎂']);
+  }, [out]);
 
   return (
     <div className="party" aria-hidden="true">
@@ -48,8 +40,8 @@ export function BirthdayParty({ night, onBlow }: { night: boolean; onBlow: () =>
       <svg className="party-gift g1" viewBox="0 0 40 40"><rect x="4" y="14" width="32" height="24" rx="4" fill="#C7A8FF" /><rect x="2" y="10" width="36" height="8" rx="3" fill="#B394F5" /><rect x="17" y="10" width="6" height="28" fill="#FFE27A" /><path d="M20 10c-6-8-13-3-8 0M20 10c6-8 13-3 8 0" fill="none" stroke="#FFE27A" strokeWidth="3" strokeLinecap="round" /></svg>
       <svg className="party-gift g2" viewBox="0 0 40 40"><rect x="5" y="16" width="30" height="22" rx="4" fill="#9BD7FF" /><rect x="3" y="12" width="34" height="7" rx="3" fill="#7CC4F2" /><rect x="17" y="12" width="6" height="26" fill="#FF9EBB" /><path d="M20 12c-5-7-12-3-7 0M20 12c5-7 12-3 7 0" fill="none" stroke="#FF9EBB" strokeWidth="3" strokeLinecap="round" /></svg>
 
-      {/* เค้กบนโต๊ะ: แตะเพื่อเป่าเทียน */}
-      <button className={`party-cake no-walk ${out ? 'out' : ''}`} onPointerDown={blow} aria-label="เป่าเทียน">
+      {/* เค้กก้อนใหญ่บนโต๊ะ: แตะ = ไดโนเดินมาเป่าเทียน */}
+      <button ref={cake} className={`party-cake no-walk ${out ? 'out' : ''}`} onPointerDown={e => { e.stopPropagation(); onTap(); }} aria-label="ให้ไดโนเป่าเทียน">
         <svg viewBox="0 0 80 84">
           <ellipse cx="40" cy="80" rx="30" ry="4" fill="rgba(120,80,40,.18)" />
           <rect x="37" y="58" width="6" height="22" rx="2" fill="#D9A877" />

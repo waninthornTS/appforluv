@@ -15,14 +15,14 @@ import { Actor, Room, useActor, useWander } from './rooms';
 import { openDevSpecies } from './devtools';
 import { nameOf, openBook, openNameSheet } from './sheets';
 import { SPECIES, STAGE_EMOJI, STAGE_NAME } from './species';
-import { setSound, sfx, useSound } from './sfx';
+import { birthdayTune, setSound, sfx, useSound } from './sfx';
 import { DinoSprite } from './Sprite';
 import '@fontsource/itim/thai-400.css';
 import '@fontsource/itim/latin-400.css';
 import './dino.css';
 
 type Mode = 'room' | 'feed' | 'bath' | 'bed' | 'game';
-type FxKind = 'pet' | 'hug' | 'sweep' | 'spoon' | 'sparkle' | 'cheer';
+type FxKind = 'pet' | 'hug' | 'sweep' | 'spoon' | 'sparkle' | 'cheer' | 'blow';
 interface Fx { kind: FxKind; k: number; n: number }
 type Result = Dino | string | null;
 
@@ -109,7 +109,12 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
   const [, tick] = useState(0);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const hatched = useRef(d.status === 'alive');
-  const { a, walkTo } = useActor({ x: 50, depth: .3 });
+  const { a, walkTo, face } = useActor({ x: 50, depth: .3 });
+  // วันเกิด: แตะเค้ก → ไดโนเดินไปเป่าเทียน (cakeOut = เวลาที่เทียนดับ, puff = กำลังเป่าลม)
+  const [cakeOut, setCakeOut] = useState(0);
+  const [puff, setPuff] = useState(false);
+  const relight = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(relight.current), []);
   const info = SPECIES[d.species];
   // วันเกิด Ploy/Dream: ห้องแต่งธีมวันเกิด + ไดโนอวยพร (เฉพาะวันนั้น)
   const sp = specialOf(useToday());
@@ -222,14 +227,33 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
   const poops = Math.min(POOP_POS.length, sweeping ? fx.n : v.dirt === 2 ? v.poops * 2 + 2 : v.poops);
   const spoonBitter = fx?.kind === 'spoon' && Date.now() - fx.k < 1300;
   const mood: Mood = spoonBitter ? 'sad' : fx && !v.sick ? 'happy' : v.sick ? 'sick' : v.m.fun < 30 || v.dirt === 2 || v.m.food < 15 ? 'sad' : 'normal';
-  const pose = fx && !v.sick && fx.kind !== 'sweep' && !spoonBitter ? 'happy' as const : undefined;
+  const pose = fx?.kind === 'blow' ? (puff ? 'eat' as const : undefined) // อ้าปากเป่าเทียน
+    : fx && !v.sick && fx.kind !== 'sweep' && !spoonBitter ? 'happy' as const : undefined;
+
+  // ไดโนเดินไปข้างเค้ก (มุมซ้าย) หันหน้าเข้าเค้ก เป่าลมฟู่ → เทียนดับ + เพลงวันเกิด + ดีใจ แล้วจุดเทียนใหม่ทีหลัง
+  const blowCake = async () => {
+    if (cakeOut || fx?.kind === 'blow') return;
+    play('blow', 6000);
+    await walkTo(36, .6, 1.3);
+    face('left');
+    await new Promise(r => setTimeout(r, 300));
+    setPuff(true);
+    sfx.blow();
+    await new Promise(r => setTimeout(r, 750));
+    setPuff(false);
+    setCakeOut(Date.now());
+    birthdayTune();
+    play('cheer', 2600);
+    clearTimeout(relight.current);
+    relight.current = setTimeout(() => setCakeOut(0), 9000);
+  };
 
   return (
     <div className="dino-page">
       <Head d={d} title={nameOf(d)} sub={sub} />
 
       <Room kind="home" night={night} className={`${v.dirt ? `dirt${v.dirt}` : ''} ${bday ? 'bday-room' : ''}`} onFloorTap={(x, dep) => walkTo(x, dep)}>
-        {bday && <BirthdayParty night={night} onBlow={() => play('cheer', 1800)} />}
+        {bday && <BirthdayParty night={night} out={cakeOut} onTap={blowCake} />}
         <span className="stage-tag">🗓️ {dayTag}</span>
         <span className="stage-tag right">{STAGE_EMOJI[stage]} {STAGE_NAME[stage]}</span>
         {import.meta.env.DEV && <button className="dev-chip" onClick={() => openDevSpecies(d)}>🧪 ลองพันธุ์อื่น</button>}
@@ -248,6 +272,7 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
             className={fx?.kind === 'sparkle' ? '' : v.m.bath <= 0 ? 'grubby rotten' : v.m.bath < 30 ? 'grubby' : ''}
             onTap={() => { if (!fx) { play('pet', 1300); sfx.pet(); } }}>
             {v.m.bath <= 0 && fx?.kind !== 'sparkle' && <><span className="stink-lines"><i /><i /><i /></span><span className="body-fly">🪰</span></>}
+            {puff && <span className={`fx-blow ${a.face}`} key="blow">💨</span>}
             {fx?.kind === 'pet' && <span className="pet-hearts" key={`p${fx.k}`}><i>💗</i><i>💕</i><i>💗</i></span>}
             {fx?.kind === 'hug' && <div className="hug-ring" key={`h${fx.k}`}><span className="big-heart">💗</span>{Array.from({ length: 12 }, (_, i) => <i key={i} style={{ '--a': `${i * 30}deg`, '--d': `${(i % 3) * .12}s` } as React.CSSProperties}>{['💗', '💖', '💕'][i % 3]}</i>)}</div>}
             {fx?.kind === 'spoon' && <span className={`fx-spoon ${a.face}`} key={`s${fx.k}`}><i />🥄</span>}

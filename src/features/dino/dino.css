@@ -530,15 +530,21 @@
 .firework { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; border: 2px dotted var(--c); opacity: 0; animation: firework 2.7s ease-out infinite; }
 @keyframes firework { 0% { transform: scale(.1); opacity: 1; } 45% { transform: scale(1); opacity: .9; } 70%, 100% { transform: scale(1.25); opacity: 0; } }
 .party-gift { position: absolute; z-index: 1; }
-.party-gift.g1 { left: 22%; bottom: 25%; width: 30px; height: 30px; }
-.party-gift.g2 { left: 30%; bottom: 28%; width: 24px; height: 24px; }
-.party-cake { position: absolute; left: 4%; bottom: 25%; width: 64px; height: 68px; padding: 0; background: none; border: 0; pointer-events: auto; cursor: pointer; }
+.party-gift.g1 { right: 4%; bottom: 24%; width: 32px; height: 32px; }
+.party-gift.g2 { right: 14%; bottom: 22%; width: 26px; height: 26px; }
+.party-cake { position: absolute; left: 3%; bottom: 22%; width: 96px; height: 101px; /* ก้อนใหญ่ แตะง่าย */ padding: 0; background: none; border: 0; pointer-events: auto; cursor: pointer; }
 .party-cake svg { display: block; width: 100%; height: 100%; }
 .party-cake:active svg { transform: scale(.95); }
-.party-cake .flame { position: absolute; top: 4px; width: 8px; height: 13px; margin-left: -4px; border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+.party-cake .flame { position: absolute; top: 8px; width: 11px; height: 18px; margin-left: -5.5px; border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
   background: radial-gradient(ellipse at 50% 70%, #FFF7C2 0 30%, #FFC94D 55%, #FF8A3D 100%); box-shadow: 0 0 10px 3px rgba(255, 200, 80, .6); transform-origin: 50% 100%; animation: flameFlicker .45s ease-in-out infinite alternate; }
 @keyframes flameFlicker { from { transform: rotate(-6deg) scaleY(1); } to { transform: rotate(5deg) scaleY(1.12); } }
-.party-cake .smoke { position: absolute; top: 8px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: rgba(200, 200, 210, .8); animation: smokeUp 1.4s ease-out forwards; }
+.party-cake .smoke { position: absolute; top: 12px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: rgba(200, 200, 210, .8); animation: smokeUp 1.4s ease-out forwards; }
 @keyframes smokeUp { from { transform: translateY(0) scale(.6); opacity: .9; } to { transform: translate(4px, -26px) scale(1.6); opacity: 0; } }
 /* คำอวยพรวันเกิด: ฟองคำพูดอยู่กลางห้อง (ใต้สายรุ้งกระดาษ) */
 .dino-room.bday-room .dino-bubble.wish { left: 0; right: 0; top: 78px; width: max-content; max-width: 84%; margin: 0 auto; text-align: center; font-size: 15px; }
+/* ไดโนเป่าเทียน: ลมฟู่ออกจากปากไปทางเค้ก */
+.fx-blow { position: absolute; top: 30%; z-index: 3; font-size: 24px; line-height: 1; pointer-events: none; animation: blowPuff .75s ease-out forwards; }
+.fx-blow.left { left: -6%; }
+.fx-blow.right { right: -6%; transform: scaleX(-1); animation-name: blowPuffR; }
+@keyframes blowPuff { from { transform: translateX(0) scale(.6); opacity: 0; } 30% { opacity: 1; } to { transform: translateX(-46px) scale(1.25); opacity: 0; } }
+@keyframes blowPuffR { from { transform: scaleX(-1) translateX(0) scale(.6); opacity: 0; } 30% { opacity: 1; } to { transform: scaleX(-1) translateX(-46px) scale(1.25); opacity: 0; } }

@@ -79,6 +79,15 @@ let lastBubble = 0;
 /** เล่นเสียงเฉพาะตอนเปิดเสียงไว้ */
 const play = <A extends unknown[]>(fn: (...a: A) => void) => (...a: A) => { if (on) try { fn(...a); } catch { /* เบราว์เซอร์ไม่รองรับ */ } };
 
+/** เพลง Happy Birthday ท่อนแรกสั้นๆ ตอนไดโนเป่าเทียน — เล่นเสมอ แม้ปิดเสียงเกมไว้ (ผู้ใช้ขอให้มีเพลงตอนเป่าเค้ก) */
+export function birthdayTune() {
+  try {
+    // Hap-py birth-day to you (G G A G C B)
+    const M: [number, number, number][] = [[392, 0, .24], [392, .3, .24], [440, .6, .5], [392, 1.12, .5], [523.25, 1.64, .5], [493.88, 2.16, 1]];
+    for (const [f, t, d] of M) { tone(f, t, d, { type: 'triangle', vol: .17 }); tone(f * 2, t, d * .7, { vol: .035 }); }
+  } catch { /* เบราว์เซอร์ไม่รองรับ */ }
+}
+
 export const sfx = {
   /** กดปุ่มกิจกรรม */
   click: play(() => tone(1400, 0, .05, { type: 'triangle', vol: .08, to: 1800 })),
@@ -116,6 +125,8 @@ export const sfx = {
   /** กวาดห้อง */
   sweep: play(() => { for (let i = 0; i < 3; i++) noise(i * .35, .25, { freq: 700, to: 3200, q: .7, vol: .12, fade: .06 }); }),
   /** เตะบอล */
+  /** ไดโนเป่าเทียน (ลมฟู่) */
+  blow: play(() => noise(0, .6, { freq: 1100, to: 420, q: .7, vol: .16, fade: .12 })),
   /** กระโดดในมินิเกม */
   jump: play(() => tone(380, 0, .12, { type: 'square', vol: .06, to: 760 })),
   /** ชนสิ่งกีดขวาง */
