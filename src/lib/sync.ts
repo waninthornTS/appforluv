@@ -146,7 +146,11 @@ export function pull(): Promise<void> {
   if (!cloudEnabled) return Promise.resolve();
   pulling ??= (async () => {
     const c = await sb();
-    const cursor = (await db.get<{ value: string }>('kv', 'syncCursor'))?.value;
+    // แอปเวอร์ชันเก่าทิ้งรายการชนิดที่ไม่รู้จัก (เช่น จดหมาย) แต่เลื่อนจุดดึงข้ามไปแล้ว
+    // → อัปเดตแอปแล้วรู้จักชนิดใหม่เพิ่ม = ดึงทั้งหมดใหม่ครั้งเดียว ไม่งั้นของเก่าพวกนั้นจะไม่มาอีกเลย
+    const known = (await db.get<{ value: string }>('kv', 'syncColls'))?.value;
+    const full = known !== COLLS.join(',');
+    const cursor = full ? undefined : (await db.get<{ value: string }>('kv', 'syncCursor'))?.value;
     // ถอยเวลา 5 วินาที กันรายการที่บันทึกพร้อมกันหลุด (ใส่ซ้ำได้ ไม่เป็นไร)
     const since = cursor ? new Date(new Date(cursor).getTime() - 5000).toISOString() : undefined;
     let max = cursor;
@@ -161,6 +165,7 @@ export function pull(): Promise<void> {
       if (rows.length < 1000) break;
     }
     if (max) await db.put('kv', { key: 'syncCursor', value: max });
+    if (full) await db.put('kv', { key: 'syncColls', value: COLLS.join(',') });
     patch({ lastSync: Date.now(), status: outbox.length ? state.get().status : 'idle' });
   })().catch(e => {
     console.warn('sync: ดึงข้อมูลไม่สำเร็จ', e);
