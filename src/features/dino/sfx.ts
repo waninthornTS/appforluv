@@ -79,6 +79,9 @@ let lastBubble = 0;
 /** เล่นเสียงเฉพาะตอนเปิดเสียงไว้ */
 const play = <A extends unknown[]>(fn: (...a: A) => void) => (...a: A) => { if (on) try { fn(...a); } catch { /* เบราว์เซอร์ไม่รองรับ */ } };
 
+/** เรียกตอนนิ้วแตะ: iPhone ยอมเปิดเสียงเฉพาะที่เริ่มจากการแตะ (เพลงที่เล่นทีหลังจะได้ดัง) */
+export function unlockAudio() { try { audio(); } catch { /* เบราว์เซอร์ไม่รองรับ */ } }
+
 /** เพลง Happy Birthday ท่อนแรกสั้นๆ ตอนไดโนเป่าเทียน — เล่นเสมอ แม้ปิดเสียงเกมไว้ (ผู้ใช้ขอให้มีเพลงตอนเป่าเค้ก) */
 export function birthdayTune() {
   try {

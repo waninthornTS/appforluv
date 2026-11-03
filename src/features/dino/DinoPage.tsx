@@ -15,7 +15,7 @@ import { Actor, Room, useActor, useWander } from './rooms';
 import { openDevSpecies } from './devtools';
 import { nameOf, openBook, openNameSheet } from './sheets';
 import { SPECIES, STAGE_EMOJI, STAGE_NAME } from './species';
-import { birthdayTune, setSound, sfx, useSound } from './sfx';
+import { birthdayTune, setSound, sfx, unlockAudio, useSound } from './sfx';
 import { DinoSprite } from './Sprite';
 import '@fontsource/itim/thai-400.css';
 import '@fontsource/itim/latin-400.css';
@@ -231,6 +231,13 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
     : fx && !v.sick && fx.kind !== 'sweep' && !spoonBitter ? 'happy' as const : undefined;
 
   // ไดโนเดินไปข้างเค้ก (มุมซ้าย) หันหน้าเข้าเค้ก เป่าลมฟู่ → เทียนดับ + เพลงวันเกิด + ดีใจ แล้วจุดเทียนใหม่ทีหลัง
+  // แตะเค้ก → ถามก่อนว่าจะเป่าเทียนไหม
+  const askBlow = async () => {
+    unlockAudio();
+    if (!bday || cakeOut || fx?.kind === 'blow') return;
+    const ok = await confirmSheet({ title: 'เป่าเทียนวันเกิดไหม? 🎂', message: `ให้${nameOf(d)}ช่วยเป่าเทียนวันเกิดให้${bday.who === 'A' ? 'พี่พลอย' : 'ดรีม'}`, emoji: '🎂', ok: 'เป่าเลย!', danger: false });
+    if (ok) blowCake();
+  };
   const blowCake = async () => {
     if (cakeOut || fx?.kind === 'blow') return;
     play('blow', 6000);
@@ -253,7 +260,7 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
       <Head d={d} title={nameOf(d)} sub={sub} />
 
       <Room kind="home" night={night} className={`${v.dirt ? `dirt${v.dirt}` : ''} ${bday ? 'bday-room' : ''}`} onFloorTap={(x, dep) => walkTo(x, dep)}>
-        {bday && <BirthdayParty night={night} out={cakeOut} onTap={blowCake} />}
+        {bday && <BirthdayParty night={night} out={cakeOut} onTap={askBlow} />}
         <span className="stage-tag">🗓️ {dayTag}</span>
         <span className="stage-tag right">{STAGE_EMOJI[stage]} {STAGE_NAME[stage]}</span>
         {import.meta.env.DEV && <button className="dev-chip" onClick={() => openDevSpecies(d)}>🧪 ลองพันธุ์อื่น</button>}
