@@ -20,7 +20,8 @@ createRoot(document.getElementById('root')!).render(
 // แอปบนหน้าจอโฮมที่สลับกลับมาจากพื้นหลังจะไม่โหลดใหม่ เลยต้องเช็กเองตอนกลับมาที่แอป + ทุก 30 นาที
 // เช็กเฉพาะตอนว่าง (ไม่ได้พิมพ์ค้าง/เปิดชีต/เล่นเกมวิ่ง/อ่านจดหมาย) ของที่ทำค้างจะได้ไม่หายตอนรีโหลด
 const busy = () =>
-  !!document.querySelector('.sheet-wrap, .drawer.open, .an-show, .runner.go:not(.dead)') ||
+  !!document.querySelector('.sheet-wrap, .drawer.open, .music-modal.open, .an-show, .runner.go:not(.dead)') ||
+  document.body.dataset.music === 'on' || // เพลงเล่นอยู่ (ไม่ให้รีโหลดตัดเพลง)
   /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '');
 registerSW({
   immediate: true,

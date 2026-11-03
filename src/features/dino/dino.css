@@ -513,3 +513,32 @@
 .grave .stone::after { content: '🌼'; position: absolute; right: -12px; bottom: -5px; font-size: 17px; }
 .grave .g-name { position: static; transform: none; margin-top: 4px; font-size: 11px; padding: 0 7px; }
 .grave:active .stone { transform: translateY(2px); }
+
+/* ---------- วันเกิด: ห้องปาร์ตี้ของไดโน (party.tsx) ---------- */
+.dino-room.bday-room .mroom-wall { background: linear-gradient(180deg, #FFE3EE 0%, #FFF1D9 100%); }
+.dino-room.bday-room.night .mroom-wall { background: linear-gradient(180deg, #5B4A9E 0%, #8A64B4 100%); }
+.party { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.party-swags { position: absolute; left: 0; top: 0; width: 100%; height: 64px; }
+.party-star { position: absolute; top: 0; width: 18px; transform-origin: 50% 0; animation: starSwing 3.2s ease-in-out infinite; }
+.party-star::before { content: ''; display: block; width: 1.5px; height: var(--len); margin: 0 auto; background: rgba(255, 255, 255, .85); }
+.party-star svg { display: block; width: 18px; height: 18px; margin-top: -2px; }
+@keyframes starSwing { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+.party-window { position: absolute; left: calc(9% + 6px); top: calc(21% + 6px); width: 60px; height: 60px; border-radius: 50%; overflow: hidden; }
+.win-balloon { position: absolute; bottom: -20px; width: 12px; height: 15px; border-radius: 50% 50% 48% 48%; background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, .7) 0 15%, var(--c) 16%); animation: winBalloon 4.4s linear infinite; }
+.win-balloon::after { content: ''; position: absolute; top: 100%; left: 50%; width: 1px; height: 10px; background: rgba(255, 255, 255, .8); }
+@keyframes winBalloon { 0% { transform: translate(0, 0); } 50% { transform: translate(5px, -45px); } 100% { transform: translate(-3px, -95px); } }
+.firework { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; border: 2px dotted var(--c); opacity: 0; animation: firework 2.7s ease-out infinite; }
+@keyframes firework { 0% { transform: scale(.1); opacity: 1; } 45% { transform: scale(1); opacity: .9; } 70%, 100% { transform: scale(1.25); opacity: 0; } }
+.party-gift { position: absolute; z-index: 1; }
+.party-gift.g1 { left: 22%; bottom: 25%; width: 30px; height: 30px; }
+.party-gift.g2 { left: 30%; bottom: 28%; width: 24px; height: 24px; }
+.party-cake { position: absolute; left: 4%; bottom: 25%; width: 64px; height: 68px; padding: 0; background: none; border: 0; pointer-events: auto; cursor: pointer; }
+.party-cake svg { display: block; width: 100%; height: 100%; }
+.party-cake:active svg { transform: scale(.95); }
+.party-cake .flame { position: absolute; top: 4px; width: 8px; height: 13px; margin-left: -4px; border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  background: radial-gradient(ellipse at 50% 70%, #FFF7C2 0 30%, #FFC94D 55%, #FF8A3D 100%); box-shadow: 0 0 10px 3px rgba(255, 200, 80, .6); transform-origin: 50% 100%; animation: flameFlicker .45s ease-in-out infinite alternate; }
+@keyframes flameFlicker { from { transform: rotate(-6deg) scaleY(1); } to { transform: rotate(5deg) scaleY(1.12); } }
+.party-cake .smoke { position: absolute; top: 8px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: rgba(200, 200, 210, .8); animation: smokeUp 1.4s ease-out forwards; }
+@keyframes smokeUp { from { transform: translateY(0) scale(.6); opacity: .9; } to { transform: translate(4px, -26px) scale(1.6); opacity: 0; } }
+/* คำอวยพรวันเกิด: ฟองคำพูดอยู่กลางห้อง (ใต้สายรุ้งกระดาษ) */
+.dino-room.bday-room .dino-bubble.wish { left: 0; right: 0; top: 78px; width: max-content; max-width: 84%; margin: 0 auto; text-align: center; font-size: 15px; }

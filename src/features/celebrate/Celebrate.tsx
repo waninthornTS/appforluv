@@ -55,6 +55,9 @@ export function SceneDecor({ s }: { s: Special }) {
         <span key={i} className="balloon" style={{ left: `${b.l}%`, top: `${b.t}%`, '--c': b.c, animationDelay: `${b.d}s` } as CSSProperties}>{bday ? '' : '♥'}</span>
       ))}
       {!bday && Array.from({ length: 9 }, (_, i) => <i key={i} className="petal" style={{ left: `${(i * 11 + 4) % 100}%`, animationDelay: `${i * .7}s`, animationDuration: `${5 + (i % 3)}s` }} />)}
+      {bday && Array.from({ length: 14 }, (_, i) => (
+        <i key={i} className="confetto" style={{ left: `${(i * 7.3 + 3) % 100}%`, animationDelay: `${(i * .55) % 6}s`, animationDuration: `${4.5 + (i % 4) * .7}s`, '--c': ['#FF8DB3', '#FFC94D', '#6CC6F5', '#9EDB8C', '#C7A8FF'][i % 5] } as CSSProperties} />
+      ))}
     </div>
   );
 }

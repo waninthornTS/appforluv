@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState, type ComponentType, type LazyExoticComponent } from 'react';
 import { handleSpotifyCallback } from './lib/spotify';
 import { initSync } from './lib/sync';
+import { MusicHost } from './features/music/Music';
 import { OverlayHost, toast } from './ui/overlays';
 import { SkyBackground, TopBar } from './ui/Sky';
 import { TabBar, type Tab, TABS } from './ui/TabBar';
@@ -57,6 +58,7 @@ export default function App() {
         </Suspense>
       </main>
       <TabBar active={tab} />
+      <MusicHost />{/* ตัวเล่นเพลงอยู่ระดับแอป สลับแท็บแล้วยังเล่นต่อ */}
       <OverlayHost />
     </>
   );

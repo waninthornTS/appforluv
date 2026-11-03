@@ -7,7 +7,9 @@ import type { Dino } from '../../lib/types';
 import { burstCenter, burstHearts, confirmSheet, toast } from '../../ui/overlays';
 import { actions, activeDino, collection, eggTaps, gameStats, GROW_DAYS, HATCH_TAPS, lastEnded, needs, needsPersist, newEgg, settle, view, type DinoView } from './logic';
 import type { Mood } from './art';
+import { specialOf, useToday } from '../celebrate/days';
 import { RunnerMode } from './game';
+import { BirthdayParty } from './party';
 import { BathScene, BedScene, FeedScene } from './modes';
 import { Actor, Room, useActor, useWander } from './rooms';
 import { openDevSpecies } from './devtools';
@@ -109,6 +111,9 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
   const hatched = useRef(d.status === 'alive');
   const { a, walkTo } = useActor({ x: 50, depth: .3 });
   const info = SPECIES[d.species];
+  // วันเกิด Ploy/Dream: ห้องแต่งธีมวันเกิด + ไดโนอวยพร (เฉพาะวันนั้น)
+  const sp = specialOf(useToday());
+  const bday = sp?.kind === 'birthday' ? sp : null;
 
   // ฟักแล้ว → ฉลอง + ชวนตั้งชื่อ
   useEffect(() => {
@@ -211,7 +216,8 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
     );
   }
 
-  const bubble = fx ? '' : need(v, now);
+  const wish = bday ? `สุขสันต์วันเกิดคั้บบ${bday.who === 'A' ? 'พี่พลอย' : 'ดรีม'}` : '';
+  const bubble = fx ? '' : v.sick ? need(v, now) : wish || need(v, now); // ป่วยอยู่ = ขอยาก่อน
   const sweeping = fx?.kind === 'sweep';
   const poops = Math.min(POOP_POS.length, sweeping ? fx.n : v.dirt === 2 ? v.poops * 2 + 2 : v.poops);
   const spoonBitter = fx?.kind === 'spoon' && Date.now() - fx.k < 1300;
@@ -222,7 +228,8 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
     <div className="dino-page">
       <Head d={d} title={nameOf(d)} sub={sub} />
 
-      <Room kind="home" night={night} className={v.dirt ? `dirt${v.dirt}` : ''} onFloorTap={(x, dep) => walkTo(x, dep)}>
+      <Room kind="home" night={night} className={`${v.dirt ? `dirt${v.dirt}` : ''} ${bday ? 'bday-room' : ''}`} onFloorTap={(x, dep) => walkTo(x, dep)}>
+        {bday && <BirthdayParty night={night} onBlow={() => play('cheer', 1800)} />}
         <span className="stage-tag">🗓️ {dayTag}</span>
         <span className="stage-tag right">{STAGE_EMOJI[stage]} {STAGE_NAME[stage]}</span>
         {import.meta.env.DEV && <button className="dev-chip" onClick={() => openDevSpecies(d)}>🧪 ลองพันธุ์อื่น</button>}
@@ -234,7 +241,7 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
           </span>
         ))}
         {v.dirt > 0 && !sweeping && <><span className="fly f1">🪰</span>{v.dirt === 2 && <span className="fly f2">🪰</span>}</>}
-        {bubble && <div className="dino-bubble" key={`say${bubble}`}>{bubble}</div>}
+        {bubble && <div className={`dino-bubble ${bubble === wish ? 'wish' : ''}`} key={`say${bubble}`}>{bubble}</div>}
         {nextEgg && <button className="new-egg in-home no-walk" onClick={adopt} aria-label="รับเลี้ยงไข่ใบใหม่"><span className="new-egg-tag">ไข่ใบใหม่มาส่ง!</span><DinoSprite species={nextEgg.species} stage="egg" size={72} anim="none" /></button>}
         <div className="actor-layer">
           <Actor a={a} species={d.species} stage={stage} mood={mood} pose={pose} react={fx?.kind === 'hug' ? 'squish' : fx?.kind === 'pet' ? 'joy' : ''}
