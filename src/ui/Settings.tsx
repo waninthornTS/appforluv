@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { connectSpotify, disconnectSpotify, spotifyReady, useSpotifyAuth } from '../lib/spotify';
 import { refreshApp } from '../lib/update';
+import { coll, useCollection } from '../lib/store';
+import { activeDino, pauseDino, resumeDino } from '../features/dino/logic';
 import { confirmSheet, toast } from './overlays';
 
 const SpotifyIcon = () => (
@@ -52,9 +54,43 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
           <span className="txt"><b>รีเฟรช / อัปเดตแอป</b><small>ดึงข้อมูลล่าสุด และอัปเดตเป็นเวอร์ชันใหม่</small></span>
         </button>
         <SpotifyRow />
+        <DinoPauseRow />
       </nav>
     </div>
   );
+}
+
+/** พักการเลี้ยงไดโนชั่วคราว (สองเครื่องเห็นเหมือนกัน) — หยุดเวลาไว้ ไดโนไม่หิว ไม่ป่วย ไม่ตาย จนกว่าจะเปิดเลี้ยงต่อ */
+function DinoPauseRow() {
+  const all = useCollection('dino');
+  const d = all && activeDino(all);
+  if (!d) return null;
+  const paused = !!d.paused;
+  const toggle = async () => {
+    if (!paused && !(await confirmSheet({ title: 'พักการเลี้ยงไดโนไหม?', message: 'หยุดเวลาไว้ก่อน ไดโนจะไม่หิว ไม่สกปรก ไม่ป่วย จนกว่าจะกดเลี้ยงต่อ', emoji: '⏸️', ok: 'พักไว้ก่อน', danger: false }))) return;
+    const r = await toggleDinoPause(d.id);
+    if (r) toast(r.paused ? 'พักการเลี้ยงไว้แล้ว ⏸️ ไดโนรออยู่น้า' : 'เลี้ยงต่อแล้ว ▶️ ทุกอย่างเหมือนเดิม');
+  };
+  return (
+    <button className={`set-row dino-pause ${paused ? 'on' : ''}`} onClick={toggle}>
+      <span className="ico pause">{paused ? '▶️' : '⏸️'}</span>
+      <span className="txt">
+        <b>{paused ? 'เลี้ยงไดโนต่อ' : 'พักการเลี้ยงไดโน'}</b>
+        <small>{paused ? 'ตอนนี้พักอยู่ · แตะเพื่อเลี้ยงต่อจากเดิม' : 'วันไหนไม่ว่าง หยุดเวลาไว้ก่อน ไดโนจะไม่หิว ไม่ป่วย'}</small>
+      </span>
+      <span className={`switch ${paused ? 'on' : ''}`} aria-hidden="true"><i /></span>
+    </button>
+  );
+}
+
+/** สลับพัก/เลี้ยงต่อ กับข้อมูลล่าสุดในเครื่อง (ไม่ทับของที่อีกเครื่องเพิ่งซิงก์มา) */
+export async function toggleDinoPause(id: string) {
+  const cur = await coll.get('dino', id);
+  if (!cur) return null;
+  const r = cur.paused ? resumeDino(cur, Date.now()) : pauseDino(cur, Date.now());
+  if (typeof r === 'string') { toast(r); return null; }
+  await coll.save('dino', r);
+  return r;
 }
 
 /** เชื่อม Spotify ครั้งเดียว (เครื่องไหนก็ได้) แล้วทั้งสองเครื่องค้นหาเพลงได้ */

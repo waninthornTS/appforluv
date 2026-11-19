@@ -34,6 +34,10 @@ export const RULES_AT = Date.parse('2026-10-18T04:30:00+07:00');
 const OLD_RATE: Partial<Record<MeterKey, number>> = { food: 100 / 9 };
 const OLD_SLEEP_MUL: Partial<Record<MeterKey, number>> = { energy: -1.5 };
 
+// ---------- พักการเลี้ยงชั่วคราว: หยุดเวลาไว้ตอนกดพัก (ไม่หิว ไม่ป่วย ไม่โต) กดเลี้ยงต่อแล้วเดินต่อจากเดิม ----------
+/** เวลาที่ใช้คำนวณสถานะ: พักอยู่ = เวลาหยุดตอนกดพัก */
+export const effTime = (d: Dino, t: number) => (d.paused ? Math.min(t, d.paused) : t);
+
 const clamp = (v: number) => Math.max(0, Math.min(100, v));
 const dayOf = (t: number) => toStr(new Date(t));
 
@@ -49,13 +53,21 @@ function legacyWake(since: number) {
   return +w;
 }
 
-/** ช่วงเวลาตื่น/หลับระหว่าง from → to (เรียงตามเวลา): [เริ่ม, ยาว, หลับไหม] — ตัดแบ่งตรง RULES_AT ด้วย */
+// ---------- เตาผิง: จุดได้ทีละ 4 ชม. ระหว่างจุดตัวสกปรกช้าลงมาก + อึไม่เหม็นจนแมลงวันมาตอม ----------
+export const FIRE_HOURS = 4;
+const FIRE_DIRT_MUL = .25; // ความสะอาดลดเหลือ 1/4 ของปกติ
+export const fireLit = (d: Dino, t0: number) => { const t = effTime(d, t0); return !!d.fire && t >= d.fire.since && t < d.fire.until; };
+const inFire = (d: Dino, at: number) => !!d.fire && at >= d.fire.since && at < d.fire.until;
+
+/** ช่วงเวลาตื่น/หลับระหว่าง from → to (เรียงตามเวลา): [เริ่ม, ยาว, หลับไหม] — ตัดแบ่งตรง RULES_AT และตอนจุด/ดับเตาผิงด้วย */
 function phases(d: Dino, from: number, to: number): [number, number, boolean][] {
   const out: [number, number, boolean][] = [];
+  const cuts = [RULES_AT, ...(d.fire ? [d.fire.since, d.fire.until] : [])].sort((a, b) => a - b);
   const seg = (s: number, e: number, asleep: boolean) => {
     if (e <= s) return;
-    if (s < RULES_AT && e > RULES_AT) { out.push([s, RULES_AT - s, asleep], [RULES_AT, e - RULES_AT, asleep]); return; }
-    out.push([s, e - s, asleep]);
+    let p = s;
+    for (const c of cuts) if (c > p && c < e) { out.push([p, c - p, asleep]); p = c; }
+    out.push([p, e - p, asleep]);
   };
   if (!d.sleep) { seg(from, to, false); return out; }
   const a = d.sleep.since, b = sleepEnd(d.sleep);
@@ -64,27 +76,81 @@ function phases(d: Dino, from: number, to: number): [number, number, boolean][] 
   seg(Math.max(from, b), to, false);
   return out;
 }
-const ratePerMs = (k: MeterKey, asleep: boolean, at: number) => {
+const ratePerMs = (k: MeterKey, asleep: boolean, at: number, d?: Dino) => {
   const old = at < RULES_AT;
   const rate = (old && OLD_RATE[k]) || RATE[k];
   const mul = asleep ? ((old && OLD_SLEEP_MUL[k]) || SLEEP_MUL[k]) : 1;
-  return (rate * mul) / HOUR;
+  const warm = k === 'bath' && d && inFire(d, at) ? FIRE_DIRT_MUL : 1;
+  return (rate * mul * warm) / HOUR;
 };
 
 export function meter(d: Dino, k: MeterKey, t: number) {
   const m: Meter = d[k];
   let v = m.v;
   if (t <= m.at) return v; // นาฬิกาสองเครื่องอาจต่างกันนิดหน่อย
-  for (const [at, len, asleep] of phases(d, m.at, t)) v = clamp(v - ratePerMs(k, asleep, at) * len);
+  if (k === 'food' && d.bowl) return walkFood(d, t).v;
+  for (const [at, len, asleep] of phases(d, m.at, t)) v = clamp(v - ratePerMs(k, asleep, at, d) * len);
   return v;
 }
 
+// ---------- จานอาหาร: ใส่ไว้ หิวเมื่อไหร่เดินมากินเอง อยู่ได้ครึ่งวันแล้วเน่า ต้องใส่ใหม่ ----------
+export const BOWL_FRESH = 12 * HOUR;
+export const BOWL_HUNGRY = 35; // อิ่มลดถึงระดับนี้ (ตรงกับจุด ! หิว) → เดินมากินที่จาน
+export const bowlFood = (d: Dino): Food | null => (d.bowl && FOODS.find(f => f.id === d.bowl!.food)) || null;
+/** กินจากจานหนึ่งรอบอิ่มเพิ่มเท่าไหร่ (อาหารที่ชอบอยู่ท้องนานกว่า) */
+export const bowlBite = (d: Dino, f: Food) => Math.max(20, foodGain(d.species, f).food * 2);
+export const bowlSpoilAt = (d: Dino) => (d.bowl ? d.bowl.at + BOWL_FRESH : 0);
+export const bowlState = (d: Dino, t0: number, t = effTime(d, t0)): 'empty' | 'fresh' | 'spoiled' =>
+  !d.bowl ? 'empty' : t < bowlSpoilAt(d) ? 'fresh' : 'spoiled';
+
+/** ไล่หลอดอิ่มตั้งแต่บันทึกล่าสุดถึงเวลา to โดยให้ไดโนกินจากจานเองตอนหิว (ตื่นอยู่ + อาหารยังไม่เน่า)
+ *  คำนวณจากเวลาล้วนๆ สองเครื่องจึงได้ผลตรงกัน: v = อิ่มตอน to, eats = เวลาที่กินจากจาน, zero = เริ่มหิวจนหมดหลอดตอนไหน */
+function walkFood(d: Dino, to: number): { v: number; eats: number[]; zero: number | null } {
+  const m = d.food;
+  const f = bowlFood(d);
+  const bs = f ? d.bowl!.at : Infinity, be = f ? bowlSpoilAt(d) : -Infinity;
+  const bite = f ? bowlBite(d, f) : 0;
+  let v = m.v, zero: number | null = v <= 0 ? m.at : null, guardN = 0;
+  const eats: number[] = [];
+  for (const [at, len, asleep] of phases(d, m.at, to)) {
+    const r = ratePerMs('food', asleep, at, d);
+    let s = at;
+    const e = at + len;
+    while (s < e && guardN++ < 500) {
+      const open = !asleep && s >= bs && s < be;
+      if (open && v <= BOWL_HUNGRY) { v = clamp(v + bite); eats.push(s); zero = null; }
+      // จุดถัดไปที่ต้องหยุดคิด: จบช่วงนี้ / จานเริ่มมีอาหาร / อาหารเน่า / หิวถึงระดับที่จะเดินมากิน
+      let nt = e, hit = false;
+      if (s < bs && bs < nt) nt = bs;
+      if (s < be && be < nt) nt = be;
+      if (open && r > 0) { const h = s + (v - BOWL_HUNGRY) / r; if (h < nt) { nt = h; hit = true; } }
+      if (zero == null && r > 0 && v > 0 && s + v / r <= nt) zero = s + v / r;
+      if (nt === Infinity) break;
+      v = hit ? BOWL_HUNGRY : clamp(v - r * (nt - s));
+      if (zero == null && v <= 0) zero = nt;
+      s = nt;
+    }
+  }
+  return { v, eats, zero };
+}
+
+/** กินจากจานครั้งล่าสุดตอนไหน (รวมรอบที่ยังไม่ได้บันทึก) */
+export function lastBowlEat(d: Dino, t0: number): number {
+  const t = effTime(d, t0);
+  if (!d.bowl) return 0;
+  const eats = t > d.food.at ? walkFood(d, t).eats : [];
+  return eats.length ? eats[eats.length - 1] : d.bowl.ate || 0;
+}
+/** กินจากจานไปแล้วกี่รอบ */
+export const bowlMeals = (d: Dino, t0: number, t = effTime(d, t0)) => (d.bowl ? (d.bowl.n || 0) + (t > d.food.at ? walkFood(d, t).eats.length : 0) : 0);
+
 /** เวลาที่หลอดนี้จะหมด (null = ไม่หมด) */
 function zeroAt(d: Dino, k: MeterKey): number | null {
+  if (k === 'food' && d.bowl) return walkFood(d, Infinity).zero;
   const m: Meter = d[k];
   let v = m.v, t = m.at;
   for (const [at, len, asleep] of phases(d, m.at, Infinity)) {
-    const r = ratePerMs(k, asleep, at);
+    const r = ratePerMs(k, asleep, at, d);
     if (v <= 0) return t;
     if (r > 0 && v - r * len <= 0) return t + v / r;
     v = clamp(v - r * len);
@@ -127,12 +193,14 @@ export interface DinoView {
   sick: 0 | 1 | 2; // 0 สบายดี, 1 ป่วย, 2 อาการหนัก
   endedAt?: number;
   grownUp: boolean; // เลี้ยงครบ GROW_DAYS วันแล้ว (ยังเลี้ยงต่อได้จนกว่าจะรับไข่ใบใหม่)
+  paused: boolean; // พักการเลี้ยงชั่วคราวอยู่ (เวลาหยุด ไม่หิว ไม่ป่วย)
   age: number; // อยู่ด้วยกันมากี่วันแล้ว (นับต่อหลังโต)
 }
 
 /** สถานะปัจจุบันของไดโน ณ เวลา t */
-export function view(d: Dino, t: number): DinoView {
-  const base = { day: 0, m: { food: 0, fun: 0, bath: 0, energy: 0 }, sleeping: false, poops: 0, dirt: 0 as const, sick: 0 as const, grownUp: false, age: 0 };
+export function view(d: Dino, t0: number): DinoView {
+  const t = effTime(d, t0); // พักการเลี้ยงอยู่ = หยุดเวลาไว้ตอนกดพัก
+  const base = { day: 0, m: { food: 0, fun: 0, bath: 0, energy: 0 }, sleeping: false, poops: 0, dirt: 0 as const, sick: 0 as const, grownUp: false, age: 0, paused: !!d.paused };
   if (d.status === 'egg') return { ...base, status: 'egg', stage: 'egg' };
   const end = d.status === 'alive' ? endOf(d, t) : d.endedAt != null ? { status: d.status, at: d.endedAt } : null;
   const at = end ? Math.min(t, end.at) : t; // หลังจบแล้วหยุดเวลาไว้
@@ -148,11 +216,11 @@ export function view(d: Dino, t: number): DinoView {
   const oldest = poops.length ? t - Math.min(...poops) : 0;
   const sick = sickStart(d, t);
   return {
-    status: 'alive', stage, day, age, grownUp: growAt(d) <= t,
+    status: 'alive', stage, day, age, grownUp: growAt(d) <= t, paused: !!d.paused,
     m: { food: meter(d, 'food', t), fun: meter(d, 'fun', t), bath: meter(d, 'bath', t), energy: meter(d, 'energy', t) },
     sleeping: isSleeping(d, t),
     poops: poops.length,
-    dirt: oldest >= POOP_SICK ? 2 : oldest >= POOP_SMELLY ? 1 : 0,
+    dirt: oldest >= POOP_SICK ? 2 : oldest >= POOP_SMELLY && !fireLit(d, t) ? 1 : 0, // จุดเตาผิงอยู่ = ยังไม่เหม็นจนแมลงวันมา
     sick: sick == null ? 0 : t - sick >= SICK_CRITICAL ? 2 : 1,
   };
 }
@@ -171,6 +239,16 @@ export function settle(d: Dino, t: number): Dino {
   if (end) return { ...d, status: end.status, endedAt: end.at, sleep: null };
   const next: Dino = { ...d };
   for (const k of METERS) next[k] = { v: meter(d, k, t), at: t };
+  // รอบที่กินจากจานไปแล้วระหว่างนี้: จดไว้ + อึจะโผล่ 1–2 ชม. หลังกิน (เวลาคงที่ สองเครื่องได้ตรงกัน)
+  if (d.bowl && t > d.food.at) {
+    const eats = walkFood(d, t).eats;
+    if (eats.length) {
+      next.bowl = { ...d.bowl, ate: eats[eats.length - 1], n: (d.bowl.n || 0) + eats.length };
+      const poops = [...d.poops];
+      for (const e of eats) if (poops.length < 8) poops.push(e + HOUR + (Math.floor(e) % HOUR));
+      next.poops = poops;
+    }
+  }
   if (d.sleep && !isSleeping(d, t)) next.sleep = null;
   const sick = sickStart(d, t);
   if (sick != null && !d.sickSince) { next.sickSince = sick; next.everSick = true; }
@@ -179,9 +257,11 @@ export function settle(d: Dino, t: number): Dino {
 
 /** มีอะไรเปลี่ยนที่ควรบันทึกลงเครื่อง/ซิงก์ไหม (ตื่นเอง, เริ่มป่วย, โตครบ, เป็นดาว) */
 export function needsPersist(d: Dino, t: number) {
+  if (d.paused) return false;
   if (d.status !== 'alive') return false;
   if (endOf(d, t)) return true;
   if (d.sleep && !isSleeping(d, t)) return true;
+  if (d.bowl && t > d.food.at && walkFood(d, t).eats.length) return true; // กินจากจานแล้ว → จดไว้ + อึ
   return !d.sickSince && sickStart(d, t) != null;
 }
 
@@ -190,7 +270,7 @@ export type Pantry = Partial<Record<FoodId, number>>;
 const STARTER: Pantry = { meat: 1, veg: 1, egg: 1, apple: 1, milk: 1 }; // ของติดบ้านตอนเริ่ม
 export const pantryOf = (d: Dino): Pantry => (d.pantry as Pantry | undefined) ?? STARTER;
 export const foodLeft = (d: Dino) => Object.values(pantryOf(d)).reduce<number>((a, b) => a + (b || 0), 0);
-export const NO_FOOD = 'อาหารหมดแล้ว กด "เล่นด้วย" ไปวิ่งหาอาหารกันน้า 🏃';
+export const NO_FOOD = 'อาหารหมดแล้ว กด "เล่นด้วย" ไปยิงไข่หาอาหารกันน้า 🥚';
 
 // ---------- มินิเกมวิ่งหาอาหาร ----------
 export const GAME_ENERGY = 8; // ใช้พลังงานต่อรอบ
@@ -199,19 +279,24 @@ const PRIZE_WEIGHT: Record<FoodId, number> = { meat: 3, fish: 3, veg: 3, apple: 
 /** ได้อาหารกี่ชิ้นจากคะแนน: 1 ชิ้น + ทุกๆ 120 คะแนนได้เพิ่มอีก 1 (สูงสุด 5) แล้วสุ่มชนิด */
 export function prizeFor(score: number, rnd = Math.random): FoodId[] {
   const n = Math.min(5, 1 + Math.floor(score / 120));
-  const ids = FOODS.map(f => f.id), total = ids.reduce((a, id) => a + PRIZE_WEIGHT[id], 0);
-  return Array.from({ length: n }, () => {
-    let r = rnd() * total;
-    for (const id of ids) { r -= PRIZE_WEIGHT[id]; if (r < 0) return id; }
-    return ids[0];
-  });
+  return Array.from({ length: n }, () => randomFood(rnd));
 }
+/** สุ่มอาหาร 1 ชิ้นตามโอกาสของแต่ละอย่าง */
+export function randomFood(rnd = Math.random): FoodId {
+  const ids = FOODS.map(f => f.id), total = ids.reduce((a, id) => a + PRIZE_WEIGHT[id], 0);
+  let r = rnd() * total;
+  for (const id of ids) { r -= PRIZE_WEIGHT[id]; if (r < 0) return id; }
+  return ids[0];
+}
+/** มินิเกมที่มี: run = วิ่งหลบกระบองเพชร (เก็บไว้ ยังไม่เปิด), shoot = ยิงไข่ไดโน */
+export type GameKind = 'run' | 'shoot';
+const statsKey = (g: GameKind) => (g === 'shoot' ? 'shoot' : 'games') as 'shoot' | 'games';
 const EMPTY_STAT: GameStat = { plays: 0, best: 0, total: 0, food: 0 };
 /** สถิติรวมทุกตัวที่เคยเลี้ยง — ใครวิ่งได้ไกลสุด เล่นกี่รอบ หาอาหารมาได้กี่ชิ้น */
-export function gameStats(all: Dino[]): Record<'A' | 'B', GameStat> {
+export function gameStats(all: Dino[], game: GameKind = 'run'): Record<'A' | 'B', GameStat> {
   const out = { A: { ...EMPTY_STAT }, B: { ...EMPTY_STAT } };
   for (const d of all) for (const w of ['A', 'B'] as const) {
-    const g = d.games?.[w];
+    const g = d[statsKey(game)]?.[w];
     if (!g) continue;
     out[w] = { plays: out[w].plays + g.plays, best: Math.max(out[w].best, g.best), total: out[w].total + g.total, food: out[w].food + g.food };
   }
@@ -247,13 +332,45 @@ export const actions = {
     const d = settle(d0, t);
     const no = actions.canEat(d, t); if (no) return no;
     const have = pantryOf(d)[f.id] || 0;
-    if (have <= 0) return `${f.name}หมดแล้ว ไปวิ่งหาอาหารเพิ่มน้า 🏃`;
+    if (have <= 0) return `${f.name}หมดแล้ว ไปยิงไข่หาอาหารเพิ่มน้า 🥚`;
     const gain = foodGain(d.species, f);
     let n = add(add(add(d, 'food', gain.food, t), 'fun', gain.fun, t), 'energy', gain.energy, t);
     n = { ...n, pantry: { ...pantryOf(d), [f.id]: have - 1 } };
     // มื้อหลัก: อึจะโผล่ 1–2 ชม. หลังกิน
     if (gain.food >= 12 && d.poops.length < 8) n = { ...n, poops: [...d.poops, t + HOUR + rnd * HOUR] };
     return n;
+  },
+  /** ใส่อาหารในจาน (ใช้อาหาร 1 ชิ้นจากคลัง ของเดิมในจานถูกทิ้ง) — หลับอยู่ก็ใส่ไว้ให้ได้ ตื่นมาหิวค่อยกิน */
+  fillBowl(d0: Dino, t: number, f: Food): Result {
+    const d = settle(d0, t);
+    if (d.status !== 'alive') return 'ยังทำไม่ได้นะ';
+    const have = pantryOf(d)[f.id] || 0;
+    if (have <= 0) return `${f.name}หมดแล้ว ไปยิงไข่หาอาหารเพิ่มน้า 🥚`;
+    let n: Dino = { ...d, bowl: { food: f.id, at: t }, pantry: { ...pantryOf(d), [f.id]: have - 1 } };
+    // หิวอยู่แล้ว → เดินมากินเลย
+    if (!isSleeping(n, t) && n.food.v <= BOWL_HUNGRY) {
+      n = { ...add(n, 'food', bowlBite(n, f), t), bowl: { food: f.id, at: t, ate: t, n: 1 } };
+      if (n.poops.length < 8) n = { ...n, poops: [...n.poops, t + HOUR + (Math.floor(t) % HOUR)] };
+    }
+    return n;
+  },
+  /** จุดเตาผิง 4 ชม. (ดับเอง) — หลับอยู่ก็จุดให้ได้ */
+  fireOn(d0: Dino, t: number): Result {
+    const d = settle(d0, t);
+    if (d.status !== 'alive') return 'ยังทำไม่ได้นะ';
+    if (fireLit(d, t)) return 'เตาผิงติดอยู่แล้วน้า 🔥';
+    return { ...d, fire: { since: t, until: t + FIRE_HOURS * HOUR } };
+  },
+  fireOff(d0: Dino, t: number): Result {
+    const d = settle(d0, t);
+    if (!d.fire || !fireLit(d, t)) return 'เตาผิงดับอยู่แล้ว';
+    return { ...d, fire: { ...d.fire, until: t } };
+  },
+  /** เทอาหารในจานทิ้ง (เน่าแล้ว หรือไม่อยากให้กินแล้ว) */
+  emptyBowl(d0: Dino, t: number): Result {
+    const d = settle(d0, t);
+    if (!d.bowl) return 'จานว่างอยู่แล้ว';
+    return { ...d, bowl: null };
   },
   clean(d0: Dino, t: number): Result {
     const d = settle(d0, t);
@@ -278,16 +395,18 @@ export const actions = {
     if (d.energy.v < GAME_ENERGY) return 'เหนื่อยแล้ว ขอพักก่อนน้า 😮‍💨';
     return null;
   },
-  /** วิ่งจบหนึ่งรอบ: สนุก + เหนื่อย + ได้อาหารเข้าคลัง + บันทึกสถิติของคนที่เล่น */
-  gameOver(d0: Dino, t: number, who: 'A' | 'B', score: number, prize: FoodId[]): Result {
+  /** เล่นมินิเกมจบหนึ่งรอบ: สนุก + เหนื่อย + ได้อาหารเข้าคลัง + บันทึกสถิติของคนที่เล่น (แยกตามเกม) */
+  gameOver(d0: Dino, t: number, who: 'A' | 'B', score: number, prize: FoodId[], game: GameKind = 'run'): Result {
     const d = settle(d0, t);
     if (d.status !== 'alive') return 'ยังทำไม่ได้นะ';
     const pantry = { ...pantryOf(d) };
     for (const id of prize) pantry[id] = (pantry[id] || 0) + 1;
-    const g = d.games?.[who] ?? EMPTY_STAT;
-    const games = { ...d.games, [who]: { plays: g.plays + 1, best: Math.max(g.best, score), total: g.total + score, food: g.food + prize.length } };
-    const n = add(add(add(add(d, 'fun', 15, t), 'energy', -GAME_ENERGY, t), 'food', -3, t), 'bath', -GAME_DIRT, t);
-    return { ...n, pantry, games, workoutDays: addDay(d.workoutDays, t) };
+    const key = statsKey(game);
+    const g = d[key]?.[who] ?? EMPTY_STAT;
+    const stats = { ...d[key], [who]: { plays: g.plays + 1, best: Math.max(g.best, score), total: g.total + score, food: g.food + prize.length } };
+    // ยิงไข่อยู่กับที่ ไม่มอมแมมเท่าวิ่ง
+    const n = add(add(add(add(d, 'fun', 15, t), 'energy', -GAME_ENERGY, t), 'food', -3, t), 'bath', game === 'run' ? -GAME_DIRT : -5, t);
+    return { ...n, pantry, [key]: stats, workoutDays: addDay(d.workoutDays, t) };
   },
   sleep(d0: Dino, t: number): Result {
     const d = settle(d0, t);
@@ -316,6 +435,43 @@ export const actions = {
     return add({ ...d, sickSince: null, curedAt: t }, 'fun', -3, t);
   },
 };
+
+// ระหว่างพักการเลี้ยง ทำอะไรกับไดโนไม่ได้ (ต้องกดเลี้ยงต่อก่อน)
+export const PAUSED_MSG = 'พักการเลี้ยงอยู่ ⏸️ กด "เลี้ยงต่อ" ก่อนน้า';
+for (const k of Object.keys(actions) as (keyof typeof actions)[]) {
+  const fn = actions[k] as (d: Dino, ...rest: never[]) => Result | string | null;
+  (actions as Record<string, unknown>)[k] = (d: Dino, ...rest: never[]) => (d.paused ? PAUSED_MSG : fn(d, ...rest));
+}
+
+/** พักการเลี้ยง: บันทึกค่าทั้งหมด ณ ตอนนี้ แล้วหยุดเวลาไว้ (ไม่หิว ไม่ป่วย ไม่โต ไม่ตาย) */
+export function pauseDino(d0: Dino, t: number): Result {
+  if (d0.paused) return 'พักการเลี้ยงอยู่แล้ว';
+  if (d0.status !== 'alive' && d0.status !== 'egg') return 'ไม่มีไดโนที่กำลังเลี้ยงอยู่';
+  const d = d0.status === 'alive' ? settle(d0, t) : d0;
+  if (d.status !== 'alive' && d.status !== 'egg') return d; // เพิ่งเป็นดาวไปก่อนกดพัก
+  return { ...d, paused: t };
+}
+
+/** เลี้ยงต่อ: เลื่อนเวลาทุกอย่างไปข้างหน้าเท่ากับช่วงที่พัก — ค่าต่างๆ เหมือนตอนกดพักทุกอย่าง แล้วค่อยเดินต่อ */
+export function resumeDino(d: Dino, t: number): Result {
+  if (!d.paused) return 'เลี้ยงอยู่ตามปกติแล้ว';
+  const k = Math.max(0, t - d.paused);
+  const s = <T extends number | null | undefined>(x: T) => (x == null ? x : x + k) as T;
+  const m = (x: Meter): Meter => ({ ...x, at: x.at + k });
+  // วันเกิดเลื่อนไป = วันที่อาบน้ำ/ออกกำลังที่จดไว้ต้องเลื่อนตามด้วย (นับวันติดกันจนโตได้เหมือนเดิม)
+  const shiftDays = d.hatchedAt ? diffDays(dayOf(d.hatchedAt), dayOf(d.hatchedAt + k)) : 0;
+  const days = (xs: string[]) => (shiftDays ? xs.map(x => addDays(x, shiftDays)) : xs);
+  return {
+    ...d, paused: null,
+    food: m(d.food), fun: m(d.fun), bath: m(d.bath), energy: m(d.energy),
+    poops: d.poops.map(p => p + k),
+    sleep: d.sleep ? { since: d.sleep.since + k, ...(d.sleep.until != null ? { until: d.sleep.until + k } : {}) } : d.sleep,
+    sickSince: s(d.sickSince), curedAt: s(d.curedAt), hatchedAt: s(d.hatchedAt),
+    bathDays: days(d.bathDays), workoutDays: days(d.workoutDays),
+    bowl: d.bowl ? { ...d.bowl, at: d.bowl.at + k, ate: s(d.bowl.ate) } : d.bowl,
+    fire: d.fire ? { since: d.fire.since + k, until: d.fire.until + k } : d.fire,
+  };
+}
 
 // ---------- ไข่ใบใหม่ ----------
 const hash = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
@@ -377,4 +533,4 @@ export function needs(v: DinoView, _t?: number) {
     medicine: v.sick > 0,
   };
 }
-export const anyNeed = (v: DinoView, t: number) => v.status === 'egg' || (v.status === 'alive' && (v.grownUp || (!v.sleeping && Object.values(needs(v, t)).some(Boolean))));
+export const anyNeed = (v: DinoView, t: number) => !v.paused && (v.status === 'egg' || (v.status === 'alive' && (v.grownUp || (!v.sleeping && Object.values(needs(v, t)).some(Boolean)))));

@@ -82,8 +82,14 @@ export interface Dino extends Base {
   bathDays: string[]; // YYYY-MM-DD ที่ได้อาบน้ำ
   workoutDays: string[]; // YYYY-MM-DD ที่ได้ออกกำลัง
   pantry?: Record<string, number>; // คลังอาหาร (ได้จากมินิเกมวิ่ง) — ไม่มี = ของเริ่มต้น
-  games?: { A?: GameStat; B?: GameStat }; // สถิติมินิเกมของแต่ละคน
+  games?: { A?: GameStat; B?: GameStat }; // สถิติมินิเกมวิ่งของแต่ละคน
+  shoot?: { A?: GameStat; B?: GameStat }; // สถิติเกมยิงไข่ของแต่ละคน (แยกจากเกมวิ่ง)
+  bowl?: DinoBowl | null; // จานอาหาร: ใส่ไว้ หิวเมื่อไหร่เดินมากินเอง (อยู่ได้ครึ่งวันแล้วเน่า)
+  fire?: { since: number; until: number } | null; // เตาผิง: จุดตอน since ดับเองตอน until (ทีละ 4 ชม.)
+  paused?: number | null; // พักการเลี้ยงชั่วคราวตั้งแต่เวลานี้ (เวลาหยุด) — null/ไม่มี = เลี้ยงปกติ
 }
+/** จานอาหาร: food = อาหารที่ใส่ไว้, at = เวลาที่ใส่, ate = กินจากจานครั้งล่าสุด, n = กินไปแล้วกี่รอบ */
+export interface DinoBowl { food: string; at: number; ate?: number; n?: number }
 export interface GameStat { plays: number; best: number; total: number; food: number }
 
 /** เพลงบนกระดานเพลง (หน้าแรก) — ลิงก์จาก Spotify, เลือกละ 1 รายการ สองเครื่องเห็นเหมือนกัน */

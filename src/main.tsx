@@ -8,7 +8,11 @@ import '@fontsource/mali/latin-400.css';
 import '@fontsource/mali/latin-600.css';
 import '@fontsource/mali/latin-700.css';
 import './styles/app.css';
+import './styles/xmas.css';
+import { applyTheme } from './lib/theme';
 import App from './App';
+
+applyTheme();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

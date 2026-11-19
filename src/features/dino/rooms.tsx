@@ -1,6 +1,7 @@
 // ห้องแบบมินิมอล + ตัวไดโนที่เดินไปมาได้ (แตะพื้นตรงไหน เดินไปตรงนั้น)
 import { useCallback, useEffect, useRef, useState, type ReactNode, type PointerEvent as RPointerEvent } from 'react';
 import type { DinoSpecies } from '../../lib/types';
+import { isXmas } from '../../lib/theme';
 import type { Mood } from './art';
 import type { Food, Stage } from './species';
 import { DinoSprite, type Pose } from './Sprite';
@@ -33,8 +34,8 @@ export function Room({ kind, night = false, dark = false, children, onFloorTap, 
       <div className="mroom-wall" />
       <div className="mroom-floor" />
       {kind === 'home' && <>
-        <div className="m-window"><i className="m-sun" /><i className="m-cloud" /></div>
-        <div className="m-plant"><i /><i /><i /><span /></div>
+        <div className="m-window"><i className="m-sun" /><i className="m-cloud" />{isXmas && <span className="m-snow"><i /><i /><i /><i /><i /><i /></span>}</div>
+        {isXmas ? <><XmasLights /><XmasTree /></> : <div className="m-plant"><i /><i /><i /><span /></div>}
         <div className="m-rug" />
       </>}
       {kind === 'bath' && <>
@@ -50,6 +51,43 @@ export function Room({ kind, night = false, dark = false, children, onFloorTap, 
       </>}
       {children}
       <div className="mroom-dim" />
+    </div>
+  );
+}
+
+// ---------- ธีมคริสต์มาส: ต้นคริสต์มาส (แทนกระถางต้นไม้) + ไฟประดับบนผนัง ----------
+const BULB = ['#FF5C6E', '#FFD15C', '#5CC98B', '#6FB6F5', '#FF9DBC'];
+// รูป 3D ที่เจนจาก Gemini: วางไฟล์ src/assets/scenes/xmas-tree.webp (หรือ .png) — ไม่มีไฟล์ใช้ภาพวาดเวกเตอร์แทน
+const PROPS = import.meta.glob('../../assets/scenes/{xmas-tree,fireplace,fireplace-off}.{webp,png}', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
+export const propPic = (name: 'xmas-tree' | 'fireplace' | 'fireplace-off') => Object.entries(PROPS).find(([p]) => p.includes(`/${name}.`))?.[1];
+function XmasTree() {
+  const pic = propPic('xmas-tree');
+  if (pic) return <img className="m-xtree pic" src={pic} alt="" draggable={false} />;
+  return <XmasTreeSvg />;
+}
+function XmasTreeSvg() {
+  const balls = [[30, 30, 0], [40, 38, 1], [24, 50, 2], [36, 56, 3], [46, 64, 0], [20, 70, 4], [32, 74, 1]];
+  return (
+    <svg className="m-xtree" viewBox="0 0 64 104" aria-hidden="true">
+      <rect x="27" y="86" width="10" height="9" rx="2" fill="#A86E45" />
+      <path d="M14 92h36l-4 11H18z" fill="#E8445A" /><path d="M14 92h36v4H14z" fill="#FF7A8A" />
+      <path d="M32 10 L54 86 Q32 92 10 86Z" fill="#2E9E62" />
+      <path d="M32 10 L50 62 Q32 68 14 62Z" fill="#3BB574" />
+      <path d="M32 10 L46 40 Q32 45 18 40Z" fill="#4CC984" />
+      <path d="M17 46 Q32 54 47 44 M14 68 Q32 78 51 66" fill="none" stroke="#FFE08A" strokeWidth="2" strokeDasharray="0.1 5" strokeLinecap="round" />
+      {balls.map(([x, y, c], i) => <circle key={i} className="xt-ball" cx={x} cy={y} r="3.2" fill={BULB[c]} style={{ animationDelay: `${(i % 4) * .5}s` }} />)}
+      <path className="xt-star" d="M32 1.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L32 14.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z" fill="#FFD15C" stroke="#fff" strokeWidth="1.2" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function XmasLights() {
+  return (
+    <div className="m-lights" aria-hidden="true">
+      <svg viewBox="0 0 300 30" preserveAspectRatio="none"><path d="M0 4 Q37 26 75 6 Q112 26 150 6 Q187 26 225 6 Q262 26 300 4" fill="none" stroke="#5E8A5A" strokeWidth="2" /></svg>
+      {Array.from({ length: 12 }, (_, i) => {
+        const x = (i + .5) / 12, seg = (x * 4) % 1, y = 4 + Math.sin(seg * Math.PI) * 15;
+        return <i key={i} style={{ left: `${x * 100}%`, top: `${y}px`, '--c': BULB[i % BULB.length], animationDelay: `${(i % 3) * .45}s` } as React.CSSProperties} />;
+      })}
     </div>
   );
 }

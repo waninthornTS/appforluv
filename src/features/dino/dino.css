@@ -44,7 +44,7 @@
 }
 .room-hint.dark { background: rgba(40, 34, 90, .72); color: #F3EEFF; top: auto; bottom: 12px; }
 .dino-bubble {
-  position: absolute; right: 12px; top: 46px; z-index: 9; max-width: 60%; /* ใต้ป้ายวันที่มุมขวาบน */
+  position: absolute; right: 12px; top: 46px; z-index: 9; max-width: 48%; /* ใต้ป้ายวันที่มุมขวาบน (ไม่ทับพัดลม) */
   background: var(--cream); color: var(--brown); border: 2.5px solid var(--beige); box-shadow: 0 4px 0 var(--beige-d);
   border-radius: 18px; padding: 6px 13px; font-weight: 700; font-size: 14px; line-height: 1.35;
   animation: bubbleIn .35s cubic-bezier(.3, 1.6, .5, 1);
@@ -551,3 +551,105 @@
 /* ห้องวันเกิด: ชั้นตัวไดโนให้นิ้วแตะทะลุลงไปถึงเค้กได้ (ตัวไดโนยังแตะได้) */
 .dino-room.bday-room .actor-layer { pointer-events: none; }
 .dino-room.bday-room .actor-layer .actor { pointer-events: auto; }
+
+/* ---------- จานอาหาร (มุมซ้ายของพื้น) ---------- */
+.food-bowl { position: absolute; left: 13%; bottom: 24%; z-index: 6; /* เหนือชั้นไดโน จะได้แตะจานได้เสมอ */ width: 62px; height: 52px; padding: 0; border: 0; background: none; cursor: pointer; display: flex; align-items: flex-end; justify-content: center; }
+.food-bowl.by-cake { left: 23%; } /* วันเกิด: เค้กอยู่มุมซ้าย เลื่อนจานไปข้างๆ */
+.food-bowl:active .bowl-dish { transform: scale(.92); }
+.bowl-dish { position: relative; z-index: 2; display: block; width: 62px; height: 39px; transition: transform .15s; }
+.bowl-stink { top: -4px; }
+.bowl-fly { position: absolute; left: 60%; top: -14px; z-index: 3; font-size: 13px; pointer-events: none; animation: fly 2.4s ease-in-out infinite; }
+.bowl-plus { position: absolute; left: 50%; bottom: 20px; z-index: 3; transform: translateX(-50%); width: 22px; height: 22px; border-radius: 50%; background: #fff; color: #F2548A; font-weight: 800; font-size: 17px; line-height: 21px; box-shadow: 0 2px 0 rgba(240, 120, 160, .35); animation: bowlPulse 1.8s ease-in-out infinite; }
+@keyframes bowlPulse { 50% { transform: translateX(-50%) scale(1.15); } }
+.bowl-tag { position: absolute; left: 50%; bottom: -15px; z-index: 3; transform: translateX(-50%); white-space: nowrap; padding: 1px 7px; border-radius: 999px; background: rgba(255, 255, 255, .88); color: #8A6A55; font-size: 10px; font-weight: 700; line-height: 1.5; pointer-events: none; }
+.bowl-tag.bad { color: #6E8A2E; }
+.mroom.night .food-bowl { filter: brightness(.88); }
+
+.bowl-sheet .bowl-now { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border-radius: 16px; background: #FFF4F8; border: 2px solid #FFD1E0; }
+.bowl-sheet .bowl-now.spoiled { background: #F5F8EA; border-color: #D5E2B0; }
+.bowl-sheet .bowl-now span { font-size: 13px; color: var(--muted, #8a7a80); }
+.bowl-sheet .bowl-hint { margin: 10px 2px 0; }
+.bowl-grid { margin-top: 10px; }
+
+/* ---------- มินิเกมยิงไข่ไดโน ---------- */
+.shooter {
+  position: relative; display: flex; flex-direction: column; height: max(420px, calc(100dvh - 165px - var(--safe-b, 0px))); margin-top: 12px; border-radius: 26px; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none;
+  border: 4px solid var(--cream); box-shadow: 0 6px 0 var(--beige-d), 0 14px 30px rgba(60, 40, 90, .2);
+  background: radial-gradient(120% 60% at 50% 0%, #FFFFFF 0%, rgba(255, 255, 255, 0) 60%), linear-gradient(180deg, #E6E0FF 0%, #DDF3EC 70%, #FFF1DC 100%);
+}
+.shoot-hud { position: relative; z-index: 3; display: flex; align-items: center; gap: 8px; padding: 8px 10px 4px 12px; font-weight: 800; color: #6B5A7E; }
+.shoot-hud .who { font-size: 12px; padding: 2px 10px; border-radius: 999px; background: rgba(255, 255, 255, .85); }
+.shoot-hud .lv { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #FFE9A8; color: #8A6410; }
+.shoot-hud .hi { margin-left: auto; font-family: ui-monospace, 'Courier New', monospace; font-size: 13px; opacity: .55; }
+.shoot-hud .sc { min-width: 44px; text-align: right; font-family: ui-monospace, 'Courier New', monospace; font-size: 18px; }
+.shoot-hud .hi + .sc { margin-left: 0; }
+.shoot-hud .lv + .sc { margin-left: auto; }
+.shoot-cv { position: relative; z-index: 1; flex: 1; width: 100%; min-height: 0; display: block; cursor: crosshair; touch-action: none; }
+.shoot-me { position: absolute; left: 4px; bottom: 0; z-index: 2; pointer-events: none; transform-origin: 50% 100%; }
+.shoot-me.hop { animation: shootHop .3s ease-out; }
+@keyframes shootHop { 40% { transform: translateY(-8px) scale(1.04, .96); } }
+.shooter.dead .shoot-me { animation: runHit .45s ease; }
+@keyframes basketBump { 40% { transform: scale(1.18); } }
+.shoot-banner { position: absolute; left: 50%; top: 42%; z-index: 4; transform: translate(-50%, -50%); padding: 10px 18px; border-radius: 18px; white-space: nowrap; font-weight: 800; color: #E2557F; background: rgba(255, 255, 255, .92); box-shadow: 0 6px 16px rgba(60, 40, 90, .15); opacity: 0; pointer-events: none; }
+.shoot-banner.show { animation: bannerShow 1.4s ease forwards; }
+@keyframes bannerShow { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.8); } 15%, 75% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -70%); } }
+.shooter .run-tip { top: 40%; }
+/* ตะกร้าเล็กบอกจำนวนอาหาร + ปุ่มมือใหญ่ "พอแค่นี้" (มุมขวาล่าง) */
+.shoot-basket { position: absolute; right: 14px; bottom: 86px; z-index: 3; display: flex; align-items: center; gap: 3px; padding: 2px 9px 2px 5px; border-radius: 999px; background: rgba(255, 255, 255, .92); color: #6B5A7E; font-weight: 800; font-size: 14px; line-height: 1.4; pointer-events: none; box-shadow: 0 2px 0 rgba(120, 100, 150, .16); }
+.shoot-basket .b { font-size: 16px; }
+.shoot-basket.bump { animation: basketBump .35s ease; }
+.shoot-enough { position: absolute; right: 12px; bottom: 12px; z-index: 3; width: 64px; height: 64px; padding: 0; border-radius: 50%; border: 3px solid #fff; font-size: 32px; line-height: 1; cursor: pointer;
+  background: radial-gradient(circle at 35% 28%, #FFD3E1 0%, #FF9DBC 45%, #F2548A 100%);
+  box-shadow: 0 5px 0 #D63F73, 0 10px 18px rgba(214, 63, 115, .35), inset 0 -4px 0 rgba(0, 0, 0, .08); transition: transform .12s, box-shadow .12s; }
+.shoot-enough:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 #D63F73, 0 4px 10px rgba(214, 63, 115, .3), inset 0 -4px 0 rgba(0, 0, 0, .08); }
+.shoot-enough:disabled { filter: grayscale(.6); opacity: .6; }
+
+
+/* ---------- ธีมคริสต์มาสในห้องไดโน ---------- */
+.m-xtree { position: absolute; right: 7%; bottom: 31%; width: 58px; height: auto; z-index: 2; filter: drop-shadow(0 4px 0 rgba(60, 90, 60, .18)); }
+.m-xtree .xt-ball { animation: twinkle 1.8s ease-in-out infinite; }
+.m-xtree .xt-star { transform-box: fill-box; transform-origin: center; animation: xtStar 2.4s ease-in-out infinite; }
+@keyframes xtStar { 50% { transform: scale(1.18) rotate(8deg); filter: drop-shadow(0 0 4px #FFE08A); } }
+.m-lights { position: absolute; left: 4%; right: 4%; top: 0; height: 30px; z-index: 1; pointer-events: none; }
+.m-lights svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.m-lights i { position: absolute; width: 7px; height: 10px; margin-left: -3.5px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; background: var(--c); box-shadow: 0 0 8px var(--c); animation: bulb 1.4s ease-in-out infinite; }
+.m-lights i::before { content: ''; position: absolute; left: 1.5px; top: -3px; width: 4px; height: 4px; border-radius: 1px; background: #5E8A5A; }
+@keyframes bulb { 50% { opacity: .45; box-shadow: none; } }
+.m-snow i { position: absolute; top: -6px; width: 4px; height: 4px; border-radius: 50%; background: #fff; animation: winSnow 3.2s linear infinite; }
+.m-snow i:nth-child(1) { left: 14%; } .m-snow i:nth-child(2) { left: 34%; animation-delay: -1s; width: 3px; height: 3px; } .m-snow i:nth-child(3) { left: 56%; animation-delay: -2.1s; }
+.m-snow i:nth-child(4) { left: 72%; animation-delay: -.5s; width: 3px; height: 3px; } .m-snow i:nth-child(5) { left: 86%; animation-delay: -2.6s; } .m-snow i:nth-child(6) { left: 46%; animation-delay: -1.6s; width: 3px; height: 3px; }
+@keyframes winSnow { to { transform: translate(4px, 80px); } }
+
+/* ---------- รูป 3D ต้นคริสต์มาส (ถ้ามีไฟล์ใน src/assets/scenes) ---------- */
+.m-xtree.pic { width: 74px; right: 5%; bottom: 30%; object-fit: contain; pointer-events: none; }
+
+/* ---------- เตาผิง (ชิดผนังกลางห้อง) ---------- */
+.actor-layer.pass { pointer-events: none; } /* แตะทะลุชั้นไดโนไปโดนของในห้องได้ (ตัวไดโนยังแตะได้) */
+.actor-layer.pass .actor { pointer-events: auto; }
+.room-fire { position: absolute; left: 38%; bottom: 36%; z-index: 3; width: 112px; /* ฐานวางชิดเส้นผนัง-พื้น ข้างหน้าต่าง */ padding: 0; border: 0; background: none; transform: translateX(-50%); cursor: pointer; }
+.room-fire img, .room-fire svg { position: relative; z-index: 1; display: block; width: 100%; height: auto; pointer-events: none; filter: drop-shadow(0 4px 0 rgba(120, 80, 60, .16)); }
+.room-fire:active img, .room-fire:active svg { transform: scale(.95); }
+.room-fire img.cold { filter: grayscale(.4) brightness(.9); }
+.fire-glow { position: absolute; left: 50%; bottom: 4%; z-index: 0; width: 170%; aspect-ratio: 1.6; transform: translateX(-50%); border-radius: 50%; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 70%, rgba(255, 170, 80, .55) 0%, rgba(255, 140, 60, .25) 35%, rgba(255, 140, 60, 0) 70%); animation: fireGlow 1.6s ease-in-out infinite; }
+@keyframes fireGlow { 50% { opacity: .65; transform: translateX(-50%) scale(.94); } }
+.mroom.night .fire-glow { background: radial-gradient(ellipse at 50% 70%, rgba(255, 170, 80, .7) 0%, rgba(255, 140, 60, .32) 38%, rgba(255, 140, 60, 0) 72%); }
+.room-fire.lit img { animation: fireFlicker 2.2s ease-in-out infinite; }
+@keyframes fireFlicker { 50% { filter: drop-shadow(0 4px 0 rgba(120, 80, 60, .16)) brightness(1.06) saturate(1.08); } }
+.room-fire .fire-flames { transform-box: fill-box; transform-origin: 50% 100%; animation: flame .5s ease-in-out infinite alternate; }
+@keyframes flame { to { transform: scale(1.06, .92) skewX(3deg); } }
+.fire-sparks { position: absolute; left: 50%; bottom: 40%; z-index: 2; width: 30px; height: 40px; transform: translateX(-50%); pointer-events: none; }
+.fire-sparks i { position: absolute; bottom: 0; width: 4px; height: 4px; border-radius: 50%; background: #FFC65C; box-shadow: 0 0 6px #FFA040; opacity: 0; animation: spark 1.8s ease-out infinite; }
+.fire-sparks i:nth-child(1) { left: 8px; } .fire-sparks i:nth-child(2) { left: 16px; animation-delay: .6s; } .fire-sparks i:nth-child(3) { left: 22px; animation-delay: 1.2s; }
+@keyframes spark { 0% { opacity: 0; transform: translate(0, 0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(6px, -34px); } }
+
+/* ---------- พักการเลี้ยงชั่วคราว ---------- */
+.paused-room .mroom-dim { opacity: 1; background: rgba(60, 50, 110, .22); }
+.paused-badge { position: absolute; left: 50%; top: 22%; z-index: 9; transform: translateX(-50%); padding: 6px 16px; border-radius: 999px; background: rgba(255, 255, 255, .92); color: #6A55C8; font-weight: 800; font-size: 15px; white-space: nowrap; box-shadow: 0 4px 0 rgba(120, 100, 200, .25); }
+.paused-zz { position: absolute; left: 56%; bottom: 46%; z-index: 9; pointer-events: none; color: #fff; font-weight: 800; text-shadow: 0 2px 4px rgba(60, 50, 110, .4); }
+.paused-zz i { position: absolute; font-style: normal; opacity: 0; animation: zzUp 3s ease-in-out infinite; }
+.paused-zz i:nth-child(1) { font-size: 14px; } .paused-zz i:nth-child(2) { font-size: 18px; animation-delay: 1s; } .paused-zz i:nth-child(3) { font-size: 22px; animation-delay: 2s; }
+@keyframes zzUp { 0% { opacity: 0; transform: translate(0, 0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(14px, -40px); } }
+.dino-paused-card { margin-top: 12px; text-align: center; }
+.dino-paused-card p { margin: 4px 0 12px; }
+.dino-bars.paused { opacity: .6; filter: grayscale(.4); }

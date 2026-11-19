@@ -5,10 +5,19 @@ import { useNow } from '../../lib/sky';
 import { coll, useCollection } from '../../lib/store';
 import type { Dino } from '../../lib/types';
 import { burstCenter, burstHearts, confirmSheet, toast } from '../../ui/overlays';
-import { actions, activeDino, collection, eggTaps, gameStats, GROW_DAYS, HATCH_TAPS, lastEnded, needs, needsPersist, newEgg, settle, view, type DinoView } from './logic';
+import { actions, activeDino, collection, eggTaps, gameStats, GROW_DAYS, HATCH_TAPS, lastBowlEat, lastEnded, needs, needsPersist, newEgg, settle, view, type DinoView } from './logic';
+import { BowlProp, openBowlSheet } from './bowl';
+import { toggleDinoPause } from '../../ui/Settings';
+import { FireplaceProp } from './fireplace';
+import { fireLit } from './logic';
 import type { Mood } from './art';
 import { specialOf, useToday } from '../celebrate/days';
 import { RunnerMode } from './game';
+import { ShooterMode } from './shooter';
+import type { GameKind } from './logic';
+
+// ปุ่ม "เล่นด้วย" เปิดเกมไหน — เกมวิ่ง (run) เก็บไว้ครบ เปลี่ยนกลับเป็น 'run' ได้ทันที (สถิติแยกกัน ไม่หาย)
+const PLAY_GAME: GameKind = 'shoot';
 import { BirthdayParty } from './party';
 import { BathScene, BedScene, FeedScene } from './modes';
 import { Actor, Room, useActor, useWander } from './rooms';
@@ -22,7 +31,9 @@ import '@fontsource/itim/latin-400.css';
 import './dino.css';
 
 type Mode = 'room' | 'feed' | 'bath' | 'bed' | 'game';
-type FxKind = 'pet' | 'hug' | 'sweep' | 'spoon' | 'sparkle' | 'cheer' | 'blow';
+type FxKind = 'pet' | 'hug' | 'sweep' | 'spoon' | 'sparkle' | 'cheer' | 'blow' | 'munch';
+// จานอาหารวางมุมซ้ายของพื้น (วันเกิดเลื่อนไปข้างเค้ก) — ไดโนยืนขวาของจาน หันซ้ายก้มกิน
+const BOWL_SPOT = { x: 31, depth: .5 }, BOWL_SPOT_BDAY = { x: 41, depth: .5 };
 interface Fx { kind: FxKind; k: number; n: number }
 type Result = Dino | string | null;
 
@@ -113,6 +124,8 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
   // วันเกิด: แตะเค้ก → ไดโนเดินไปเป่าเทียน (cakeOut = เวลาที่เทียนดับ, puff = กำลังเป่าลม)
   const [cakeOut, setCakeOut] = useState(0);
   const [puff, setPuff] = useState(false);
+  const [chew, setChew] = useState(false);
+  const munchSeen = useRef(0);
   const relight = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(relight.current), []);
   const info = SPECIES[d.species];
@@ -137,7 +150,7 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
     if (wasAsleep.current && !asleepNow) setMode('room');
     wasAsleep.current = asleepNow;
   }, [asleepNow]);
-  useWander(walkTo, mode === 'room' && !fx && v.status === 'alive' && !v.sleeping && !v.sick, v.grownUp ? { range: [30, 75] } : undefined);
+  useWander(walkTo, mode === 'room' && !fx && v.status === 'alive' && !v.sleeping && !v.sick && !v.paused, v.grownUp ? { range: [30, 75] } : undefined);
 
   /** เอฟเฟกต์ในห้อง (หัวใจรอบตัว, ไม้กวาด, ช้อนยา ...) */
   const play = (kind: FxKind, ms = 2200, n = 0) => {
@@ -148,6 +161,37 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
       setTimeout(() => setFx(f => (f?.k === k ? null : f)), ms),
       setTimeout(() => tick(x => x + 1), 1300), // ยาขม → ยิ้ม
     ];
+  };
+
+  // หิวแล้วไปกินที่จานเอง (หรือเพิ่งใส่อาหารตอนหิวอยู่) → เดินไปที่จาน ก้มกินงับๆ แล้วดีใจ
+  const ateAt = v.status === 'alive' ? lastBowlEat(d, now) : 0;
+  const munch = async () => {
+    const spot = bday ? BOWL_SPOT_BDAY : BOWL_SPOT;
+    play('munch', 5200);
+    await walkTo(spot.x, spot.depth, 1.1);
+    face('left');
+    setChew(true);
+    for (let i = 0; i < 6; i++) { if (i % 2 === 0) sfx.chomp(); await new Promise(r => setTimeout(r, 300)); }
+    setChew(false);
+    sfx.yum();
+    play('cheer', 1800);
+  };
+  useEffect(() => {
+    if (!ateAt || ateAt <= munchSeen.current) return;
+    munchSeen.current = ateAt;
+    if (mode === 'room' && !v.sleeping && Date.now() - ateAt < 90_000) munch();
+  }, [ateAt]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // เตาผิง: ดับอยู่ → จุดไฟ 4 ชม. (ดับเอง) / ติดอยู่ → ถามก่อนว่าจะดับไหม
+  const toggleFire = async () => {
+    sfx.click();
+    const t = Date.now();
+    if (!fireLit(d, t)) {
+      if (await run(d.id, actions.fireOn)) { sfx.lamp(); toast("จุดเตาผิงแล้ว อุ่นสบาย 🔥 ตัวจะสกปรกช้าลง"); }
+      return;
+    }
+    const ok = await confirmSheet({ title: 'ดับเตาผิงไหม?', message: 'ไฟยังติดอยู่ เดี๋ยวก็ดับเองน้า', emoji: '🔥', ok: 'ดับไฟ', danger: false });
+    if (ok && (await run(d.id, actions.fireOff))) sfx.lamp();
   };
 
   if (v.status === 'egg') return <EggView d={d} />;
@@ -174,6 +218,33 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
   const n = needs(v, now);
   const hour = new Date(now).getHours();
   const night = hour >= 19 || hour < 6;
+
+  // พักการเลี้ยงชั่วคราว: เวลาหยุด ไดโนนอนรออยู่ในห้อง (ค่าต่างๆ ค้างไว้เท่าตอนกดพัก) กดเลี้ยงต่อได้จากตรงนี้หรือในตั้งค่า
+  if (v.paused) {
+    return (
+      <div className="dino-page">
+        <Head d={d} title={nameOf(d)} sub={sub} />
+        <Room kind="home" night={night} className="paused-room">
+          <span className="stage-tag">🗓️ {dayTag}</span>
+          <span className="stage-tag right">{STAGE_EMOJI[stage]} {STAGE_NAME[stage]}</span>
+          <div className="actor-layer pass"><Actor a={a} species={d.species} stage={stage} mood="sleep" pose={'sleep'} /></div>
+          <span className="paused-zz" aria-hidden="true"><i>z</i><i>z</i><i>Z</i></span>
+          <div className="paused-badge">⏸️ พักการเลี้ยงอยู่</div>
+        </Room>
+        <div className="card dino-paused-card">
+          <b>หยุดเวลาไว้ก่อนน้า</b>
+          <p className="small muted">ระหว่างนี้{nameOf(d)}จะไม่หิว ไม่สกปรก ไม่ป่วย ไม่โต พอกดเลี้ยงต่อ ทุกอย่างจะเดินต่อจากตอนที่พักไว้</p>
+          <button className="btn btn-primary btn-block" onClick={async () => { sfx.click(); if (await toggleDinoPause(d.id)) { sfx.wake(); toast('เลี้ยงต่อแล้ว ▶️ ทุกอย่างเหมือนเดิม'); } }}>▶️ เลี้ยงต่อ</button>
+        </div>
+        <div className="card dino-bars paused">
+          <Bar label="🍖 อิ่ม" v={v.m.food} c="linear-gradient(90deg,#FFB37A,#F28B4B)" />
+          <Bar label="💗 ความสุข" v={v.m.fun} c="linear-gradient(90deg,#FF9DBC,#F2548A)" />
+          <Bar label="🫧 สะอาด" v={v.m.bath} c="linear-gradient(90deg,#9ADBFF,#5CB6EC)" />
+          <Bar label="⚡ พลังงาน" v={v.m.energy} c="linear-gradient(90deg,#FFE27A,#F5B932)" />
+        </div>
+      </div>
+    );
+  }
 
   if (sleeping || mode === 'bed') {
     return (
@@ -202,11 +273,18 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
   }
 
   if (mode === 'game') {
+    const canPlay = () => actions.canPlay(d, Date.now());
     return (
       <div className="dino-page">
-        <Head d={d} title="วิ่งหาอาหาร 🏃" sub={nameOf(d)} onBack={() => setMode('room')} />
-        <RunnerMode species={d.species} stage={stage} stats={gameStats(all)} canPlay={() => actions.canPlay(d, Date.now())}
-          onFinish={async (who, score, prize) => !!(await run(d.id, (x, t) => actions.gameOver(x, t, who, score, prize)))} />
+        {PLAY_GAME === 'shoot' ? <>
+          <Head d={d} title="ยิงไข่หาอาหาร 🥚" sub={nameOf(d)} onBack={() => setMode('room')} />
+          <ShooterMode species={d.species} stage={stage} stats={gameStats(all, 'shoot')} canPlay={canPlay}
+            onFinish={async (who, score, prize) => !!(await run(d.id, (x, t) => actions.gameOver(x, t, who, score, prize, 'shoot')))} />
+        </> : <>
+          <Head d={d} title="วิ่งหาอาหาร 🏃" sub={nameOf(d)} onBack={() => setMode('room')} />
+          <RunnerMode species={d.species} stage={stage} stats={gameStats(all)} canPlay={canPlay}
+            onFinish={async (who, score, prize) => !!(await run(d.id, (x, t) => actions.gameOver(x, t, who, score, prize)))} />
+        </>}
       </div>
     );
   }
@@ -228,6 +306,7 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
   const spoonBitter = fx?.kind === 'spoon' && Date.now() - fx.k < 1300;
   const mood: Mood = spoonBitter ? 'sad' : fx && !v.sick ? 'happy' : v.sick ? 'sick' : v.m.fun < 30 || v.dirt === 2 || v.m.food < 15 ? 'sad' : 'normal';
   const pose = fx?.kind === 'blow' ? (puff ? 'eat' as const : undefined) // อ้าปากเป่าเทียน
+    : fx?.kind === 'munch' ? (chew ? 'eat' as const : undefined) // ก้มกินที่จาน
     : fx && !v.sick && fx.kind !== 'sweep' && !spoonBitter ? 'happy' as const : undefined;
 
   // ไดโนเดินไปข้างเค้ก (มุมซ้าย) หันหน้าเข้าเค้ก เป่าลมฟู่ → เทียนดับ + เพลงวันเกิด + ดีใจ แล้วจุดเทียนใหม่ทีหลัง
@@ -265,6 +344,8 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
         <span className="stage-tag right">{STAGE_EMOJI[stage]} {STAGE_NAME[stage]}</span>
         {import.meta.env.DEV && <button className="dev-chip" onClick={() => openDevSpecies(d)}>🧪 ลองพันธุ์อื่น</button>}
         <GardenButton />
+        <BowlProp d={d} now={now} className={bday ? 'by-cake' : ''} onTap={() => openBowlSheet(d)} />
+        <FireplaceProp d={d} now={now} onTap={toggleFire} />
         {v.dirt === 2 && !sweeping && [[12, 8, 60], [62, 4, 80], [36, 12, 50], [80, 10, 44]].map(([l, b, w], i) => <span key={i} className="stain" style={{ left: `${l}%`, bottom: `${b}%`, width: w, height: w * 0.4 }} />)}
         {Array.from({ length: poops }, (_, i) => (
           <span key={`poo${i}`} className={`poo ${sweeping ? 'swept' : ''}`} style={{ left: `${POOP_POS[i][0]}%`, bottom: `${POOP_POS[i][1] / 2 + 4}%`, animationDelay: sweeping ? `${.25 + (POOP_POS[i][0] / 100) * .9}s` : undefined }}>💩
@@ -274,8 +355,8 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
         {v.dirt > 0 && !sweeping && <><span className="fly f1">🪰</span>{v.dirt === 2 && <span className="fly f2">🪰</span>}</>}
         {bubble && <div className={`dino-bubble ${bubble === wish ? 'wish' : ''}`} key={`say${bubble}`}>{bubble}</div>}
         {nextEgg && <button className="new-egg in-home no-walk" onClick={adopt} aria-label="รับเลี้ยงไข่ใบใหม่"><span className="new-egg-tag">ไข่ใบใหม่มาส่ง!</span><DinoSprite species={nextEgg.species} stage="egg" size={72} anim="none" /></button>}
-        <div className="actor-layer">
-          <Actor a={a} species={d.species} stage={stage} mood={mood} pose={pose} react={fx?.kind === 'hug' ? 'squish' : fx?.kind === 'pet' ? 'joy' : ''}
+        <div className="actor-layer pass">
+          <Actor a={a} species={d.species} stage={stage} mood={mood} pose={pose} react={fx?.kind === 'hug' ? 'squish' : fx?.kind === 'pet' ? 'joy' : chew ? 'chew' : ''}
             className={fx?.kind === 'sparkle' ? '' : v.m.bath <= 0 ? 'grubby rotten' : v.m.bath < 30 ? 'grubby' : ''}
             onTap={() => { if (!fx) { play('pet', 1300); sfx.pet(); } }}>
             {v.m.bath <= 0 && fx?.kind !== 'sparkle' && <><span className="stink-lines"><i /><i /><i /></span><span className="body-fly">🪰</span></>}

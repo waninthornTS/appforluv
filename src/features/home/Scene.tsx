@@ -4,6 +4,7 @@ import { Character, HEART_SVG } from '../../characters/Character';
 import { PROFILE } from '../../lib/store';
 import type { Who } from '../../lib/types';
 import type { Period } from '../../lib/sky';
+import { isXmas } from '../../lib/theme';
 import { SceneDecor } from '../celebrate/Celebrate';
 import type { Special } from '../celebrate/days';
 
@@ -18,6 +19,35 @@ const Flower = ({ color, style }: { color: string; style: React.CSSProperties })
     <circle cx="10" cy="10" r="2.8" fill="#FFD66B" />
   </svg>
 );
+
+// ธีมคริสต์มาส: ต้นสนมีหิมะ + ตุ๊กตาหิมะ + หิมะตกในฉาก (ดอกไม้ซ่อนด้วย CSS)
+const Pine = ({ style }: { style: CSSProperties }) => (
+  <svg className="xs-pine" style={style} viewBox="0 0 40 60" aria-hidden="true">
+    <rect x="17" y="50" width="6" height="9" rx="1.5" fill="#9A6440" />
+    <path d="M20 3 L36 50 Q20 55 4 50Z" fill="#2E9E62" /><path d="M20 3 L32 32 Q20 36 8 32Z" fill="#3BB574" />
+    <path d="M20 3 L27 18 Q20 21 13 18Z M8 32 Q20 36 32 32 L30 28 Q20 31 10 28Z M4 50 Q20 55 36 50 L34 46 Q20 50 6 46Z" fill="#fff" opacity=".9" />
+    <circle cx="14" cy="40" r="2" fill="#FF5C6E" /><circle cx="26" cy="44" r="2" fill="#FFD15C" /><circle cx="22" cy="26" r="1.8" fill="#6FB6F5" />
+  </svg>
+);
+const XS_FLAKES = Array.from({ length: 14 }, (_, i) => ({ l: (i * 41) % 100, d: -(i * 0.9), dur: 6 + (i % 4) * 1.5, s: 3 + (i % 3) }));
+function XmasScene() {
+  return (
+    <div className="xs" aria-hidden="true">
+      <Pine style={{ left: '3%', bottom: 26, width: 40 }} />
+      <Pine style={{ left: '13%', bottom: 16, width: 28 }} />
+      <svg className="xs-snowman" viewBox="0 0 40 52">
+        <circle cx="20" cy="38" r="13" fill="#fff" stroke="#DCE9F3" strokeWidth="1.5" />
+        <circle cx="20" cy="18" r="9" fill="#fff" stroke="#DCE9F3" strokeWidth="1.5" />
+        <path d="M11 13 Q20 2 29 13Z" fill="#E8445A" /><circle cx="30" cy="9" r="2.6" fill="#fff" /><rect x="10" y="12" width="20" height="3.5" rx="1.7" fill="#fff" />
+        <circle cx="17" cy="17" r="1.2" fill="#4E3A3A" /><circle cx="23" cy="17" r="1.2" fill="#4E3A3A" />
+        <path d="M20 19.5 l6 1.5 -6 1.2z" fill="#FF9A3C" />
+        <path d="M12 26 Q20 30 28 26 L28 29 Q20 33 12 29Z" fill="#2E9E62" />
+        <circle cx="20" cy="35" r="1.3" fill="#4E3A3A" /><circle cx="20" cy="41" r="1.3" fill="#4E3A3A" />
+      </svg>
+      {XS_FLAKES.map((f, i) => <i key={i} className="xs-flake" style={{ left: `${f.l}%`, width: f.s, height: f.s, animationDelay: `${f.d}s`, animationDuration: `${f.dur}s` }} />)}
+    </div>
+  );
+}
 
 // ปุ่มหัวใจด้านขวาของฉาก: กดแล้วสองคนเดินเข้าไปกอดกันแบบนุ่มๆ ด้วย CSS (ป้ายชื่ออยู่ที่เดิม ขยับแค่ตัว)
 const HUG_MS = 3000;
@@ -63,6 +93,7 @@ export const Scene = memo(function Scene({ sky, days, special }: { sky: Period; 
       <div className="cloud c1" /><div className="cloud c2" />
       {special && <SceneDecor s={special} />}
       <div className="ground" />
+      {isXmas && <XmasScene />}
       <Flower color="#FFB3CB" style={{ left: '5%', bottom: 34 }} />
       <Flower color="#E9D8FF" style={{ left: '13%', bottom: 18, width: 15 }} />
       <Flower color="#FFC9DA" style={{ right: '4%', bottom: 12 }} />

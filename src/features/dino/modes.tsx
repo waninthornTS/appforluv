@@ -125,7 +125,7 @@ export function FeedScene({ d, stage, night, onEat }: { d: Dino; stage: Stage; n
             {crumbs > 0 && busy && <span className="crumbs mouth" key={crumbs} style={{ [a.face === 'left' ? 'left' : 'right']: `${Math.round(mp[0] * 100) - 8}%`, top: `${Math.round(mp[1] * 100) + 2}%` } as CSSProperties}><i /><i /><i /><i /><i /></span>}
           </Actor>
         </div>
-        {!busy && !ghost && <div className="room-hint">{foodLeft(d) > 0 ? 'ลากอาหารไปป้อนที่ปาก หรือแตะเมนูเลย 🍽️' : 'อาหารหมดแล้ว ไปวิ่งหาอาหารกันน้า 🏃'}</div>}
+        {!busy && !ghost && <div className="room-hint">{foodLeft(d) > 0 ? 'ลากอาหารไปป้อนที่ปาก หรือแตะเมนูเลย 🍽️' : 'อาหารหมดแล้ว ไปยิงไข่หาอาหารกันน้า 🥚'}</div>}
       </Room>
       {ghost && (
         <div className={`food-ghost ${ghost.fly ? 'fly' : ''}`} style={{ left: ghost.x, top: ghost.y, transform: `translate(-50%, -50%) scale(${ghost.s})`, opacity: ghost.o ?? 1 }}>

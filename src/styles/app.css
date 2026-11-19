@@ -988,3 +988,12 @@ html[data-sky=night] .card.passport { box-shadow: 0 5px 0 #4A3EA8, 0 12px 26px r
 @keyframes fxRise { 0% { opacity: 0; transform: translate(0, 10px) scale(.5); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), -110px) scale(1.15); } }
 
 .set-row .ico.spotify { background: #E3F8EA; color: #1DB954; }
+
+/* ---------- ตั้งค่า: พักการเลี้ยงไดโน (สวิตช์) ---------- */
+.set-row .ico.pause { background: #EEE8FF; color: var(--lav); font-size: 18px; }
+.set-row .txt { flex: 1; min-width: 0; }
+.set-row .switch { flex: none; position: relative; width: 44px; height: 26px; border-radius: 999px; background: #E6DCE2; transition: background .2s; }
+.set-row .switch i { position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, .15); transition: transform .2s; }
+.set-row .switch.on { background: var(--lav); }
+.set-row .switch.on i { transform: translateX(18px); }
+.set-row.dino-pause.on { background: #F6F2FF; }
