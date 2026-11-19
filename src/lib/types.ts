@@ -85,7 +85,7 @@ export interface Dino extends Base {
   games?: { A?: GameStat; B?: GameStat }; // สถิติมินิเกมวิ่งของแต่ละคน
   shoot?: { A?: GameStat; B?: GameStat }; // สถิติเกมยิงไข่ของแต่ละคน (แยกจากเกมวิ่ง)
   bowl?: DinoBowl | null; // จานอาหาร: ใส่ไว้ หิวเมื่อไหร่เดินมากินเอง (อยู่ได้ครึ่งวันแล้วเน่า)
-  fire?: { since: number; until: number } | null; // เตาผิง: จุดตอน since ดับเองตอน until (ทีละ 4 ชม.)
+  fire?: { since: number; until: number } | null; // เตาไฟติดผนัง: เปิดตอน since ดับเองตอน until (ทีละ 4 ชม.)
   paused?: number | null; // พักการเลี้ยงชั่วคราวตั้งแต่เวลานี้ (เวลาหยุด) — null/ไม่มี = เลี้ยงปกติ
 }
 /** จานอาหาร: food = อาหารที่ใส่ไว้, at = เวลาที่ใส่, ate = กินจากจานครั้งล่าสุด, n = กินไปแล้วกี่รอบ */

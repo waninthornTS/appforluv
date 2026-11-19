@@ -59,7 +59,7 @@ html[data-theme=xmas] #sky::after { background-image: radial-gradient(rgba(255, 
 .xm-lights i::before { content: ''; position: absolute; left: 2px; top: -3px; width: 4px; height: 4px; border-radius: 1px; background: #4E7A55; }
 @keyframes xmBulb { 50% { opacity: .45; box-shadow: none; } }
 
-/* ---------- ฉากหน้าแรก: เนินหิมะ ต้นสน ตุ๊กตาหิมะ ---------- */
+/* ---------- ฉากหน้าแรก: เนินหิมะ + หิมะตก ---------- */
 html[data-theme=xmas] .scene { background: linear-gradient(180deg, #BFDDF3 0%, #E3F0FA 55%, #FFF6F2 100%); }
 html[data-theme=xmas] .scene.sky-morning { background: linear-gradient(180deg, #FFD8C6 0%, #F3E8EE 50%, #E6F2FB 100%); }
 html[data-theme=xmas] .scene.sky-evening { background: linear-gradient(180deg, #F2A79B 0%, #E6BFCB 50%, #D9E0F4 100%); }
@@ -69,7 +69,5 @@ html[data-theme=xmas] .ground::before { opacity: .5; background-image: radial-gr
 html[data-theme=xmas] .scene.sky-night .ground { background: radial-gradient(ellipse at 50% 0%, #E6EEF8 0%, #C4D4EA 45%, #9DB2D2 100%); }
 html[data-theme=xmas] .scene .flower, html[data-theme=xmas] .scene .sprout { display: none; }
 .xs { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
-.xs-pine { position: absolute; height: auto; filter: drop-shadow(0 3px 0 rgba(40, 80, 60, .15)); }
-.xs-snowman { position: absolute; right: 4%; bottom: 10px; width: 36px; filter: drop-shadow(0 3px 0 rgba(80, 110, 150, .15)); }
 .xs-flake { position: absolute; top: -8px; border-radius: 50%; background: #fff; opacity: .9; box-shadow: 0 0 2px rgba(120, 150, 190, .5); animation: xsFall linear infinite; }
 @keyframes xsFall { to { transform: translate(10px, 320px); } }

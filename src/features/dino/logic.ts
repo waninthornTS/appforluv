@@ -53,7 +53,7 @@ function legacyWake(since: number) {
   return +w;
 }
 
-// ---------- เตาผิง: จุดได้ทีละ 4 ชม. ระหว่างจุดตัวสกปรกช้าลงมาก + อึไม่เหม็นจนแมลงวันมาตอม ----------
+// ---------- เตาไฟติดผนัง: เปิดได้ทีละ 4 ชม. ระหว่างจุดตัวสกปรกช้าลงมาก + อึไม่เหม็นจนแมลงวันมาตอม ----------
 export const FIRE_HOURS = 4;
 const FIRE_DIRT_MUL = .25; // ความสะอาดลดเหลือ 1/4 ของปกติ
 export const fireLit = (d: Dino, t0: number) => { const t = effTime(d, t0); return !!d.fire && t >= d.fire.since && t < d.fire.until; };
@@ -220,7 +220,7 @@ export function view(d: Dino, t0: number): DinoView {
     m: { food: meter(d, 'food', t), fun: meter(d, 'fun', t), bath: meter(d, 'bath', t), energy: meter(d, 'energy', t) },
     sleeping: isSleeping(d, t),
     poops: poops.length,
-    dirt: oldest >= POOP_SICK ? 2 : oldest >= POOP_SMELLY && !fireLit(d, t) ? 1 : 0, // จุดเตาผิงอยู่ = ยังไม่เหม็นจนแมลงวันมา
+    dirt: oldest >= POOP_SICK ? 2 : oldest >= POOP_SMELLY && !fireLit(d, t) ? 1 : 0, // เปิดเตาไฟอยู่ = ยังไม่เหม็นจนแมลงวันมา
     sick: sick == null ? 0 : t - sick >= SICK_CRITICAL ? 2 : 1,
   };
 }
@@ -354,16 +354,16 @@ export const actions = {
     }
     return n;
   },
-  /** จุดเตาผิง 4 ชม. (ดับเอง) — หลับอยู่ก็จุดให้ได้ */
+  /** เปิดเตาไฟ 4 ชม. (ดับเอง) — หลับอยู่ก็เปิดให้ได้ */
   fireOn(d0: Dino, t: number): Result {
     const d = settle(d0, t);
     if (d.status !== 'alive') return 'ยังทำไม่ได้นะ';
-    if (fireLit(d, t)) return 'เตาผิงติดอยู่แล้วน้า 🔥';
+    if (fireLit(d, t)) return 'เตาไฟเปิดอยู่แล้วน้า 🔥';
     return { ...d, fire: { since: t, until: t + FIRE_HOURS * HOUR } };
   },
   fireOff(d0: Dino, t: number): Result {
     const d = settle(d0, t);
-    if (!d.fire || !fireLit(d, t)) return 'เตาผิงดับอยู่แล้ว';
+    if (!d.fire || !fireLit(d, t)) return 'เตาไฟปิดอยู่แล้ว';
     return { ...d, fire: { ...d.fire, until: t } };
   },
   /** เทอาหารในจานทิ้ง (เน่าแล้ว หรือไม่อยากให้กินแล้ว) */

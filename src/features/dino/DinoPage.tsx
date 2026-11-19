@@ -182,16 +182,19 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
     if (mode === 'room' && !v.sleeping && Date.now() - ateAt < 90_000) munch();
   }, [ateAt]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // เตาผิง: ดับอยู่ → จุดไฟ 4 ชม. (ดับเอง) / ติดอยู่ → ถามก่อนว่าจะดับไหม
+  // เตาไฟติดผนัง: แตะ = เปิด/ปิดทันที (เปิดได้ทีละ 4 ชม. แล้วดับเอง) — กันแตะรัวระหว่างบันทึก
+  const fireBusy = useRef(false);
   const toggleFire = async () => {
-    sfx.click();
-    const t = Date.now();
-    if (!fireLit(d, t)) {
-      if (await run(d.id, actions.fireOn)) { sfx.lamp(); toast("จุดเตาผิงแล้ว อุ่นสบาย 🔥 ตัวจะสกปรกช้าลง"); }
-      return;
-    }
-    const ok = await confirmSheet({ title: 'ดับเตาผิงไหม?', message: 'ไฟยังติดอยู่ เดี๋ยวก็ดับเองน้า', emoji: '🔥', ok: 'ดับไฟ', danger: false });
-    if (ok && (await run(d.id, actions.fireOff))) sfx.lamp();
+    if (fireBusy.current) return;
+    fireBusy.current = true;
+    try {
+      sfx.click();
+      const on = !fireLit(d, Date.now());
+      if (await run(d.id, on ? actions.fireOn : actions.fireOff)) {
+        sfx.lamp();
+        toast(on ? 'เปิดเตาไฟแล้ว อุ่นสบาย 🔥 ตัวจะสกปรกช้าลง' : 'ปิดเตาไฟแล้ว');
+      }
+    } finally { fireBusy.current = false; }
   };
 
   if (v.status === 'egg') return <EggView d={d} />;

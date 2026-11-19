@@ -57,26 +57,27 @@ export function Room({ kind, night = false, dark = false, children, onFloorTap, 
 
 // ---------- ธีมคริสต์มาส: ต้นคริสต์มาส (แทนกระถางต้นไม้) + ไฟประดับบนผนัง ----------
 const BULB = ['#FF5C6E', '#FFD15C', '#5CC98B', '#6FB6F5', '#FF9DBC'];
-// รูป 3D ที่เจนจาก Gemini: วางไฟล์ src/assets/scenes/xmas-tree.webp (หรือ .png) — ไม่มีไฟล์ใช้ภาพวาดเวกเตอร์แทน
-const PROPS = import.meta.glob('../../assets/scenes/{xmas-tree,fireplace,fireplace-off}.{webp,png}', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
-export const propPic = (name: 'xmas-tree' | 'fireplace' | 'fireplace-off') => Object.entries(PROPS).find(([p]) => p.includes(`/${name}.`))?.[1];
+// ต้นคริสต์มาสแบบเรียบ: ใบ 3 ชั้นขอบมน + ลูกบอลไม่กี่ลูก + ดาวบนยอด + กระถางชมพู (เวกเตอร์ คมชัดทุกขนาด)
+/** ใบหนึ่งชั้น: สามเหลี่ยมมน ยอดที่ (35, top) ฐานกว้าง ±w ที่ระดับ bot */
+const tier = (top: number, bot: number, w: number) =>
+  `M35 ${top}C39 ${top} ${35 + w} ${bot - 7} ${35 + w - 1} ${bot - 1}Q35 ${bot + 6} ${35 - w + 1} ${bot - 1}C${35 - w} ${bot - 7} 31 ${top} 35 ${top}Z`;
+const TIERS: [number, number, number, string][] = [[34, 84, 27, '#2FA56A'], [20, 63, 21, '#3DBA79'], [9, 42, 15, '#56CB8B']];
+const BALLS: [number, number, string][] = [[26, 52, '#FF5C6E'], [45, 49, '#FFD15C'], [35, 70, '#FF9DBC'], [20, 77, '#FFD15C'], [50, 75, '#FF5C6E'], [36, 32, '#FF9DBC']];
 function XmasTree() {
-  const pic = propPic('xmas-tree');
-  if (pic) return <img className="m-xtree pic" src={pic} alt="" draggable={false} />;
-  return <XmasTreeSvg />;
-}
-function XmasTreeSvg() {
-  const balls = [[30, 30, 0], [40, 38, 1], [24, 50, 2], [36, 56, 3], [46, 64, 0], [20, 70, 4], [32, 74, 1]];
   return (
-    <svg className="m-xtree" viewBox="0 0 64 104" aria-hidden="true">
-      <rect x="27" y="86" width="10" height="9" rx="2" fill="#A86E45" />
-      <path d="M14 92h36l-4 11H18z" fill="#E8445A" /><path d="M14 92h36v4H14z" fill="#FF7A8A" />
-      <path d="M32 10 L54 86 Q32 92 10 86Z" fill="#2E9E62" />
-      <path d="M32 10 L50 62 Q32 68 14 62Z" fill="#3BB574" />
-      <path d="M32 10 L46 40 Q32 45 18 40Z" fill="#4CC984" />
-      <path d="M17 46 Q32 54 47 44 M14 68 Q32 78 51 66" fill="none" stroke="#FFE08A" strokeWidth="2" strokeDasharray="0.1 5" strokeLinecap="round" />
-      {balls.map(([x, y, c], i) => <circle key={i} className="xt-ball" cx={x} cy={y} r="3.2" fill={BULB[c]} style={{ animationDelay: `${(i % 4) * .5}s` }} />)}
-      <path className="xt-star" d="M32 1.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L32 14.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z" fill="#FFD15C" stroke="#fff" strokeWidth="1.2" strokeLinejoin="round" />
+    <svg className="m-xtree" viewBox="0 0 70 112" aria-hidden="true">
+      <rect x="31" y="82" width="8" height="9" rx="2" fill="#B07850" />
+      <path d="M18 92h34l-3.2 15a4 4 0 0 1-3.9 3.2H25.1a4 4 0 0 1-3.9-3.2z" fill="#FF9DB4" />
+      <rect x="15" y="87" width="40" height="8" rx="4" fill="#FFB9C9" />
+      {TIERS.map(([t, b, w, c], i) => <g key={i}>
+        {i > 0 && <path d={tier(t, b + 2.5, w)} fill="#25915B" opacity=".45" />}
+        <path d={tier(t, b, w)} fill={c} />
+      </g>)}
+      {BALLS.map(([x, y, c], i) => <g key={i}>
+        <circle cx={x} cy={y} r="3.6" fill={c} />
+        <circle cx={x - 1.2} cy={y - 1.2} r="1" fill="#fff" opacity=".8" />
+      </g>)}
+      <path className="xt-star" d="M35 1.5l2.8 5.6 6.1.9-4.4 4.3 1 6.1L35 15.5l-5.5 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="#FFD15C" stroke="#fff" strokeWidth="1.4" strokeLinejoin="round" />
     </svg>
   );
 }
