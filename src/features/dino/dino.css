@@ -622,7 +622,7 @@
 /* ---------- เตาไฟเล็กติดผนัง + ปล่องไฟลายลูกกวาดขึ้นเพดาน ---------- */
 .actor-layer.pass { pointer-events: none; } /* แตะทะลุชั้นไดโนไปโดนของในห้องได้ (ตัวไดโนยังแตะได้) */
 .actor-layer.pass .actor { pointer-events: auto; }
-.room-stove { position: absolute; left: 37%; top: 0; bottom: 58%; z-index: 3; width: 80px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+.room-stove { position: absolute; left: 53%; top: 0; bottom: 58%; z-index: 3; width: 80px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; pointer-events: none; }
 .stove-pipe { position: relative; flex: 1; width: 13px; margin-bottom: -7px; border-radius: 2px;
   background: linear-gradient(90deg, rgba(120, 30, 50, .18), rgba(255, 255, 255, .35) 35%, rgba(255, 255, 255, 0) 60%, rgba(120, 30, 50, .22)),
     repeating-linear-gradient(-40deg, #FFF6F4 0 5px, #EC5A6E 5px 10px); }
