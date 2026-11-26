@@ -47,8 +47,8 @@ export function confirmSheet({ title = 'แน่ใจนะ?', message = '', e
       onClose: () => resolve(answer),
       render: close => (
         <div className="confirm-box">
-          <div className="big">{emoji}</div>
-          <p>{message}</p>
+          {emoji && <div className="big">{emoji}</div>}
+          {message && <p>{message}</p>}
           <div className="btn-row">
             <button className="btn btn-ghost" onClick={close}>ยกเลิก</button>
             <button className={`btn ${danger ? 'btn-danger' : 'btn-primary'}`} onClick={() => { answer = true; close(); }}>{ok}</button>

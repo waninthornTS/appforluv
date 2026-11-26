@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { connectSpotify, disconnectSpotify, spotifyReady, useSpotifyAuth } from '../lib/spotify';
 import { refreshApp } from '../lib/update';
 import { logout, useMe } from '../lib/auth';
-import { coll, nameOf, useCollection } from '../lib/store';
+import { coll, useCollection } from '../lib/store';
 import { activeDino, pauseDino, resumeDino } from '../features/dino/logic';
 import { confirmSheet, toast } from './overlays';
 
@@ -74,7 +74,7 @@ function LogoutRow({ onDone }: { onDone: () => void }) {
   const me = useMe();
   if (!me) return null;
   const out = async () => {
-    if (!(await confirmSheet({ title: 'ออกจากระบบไหม?', message: `ตอนนี้ใช้งานในชื่อ ${nameOf(me)} · ข้อมูลไม่หาย แค่ต้องเลือกใหม่ว่าเป็นใคร`, emoji: '👋', ok: 'ออกจากระบบ' }))) return;
+    if (!(await confirmSheet({ title: 'ออกจากระบบไหม?', emoji: '', ok: 'ออกจากระบบ' }))) return;
     onDone();
     logout();
   };
