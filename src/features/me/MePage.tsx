@@ -5,11 +5,12 @@ import { diffDays, fmtDate, nextYearly, todayStr, ymd } from '../../lib/date';
 import { ABOUT_CATS, entries } from '../../lib/meta';
 import { coll, PROFILE, useCollection } from '../../lib/store';
 import type { AboutCat, AboutItem, Who } from '../../lib/types';
+import { useMeSure } from '../../lib/auth';
 import { Seg } from '../../ui/controls';
 import { confirmSheet, toast } from '../../ui/overlays';
 import { openAboutSheet } from './AboutSheet';
 
-let lastWho: Who = 'A';
+let lastWho: Who | null = null; // เปิดครั้งแรกเห็นของตัวเองก่อน
 
 function PrefCard({ who, cat, items }: { who: Who; cat: AboutCat; items: AboutItem[] }) {
   const c = ABOUT_CATS[cat];
@@ -53,7 +54,8 @@ function SameCard({ about }: { about: AboutItem[] }) {
 
 export default function MePage() {
   const about = useCollection('about');
-  const [who, setWhoS] = useState<Who>(lastWho);
+  const me = useMeSure();
+  const [who, setWhoS] = useState<Who>(lastWho ?? me);
   const setWho = (w: Who) => { lastWho = w; setWhoS(w); };
 
   const today = todayStr();

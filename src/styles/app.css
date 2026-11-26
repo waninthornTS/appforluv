@@ -417,6 +417,9 @@ h1, h2, h3 { line-height: 1.25; }
 .polaroid .ph { aspect-ratio: 1; border-radius: 4px; overflow: hidden; background: var(--pink-l); display: grid; place-items: center; font-size: 46px; position: relative; }
 .polaroid .ph img { width: 100%; height: 100%; object-fit: cover; }
 .polaroid .ph .count { position: absolute; right: 6px; bottom: 6px; font-size: 11px; font-weight: 700; color: #fff; background: rgba(0, 0, 0, .45); padding: 1px 7px; border-radius: 999px; }
+.polaroid .ph .author { position: absolute; left: 6px; top: 6px; font-size: 10.5px; font-weight: 700; line-height: 1.5; padding: 1px 7px; border-radius: 999px; box-shadow: 0 1px 3px rgba(0, 0, 0, .15); }
+.polaroid .ph .author.A { background: #E4F0FF; color: #3C6FB0; }
+.polaroid .ph .author.B { background: #FFE3EC; color: #D2487A; }
 .polaroid .cap { margin-top: 8px; padding: 0 2px; }
 .polaroid .cap .t { font-weight: 700; font-size: 14px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .polaroid .cap .d { font-size: 11.5px; color: var(--ink-soft); }
@@ -997,3 +1000,25 @@ html[data-sky=night] .card.passport { box-shadow: 0 5px 0 #4A3EA8, 0 12px 26px r
 .set-row .switch.on { background: var(--lav); }
 .set-row .switch.on i { transform: translateX(18px); }
 .set-row.dino-pause.on { background: #F6F2FF; }
+
+/* หน้าเข้าสู่ระบบ (เลือกว่าเป็นใคร) */
+.login { position: relative; z-index: 1; min-height: 100dvh; display: grid; place-items: center; padding: calc(var(--safe-t) + 24px) 16px calc(var(--safe-b) + 24px); }
+.login-card { width: min(380px, 100%); display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 26px 20px 22px; text-align: center;
+  background: rgba(255, 252, 247, .94); border: 2px solid #fff; border-radius: 30px; box-shadow: 0 10px 30px rgba(90, 50, 80, .18); }
+.login-card h1 { margin: 0; font-size: 22px; }
+.login-who { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 6px 0 10px; }
+.login-who-btn { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 6px 14px; border-radius: 24px;
+  background: #E9F3FF; border: 3px solid transparent; box-shadow: 0 4px 0 #BFD6F2; transition: transform .15s, border-color .15s; }
+.login-who-btn.B { background: #FFEAF1; box-shadow: 0 4px 0 #F2B8CB; }
+.login-who-btn.on { border-color: var(--pink-d); transform: translateY(-3px); }
+.login-who-btn:active { transform: translateY(2px); }
+.login-who-btn .pic { height: 120px; display: grid; place-items: end center; }
+.login-who-btn .pic .char-img { width: auto; height: 120px; }
+.login-who-btn .nm { font-weight: 800; font-size: 17px; }
+.login-who-btn .tick { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--pink-d); color: #fff; font-size: 13px; font-weight: 800; }
+.login-card .btn:disabled { opacity: .55; box-shadow: none; }
+
+/* ออกจากระบบ (เมนูตั้งค่า) */
+.drawer-panel .set-row.logout { margin-top: auto; }
+.set-row.logout .ico { background: #FFE6E6; color: #E0525E; }

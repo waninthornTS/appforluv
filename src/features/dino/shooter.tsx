@@ -1,8 +1,9 @@
 // มินิเกม "ยิงไข่ไดโน" — เล็งแล้วยิงไข่ให้ไปติดกับไข่สีเดียวกัน ครบ 3 ใบขึ้นไปแตก → มีอาหารร่วงลงตะกร้า
 // ไข่ที่ห้อยอยู่โดยไม่ติดเพดานจะร่วงตามไปด้วย (ได้คะแนนเพิ่ม) · ยิงพลาดหลายครั้งเพดานจะเลื่อนลงมาอีกแถว
-// ไข่ลงมาถึงเส้นประ = จบเกม · ล้างจอหมด = ขึ้นด่านใหม่ · เลือกก่อนว่าใครเล่น แล้วเก็บสถิติแยกคน
+// ไข่ลงมาถึงเส้นประ = จบเกม · ล้างจอหมด = ขึ้นด่านใหม่ · คนเล่น = คนที่เข้าสู่ระบบ แล้วเก็บสถิติแยกคน
 import { useEffect, useRef, useState } from 'react';
 import { Character } from '../../characters/Character';
+import { useMeSure } from '../../lib/auth';
 import { PROFILE } from '../../lib/store';
 import type { DinoSpecies, GameStat } from '../../lib/types';
 import { toast } from '../../ui/overlays';
@@ -21,16 +22,17 @@ export function ShooterMode({ species, stage, stats, canPlay, onFinish }: {
   canPlay: () => string | null;
   onFinish: (who: Who, score: number, prize: FoodId[]) => Promise<boolean>;
 }) {
+  const me = useMeSure(); // คนเล่น = คนที่เข้าสู่ระบบอยู่
   const [phase, setPhase] = useState<'pick' | 'play' | 'over'>('pick');
-  const [who, setWho] = useState<Who>('A');
+  const who = me;
   const [round, setRound] = useState(0);
   const [result, setResult] = useState<{ score: number; prize: FoodId[]; best: boolean; saved: boolean } | null>(null);
 
-  const start = (w: Who) => {
+  const start = () => {
     const no = canPlay();
     if (no) { toast(no); return; }
     sfx.click();
-    setWho(w); setResult(null); setRound(r => r + 1); setPhase('play');
+    setResult(null); setRound(r => r + 1); setPhase('play');
   };
   const over = async (score: number, prize: FoodId[]) => {
     const best = score > stats[who].best && stats[who].plays > 0;
@@ -55,27 +57,22 @@ export function ShooterMode({ species, stage, stats, canPlay, onFinish }: {
           ))}</div>
         </> : <p className="small muted">{result.saved ? 'รอบนี้ยังไม่ได้อาหาร ลองยิงให้ติดสีเดียวกัน 3 ใบนะ' : 'รอบนี้ไม่ได้อาหารนะ'}</p>}
         <div className="run-btns">
-          <button className="btn btn-primary" onClick={() => start(who)}>🔁 ยิงอีกรอบ</button>
-          <button className="btn btn-ghost" onClick={() => setPhase('pick')}>เปลี่ยนคนเล่น</button>
+          <button className="btn btn-primary" onClick={start}>🔁 ยิงอีกรอบ</button>
+          <button className="btn btn-ghost" onClick={() => setPhase('pick')}>ดูสถิติ</button>
         </div>
       </div>
     );
   }
 
-  // เลือกคนเล่น + สถิติ
+  // เริ่มเล่น (ในชื่อคนที่เข้าสู่ระบบ) + สถิติ
   const lead: Who | null = stats.A.best === stats.B.best ? null : stats.A.best > stats.B.best ? 'A' : 'B';
   return (
     <>
       <div className="card run-pick">
-        <b>เลือกผู้เล่น</b>
-        <div className="run-who">
-          {(['A', 'B'] as const).map(w => (
-            <button key={w} className={`run-who-btn ${w}`} onClick={() => start(w)}>
-              <span className="pic"><Character who={w === 'A' ? 'ploy' : 'dream'} /></span>
-              <span className="nm">{nameOf(w)}</span>
-            </button>
-          ))}
-        </div>
+        <button className={`run-who-btn solo ${who}`} onClick={start}>
+          <span className="pic"><Character who={who === 'A' ? 'ploy' : 'dream'} /></span>
+          <span className="nm">▶️ เริ่มยิงไข่ · {nameOf(who)}</span>
+        </button>
       </div>
       <div className="card run-stats">
         <b>📊 สถิติยิงไข่</b>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { fmtDate, monthLabel } from '../../lib/date';
 import { entries, MEM_CATS } from '../../lib/meta';
-import { useCollection } from '../../lib/store';
+import { nameOf, useCollection } from '../../lib/store';
 import type { MemoryCat } from '../../lib/types';
 import { Hearts, Photo } from '../../ui/controls';
 import { Fab } from '../../ui/TabBar';
@@ -48,6 +48,7 @@ export default function DiaryPage() {
               <button key={m.id} className="polaroid" onClick={() => openMemoryDetail(m.id)}>
                 <div className="ph">
                   {m.photos[0] ? <><Photo id={m.photos[0]} />{m.photos.length > 1 && <span className="count">📷 {m.photos.length}</span>}</> : MEM_CATS[m.cat]?.emoji}
+                  {m.author && <span className={`author ${m.author}`}>{nameOf(m.author)}</span>}
                 </div>
                 <div className="cap">
                   <div className="t">{MEM_CATS[m.cat]?.emoji} {m.title}</div>

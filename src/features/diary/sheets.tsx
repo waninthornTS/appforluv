@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { fmtDate, todayStr } from '../../lib/date';
 import { entries, MEM_CATS } from '../../lib/meta';
 import { deletePhotos } from '../../lib/photos';
+import { getMe } from '../../lib/auth';
 import { coll, PROFILE, useItem } from '../../lib/store';
 import type { Memory, MemoryCat } from '../../lib/types';
 import { Field, Hearts, HeartsInput, Photo, PhotoPicker, Seg, usePhotoDraft } from '../../ui/controls';
@@ -72,6 +73,7 @@ function MemoryForm({ initial, preset, close }: { initial?: Memory; preset: Part
     await coll.save('memories', {
       ...(m as Memory), title: m.title.trim(), place: m.place?.trim(), note: m.note?.trim(),
       picker: movie ? m.picker : '', photos: draft.ids,
+      author: initial ? initial.author : getMe(), // คนสร้างครั้งแรก (แก้ไขทีหลังไม่เปลี่ยน)
     });
     saved.current = true;
     close();

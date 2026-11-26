@@ -1,9 +1,10 @@
-// เมนูแฮมเบอร์เกอร์มุมซ้ายบน → เมนูสไลด์ออกมาจากทางซ้าย (ตั้งค่า: รีเฟรช/อัปเดตแอป, เชื่อมต่อ Spotify)
+// เมนูแฮมเบอร์เกอร์มุมซ้ายบน → เมนูสไลด์ออกมาจากทางซ้าย (ตั้งค่า: รีเฟรช/อัปเดตแอป, เชื่อมต่อ Spotify, ออกจากระบบ)
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { connectSpotify, disconnectSpotify, spotifyReady, useSpotifyAuth } from '../lib/spotify';
 import { refreshApp } from '../lib/update';
-import { coll, useCollection } from '../lib/store';
+import { logout, useMe } from '../lib/auth';
+import { coll, nameOf, useCollection } from '../lib/store';
 import { activeDino, pauseDino, resumeDino } from '../features/dino/logic';
 import { confirmSheet, toast } from './overlays';
 
@@ -15,6 +16,13 @@ const RefreshIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M20 12a8 8 0 1 1-2.34-5.66" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
     <path d="M20.5 3.5v5h-5" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const LogoutIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10 4H6.5A2.5 2.5 0 0 0 4 6.5v11A2.5 2.5 0 0 0 6.5 20H10" />
+    <path d="M15 8l4 4-4 4M19 12H9.5" />
   </svg>
 );
 
@@ -55,8 +63,26 @@ function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
         </button>
         <SpotifyRow />
         <DinoPauseRow />
+        <LogoutRow onDone={onClose} />
       </nav>
     </div>
+  );
+}
+
+/** ออกจากระบบ: เครื่องนี้ลืมว่าเป็นใคร แล้วกลับไปหน้าเลือก (ข้อมูลทั้งหมดยังอยู่ครบ) */
+function LogoutRow({ onDone }: { onDone: () => void }) {
+  const me = useMe();
+  if (!me) return null;
+  const out = async () => {
+    if (!(await confirmSheet({ title: 'ออกจากระบบไหม?', message: `ตอนนี้ใช้งานในชื่อ ${nameOf(me)} · ข้อมูลไม่หาย แค่ต้องเลือกใหม่ว่าเป็นใคร`, emoji: '👋', ok: 'ออกจากระบบ' }))) return;
+    onDone();
+    logout();
+  };
+  return (
+    <button className="set-row logout" onClick={out}>
+      <span className="ico"><LogoutIcon /></span>
+      <span className="txt"><b>ออกจากระบบ</b></span>
+    </button>
   );
 }
 

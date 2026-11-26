@@ -26,6 +26,7 @@ import { nameOf, openBook, openNameSheet } from './sheets';
 import { SPECIES, STAGE_EMOJI, STAGE_NAME } from './species';
 import { birthdayTune, setSound, sfx, unlockAudio, useSound } from './sfx';
 import { DinoSprite } from './Sprite';
+import { openWardrobe, WardrobeButton, HangerIcon } from './wardrobe';
 import '@fontsource/itim/thai-400.css';
 import '@fontsource/itim/latin-400.css';
 import './dino.css';
@@ -230,7 +231,7 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
         <Room kind="home" night={night} className="paused-room">
           <span className="stage-tag">🗓️ {dayTag}</span>
           <span className="stage-tag right">{STAGE_EMOJI[stage]} {STAGE_NAME[stage]}</span>
-          <div className="actor-layer pass"><Actor a={a} species={d.species} stage={stage} mood="sleep" pose={'sleep'} /></div>
+          <div className="actor-layer pass"><Actor a={a} species={d.species} stage={stage} mood="sleep" pose={'sleep'} outfit={d.outfit} /></div>
           <span className="paused-zz" aria-hidden="true"><i>z</i><i>z</i><i>Z</i></span>
           <div className="paused-badge">⏸️ พักการเลี้ยงอยู่</div>
         </Room>
@@ -347,6 +348,7 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
         <span className="stage-tag right">{STAGE_EMOJI[stage]} {STAGE_NAME[stage]}</span>
         {import.meta.env.DEV && <button className="dev-chip" onClick={() => openDevSpecies(d)}>🧪 ลองพันธุ์อื่น</button>}
         <GardenButton />
+        <WardrobeButton d={d} stage={stage} />
         <BowlProp d={d} now={now} className={bday ? 'by-cake' : ''} onTap={() => openBowlSheet(d)} />
         <FireplaceProp d={d} now={now} onTap={toggleFire} />
         {v.dirt === 2 && !sweeping && [[12, 8, 60], [62, 4, 80], [36, 12, 50], [80, 10, 44]].map(([l, b, w], i) => <span key={i} className="stain" style={{ left: `${l}%`, bottom: `${b}%`, width: w, height: w * 0.4 }} />)}
@@ -359,7 +361,7 @@ function DinoHome({ d, all, now }: { d: Dino; all: Dino[]; now: number }) {
         {bubble && <div className={`dino-bubble ${bubble === wish ? 'wish' : ''}`} key={`say${bubble}`}>{bubble}</div>}
         {nextEgg && <button className="new-egg in-home no-walk" onClick={adopt} aria-label="รับเลี้ยงไข่ใบใหม่"><span className="new-egg-tag">ไข่ใบใหม่มาส่ง!</span><DinoSprite species={nextEgg.species} stage="egg" size={72} anim="none" /></button>}
         <div className="actor-layer pass">
-          <Actor a={a} species={d.species} stage={stage} mood={mood} pose={pose} react={fx?.kind === 'hug' ? 'squish' : fx?.kind === 'pet' ? 'joy' : chew ? 'chew' : ''}
+          <Actor a={a} species={d.species} stage={stage} mood={mood} pose={pose} outfit={d.outfit} react={fx?.kind === 'hug' ? 'squish' : fx?.kind === 'pet' ? 'joy' : chew ? 'chew' : ''}
             className={fx?.kind === 'sparkle' ? '' : v.m.bath <= 0 ? 'grubby rotten' : v.m.bath < 30 ? 'grubby' : ''}
             onTap={() => { if (!fx) { play('pet', 1300); sfx.pet(); } }}>
             {v.m.bath <= 0 && fx?.kind !== 'sparkle' && <><span className="stink-lines"><i /><i /><i /></span><span className="body-fly">🪰</span></>}
@@ -475,12 +477,13 @@ function EndedView({ d, v, all }: { d: Dino; v: DinoView; all: Dino[] }) {
       <Room kind="home" night={!grown} className={`ended has-egg ${grown ? 'end-grown' : 'end-star'}`} onFloorTap={(x, dep) => { if (grown) walkTo(Math.min(68, x), dep); }}>
         {grown
           ? <div className="actor-layer">
-              <Actor a={a} species={d.species} stage="adult" mood={joy ? 'happy' : 'normal'} pose={joy ? 'happy' : undefined} react={joy ? 'joy' : ''} onTap={pet}>
+              <Actor a={a} species={d.species} stage="adult" outfit={d.outfit} mood={joy ? 'happy' : 'normal'} pose={joy ? 'happy' : undefined} react={joy ? 'joy' : ''} onTap={pet}>
                 {joy > 0 && <span className="pet-hearts" key={`p${joy}`}><i>💗</i><i>💕</i><i>💗</i></span>}
               </Actor>
             </div>
-          : <><div className="pet"><DinoSprite species={d.species} stage={v.stage} size={170} mood="sleep" className="is-star" /></div><span className="big-star">⭐</span></>}
+          : <><div className="pet"><DinoSprite species={d.species} stage={v.stage} size={170} mood="sleep" className="is-star" outfit={d.outfit} /></div><span className="big-star">⭐</span></>}
         <button className="new-egg no-walk" onClick={adopt} aria-label="รับเลี้ยงไข่ใบใหม่"><span className="new-egg-tag">ไข่ใบใหม่มาส่ง!</span><DinoSprite species={egg.species} stage="egg" size={72} anim="none" /></button>
+        {grown && <WardrobeButton d={d} stage="adult" />}
       </Room>
     </div>
   );
@@ -521,19 +524,31 @@ const graveAt = (i: number, n: number) => {
 function GardenDino({ d, size, x, depth, maxX }: { d: Dino; size: number; x: number; depth: number; maxX: number }) {
   const { a, walkTo } = useActor({ x, depth });
   const [joy, setJoy] = useState(0);
+  const [dress, setDress] = useState(false); // แตะตัว → ไอคอนไม้แขวนเด้งบนหัว แตะไอคอนเพื่อแต่งตัว
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  useEffect(() => () => clearTimeout(timer.current), []);
-  useWander(walkTo, !joy, { gap: [700, 3800], speed: 1.15, range: [10, maxX] });
+  const dressTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => { clearTimeout(timer.current); clearTimeout(dressTimer.current); }, []);
+  useWander(walkTo, !joy && !dress, { gap: [700, 3800], speed: 1.15, range: [10, maxX] });
   const pet = () => {
+    setDress(true);
+    clearTimeout(dressTimer.current);
+    dressTimer.current = setTimeout(() => setDress(false), 4000);
     if (joy) return;
     const k = Date.now();
     setJoy(k);
     sfx.pet();
     timer.current = setTimeout(() => setJoy(0), 1400);
   };
+  const openDress = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    sfx.click();
+    setDress(false);
+    openWardrobe(d, 'adult');
+  };
   return (
-    <Actor a={a} species={d.species} stage="adult" size={size} mood={joy ? 'happy' : 'normal'} pose={joy ? 'happy' : undefined} react={joy ? 'joy' : ''} onTap={pet}>
+    <Actor a={a} species={d.species} stage="adult" size={size} outfit={d.outfit} mood={joy ? 'happy' : 'normal'} pose={joy ? 'happy' : undefined} react={joy ? 'joy' : ''} onTap={pet}>
       {joy > 0 && <span className="pet-hearts" key={`p${joy}`}><i>💗</i><i>💕</i><i>💗</i></span>}
+      {dress && <button className="dress-pop no-walk" onPointerDown={openDress} aria-label={`แต่งตัว${nameOf(d)}`}><HangerIcon /></button>}
       <span className="g-name">{nameOf(d)}</span>
     </Actor>
   );

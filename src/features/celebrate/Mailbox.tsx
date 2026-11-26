@@ -1,35 +1,40 @@
-// ตู้จดหมาย (มุมขวาบนหน้าแรก): เก็บจดหมายทุกฉบับ รวมจดหมายครบรอบ 2 เดือนเดิม
+// ตู้จดหมาย (มุมขวาบนหน้าแรก): เห็นเฉพาะจดหมายที่อีกคนส่งถึงเรา (ของที่เราส่งเองไม่ขึ้น)
+// แบ่ง 2 แท็บ: "จดหมายใหม่" = ยังไม่เปิดอ่าน (รวมที่ยังล็อกอยู่) · "จดหมายเก่า" = เปิดอ่านแล้ว + จดหมายทุกฉบับก่อนมีระบบล็อกอิน
 // เขียนจดหมายใหม่ได้ (ใส่รูปได้) เลือกวันที่เปิดอ่านได้ — ก่อนถึงวันจะล็อกไว้, ส่งแล้วแก้ไม่ได้ แต่ลบทิ้งได้
 import { useEffect, useRef, useState } from 'react';
+import { otherOf, useMeSure } from '../../lib/auth';
 import { countdown, diffDays, fmtDate } from '../../lib/date';
 import { deletePhotos } from '../../lib/photos';
 import { coll, nameOf, useCollection } from '../../lib/store';
 import type { LetterDoc, Who } from '../../lib/types';
-import { Photo, PhotoPicker, usePhotoDraft } from '../../ui/controls';
+import { Photo, PhotoPicker, Seg, usePhotoDraft } from '../../ui/controls';
 import { burstCenter, confirmSheet, openLightbox, openSheet, toast } from '../../ui/overlays';
-import { markOpened, wasOpened } from './Celebrate';
 import { LETTER } from './letter';
 import './celebrate.css';
 
-const WHO_KEY = 'letter-who'; // เครื่องนี้เป็นใคร (จำไว้ครั้งล่าสุดที่เลือก)
-const readWho = (): Who => { try { return localStorage.getItem(WHO_KEY) === 'B' ? 'B' : 'A'; } catch { return 'A'; } };
-const other = (w: Who): Who => (w === 'A' ? 'B' : 'A');
-
 /** รายการในตู้: จดหมายครบรอบ (ในโค้ด) + จดหมายที่เขียนในแอป — ใหม่สุดอยู่บน */
 interface Item { id: string; from: Who; openDate: string; createdAt: number; builtIn?: boolean; doc?: LetterDoc }
-function itemsOf(letters: LetterDoc[]): Item[] {
+function itemsOf(letters: LetterDoc[], me: Who): Item[] {
   const built: Item = { id: LETTER.id, from: LETTER.from, openDate: LETTER.date, createdAt: Date.parse(LETTER.date), builtIn: true };
   return [built, ...letters.map(l => ({ id: l.id, from: l.from, openDate: l.openDate, createdAt: l.createdAt, doc: l }))]
+    .filter(i => i.from !== me) // เห็นเฉพาะที่ส่งถึงเรา
     .sort((a, b) => b.createdAt - a.createdAt);
+}
+
+/** เปิดอ่านแล้ว = จดหมายเก่า · จดหมายก่อนมีระบบล็อกอิน (ไม่มี openedAt) ที่อ่านได้แล้วก็นับเป็นเก่า */
+function isOld(it: Item, today: string) {
+  if (it.builtIn) return true;
+  const o = it.doc!.openedAt;
+  if (o) return true;
+  return o === undefined && it.openDate <= today;
 }
 
 // ---------- ไอคอนตู้จดหมาย ----------
 export function MailboxButton({ today, onOpenAnniv }: { today: string; onOpenAnniv: () => void }) {
+  const me = useMeSure();
   const letters = useCollection('letters') || [];
-  const [, rerender] = useState(0);
-  const items = itemsOf(letters);
-  const unread = items.some(i => i.openDate <= today && !wasOpened(i.id)); // มีฉบับที่เปิดได้แล้วแต่ยังไม่ได้อ่าน
-  const open = () => openSheet({ title: 'ตู้จดหมาย', render: close => <MailboxSheet today={today} close={close} onOpenAnniv={onOpenAnniv} />, onClose: () => rerender(n => n + 1) });
+  const unread = itemsOf(letters, me).some(i => i.openDate <= today && !isOld(i, today)); // มีฉบับที่เปิดได้แล้วแต่ยังไม่ได้อ่าน
+  const open = () => openSheet({ title: 'ตู้จดหมาย', render: close => <MailboxSheet today={today} close={close} onOpenAnniv={onOpenAnniv} /> });
   return (
     <button className={`mailbox-btn ${unread ? 'fresh' : ''}`} onClick={open} aria-label="ตู้จดหมาย">
       <svg viewBox="0 0 48 48" className="mailbox-ico" aria-hidden="true">
@@ -48,22 +53,30 @@ export function MailboxButton({ today, onOpenAnniv }: { today: string; onOpenAnn
 }
 
 // ---------- ในตู้ ----------
+type Box = 'new' | 'old';
 function MailboxSheet({ today, close, onOpenAnniv }: { today: string; close: () => void; onOpenAnniv: () => void }) {
-  const letters = useCollection('letters') || [];
-  const [, rerender] = useState(0);
+  const me = useMeSure();
+  const letters = useCollection('letters');
   const [shake, setShake] = useState<string | null>(null);
-  const items = itemsOf(letters);
+  const items = itemsOf(letters || [], me);
+  const fresh = items.filter(i => !isOld(i, today));
+  const old = items.filter(i => isOld(i, today));
+  const [box, setBox] = useState<Box>('new');
+  const list = box === 'new' ? fresh : old;
 
-  const tap = (it: Item) => {
+  const tap = async (it: Item) => {
     if (it.openDate > today) {
       setShake(it.id); setTimeout(() => setShake(null), 500);
       toast(`🔒 เปิดได้ ${fmtDate(it.openDate, { year: false })} · ${countdown(diffDays(today, it.openDate))}`);
       return;
     }
     if (it.builtIn) { close(); onOpenAnniv(); return; }
-    markOpened([it.id]);
-    rerender(n => n + 1);
     openLetter(it.doc!);
+    // เปิดครั้งแรก → ย้ายไปจดหมายเก่าทันที (ซิงก์ไปอีกเครื่องด้วย)
+    if (!it.doc!.openedAt) {
+      const cur = await coll.get('letters', it.id);
+      if (cur && !cur.openedAt) await coll.save('letters', { ...cur, openedAt: Date.now() });
+    }
   };
   const remove = async (l: LetterDoc) => {
     if (!(await confirmSheet({ title: 'ลบจดหมายฉบับนี้?', message: 'ลบแล้วเอากลับมาไม่ได้นะ', emoji: '🗑️', ok: 'ลบทิ้ง' }))) return;
@@ -74,27 +87,32 @@ function MailboxSheet({ today, close, onOpenAnniv }: { today: string; close: () 
 
   return (
     <div className="mailbox">
-      <button className="btn btn-primary btn-block" onClick={() => openCompose(today)}>✉️ เขียนจดหมาย</button>
-      <div className="mail-list">
-        {items.map(it => {
-          const locked = it.openDate > today;
-          const fresh = !locked && !wasOpened(it.id);
-          return (
-            <div key={it.id} className={`mail-item ${locked ? 'locked' : ''} ${fresh ? 'fresh' : ''} ${shake === it.id ? 'shake' : ''}`}>
-              <button className="mail-open" onClick={() => tap(it)}>
-                <span className={`env ${it.from}`}>{locked ? '🔒' : fresh ? '💌' : '✉️'}</span>
-                <span className="t">
-                  <b>จาก {nameOf(it.from)} ถึง {nameOf(other(it.from))}</b>
-                  <small>{locked ? `เปิดได้ ${fmtDate(it.openDate, { year: false })} · ${countdown(diffDays(today, it.openDate))}` : it.builtIn ? 'จดหมายครบรอบ 2 เดือน 💕' : `เปิดอ่านได้ตั้งแต่ ${fmtDate(it.openDate, { year: false })}`}</small>
-                </span>
-                {!!it.doc?.photos.length && <span className="ph">📷 {it.doc.photos.length}</span>}
-                {fresh && <span className="new">ใหม่</span>}
-              </button>
-              {it.doc && <button className="x" onClick={() => remove(it.doc!)} aria-label="ลบจดหมาย">✕</button>}
-            </div>
-          );
-        })}
-      </div>
+      <button className="btn btn-primary btn-block" onClick={() => openCompose(today)}>✉️ เขียนจดหมายถึง {nameOf(otherOf(me))}</button>
+      <Seg<Box> value={box} onChange={setBox} options={[['new', `💌 จดหมายใหม่${fresh.length ? ` (${fresh.length})` : ''}`], ['old', `📂 จดหมายเก่า${old.length ? ` (${old.length})` : ''}`]]} />
+      {letters && (list.length ? (
+        <div className="mail-list">
+          {list.map(it => {
+            const locked = it.openDate > today;
+            const unread = !locked && box === 'new';
+            return (
+              <div key={it.id} className={`mail-item ${locked ? 'locked' : ''} ${unread ? 'fresh' : ''} ${shake === it.id ? 'shake' : ''}`}>
+                <button className="mail-open" onClick={() => tap(it)}>
+                  <span className={`env ${it.from}`}>{locked ? '🔒' : unread ? '💌' : '✉️'}</span>
+                  <span className="t">
+                    <b>จาก {nameOf(it.from)}</b>
+                    <small>{locked ? `เปิดได้ ${fmtDate(it.openDate, { year: false })} · ${countdown(diffDays(today, it.openDate))}` : it.builtIn ? 'จดหมายครบรอบ 2 เดือน 💕' : `เปิดอ่านได้ตั้งแต่ ${fmtDate(it.openDate, { year: false })}`}</small>
+                  </span>
+                  {!!it.doc?.photos.length && <span className="ph">📷 {it.doc.photos.length}</span>}
+                  {unread && <span className="new">ใหม่</span>}
+                </button>
+                {it.doc && <button className="x" onClick={() => remove(it.doc!)} aria-label="ลบจดหมาย">✕</button>}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="mail-empty small muted">{box === 'new' ? `ยังไม่มีจดหมายใหม่จาก ${nameOf(otherOf(me))} 💭` : 'ยังไม่มีจดหมายเก่า'}</p>
+      ))}
     </div>
   );
 }
@@ -107,7 +125,7 @@ function LetterView({ l }: { l: LetterDoc }) {
   useEffect(() => { burstCenter(10, ['💌', '💕', '💗', '✨']); }, []);
   return (
     <div className="mail-paper">
-      <div className="to">ถึง {nameOf(other(l.from))} 💕</div>
+      <div className="to">ถึง {nameOf(otherOf(l.from))} 💕</div>
       <p className="msg">{l.message}</p>
       {l.photos.length > 0 && (
         <div className="mail-photos">
@@ -119,12 +137,13 @@ function LetterView({ l }: { l: LetterDoc }) {
   );
 }
 
-// ---------- เขียนจดหมาย ----------
+// ---------- เขียนจดหมาย (ผู้ส่ง = คนที่เข้าสู่ระบบอยู่) ----------
 function openCompose(today: string) {
   openSheet({ title: 'เขียนจดหมาย ✉️', render: close => <Compose today={today} close={close} /> });
 }
 function Compose({ today, close }: { today: string; close: () => void }) {
-  const [from, setFrom] = useState<Who>(readWho);
+  const from = useMeSure();
+  const to = otherOf(from);
   const [openDate, setOpenDate] = useState(today);
   const [message, setMessage] = useState('');
   const draft = usePhotoDraft();
@@ -133,30 +152,28 @@ function Compose({ today, close }: { today: string; close: () => void }) {
   rollback.current = draft.rollback;
   useEffect(() => () => { if (!sent.current) rollback.current(); }, []); // ปิดโดยไม่ส่ง = ลบรูปที่เพิ่งใส่
 
-  const pick = (w: Who) => { setFrom(w); try { localStorage.setItem(WHO_KEY, w); } catch { /* ไม่เป็นไร */ } };
   const send = async () => {
     if (draft.busy) return toast('รอรูปอัปโหลดแป๊บนึงน้า');
     if (!message.trim()) return toast('เขียนข้อความก่อนน้า');
     if (!(await confirmSheet({ title: 'ส่งจดหมายเลยไหม?', message: 'ส่งแล้วแก้ไขไม่ได้ แต่ลบทิ้งได้', emoji: '💌', ok: 'ส่งเลย', danger: false }))) return;
     await draft.commit();
-    await coll.save('letters', { from, openDate: openDate < today ? today : openDate, message: message.trim(), photos: draft.ids });
+    await coll.save('letters', { from, openDate: openDate < today ? today : openDate, message: message.trim(), photos: draft.ids, openedAt: null });
     sent.current = true;
     close();
-    toast(openDate > today ? `ส่งแล้ว 💌 เปิดได้ ${fmtDate(openDate, { year: false })}` : 'ส่งจดหมายแล้ว 💌');
+    toast(openDate > today ? `ส่งถึง ${nameOf(to)} แล้ว 💌 เปิดได้ ${fmtDate(openDate, { year: false })}` : `ส่งจดหมายถึง ${nameOf(to)} แล้ว 💌`);
     burstCenter(12, ['💌', '💕', '✨']);
   };
 
   return (
     <div className="compose">
       <div className="who-row">
-        <span>จาก</span>
-        {(['A', 'B'] as const).map(w => <button key={w} type="button" className={`${w} ${from === w ? 'on' : ''}`} onClick={() => pick(w)}>{nameOf(w)}</button>)}
-        <span className="to">ถึง {nameOf(other(from))}</span>
+        <span>จาก <b className={`me ${from}`}>{nameOf(from)}</b></span>
+        <span className="to">ถึง {nameOf(to)}</span>
       </div>
       <label className="field"><span>เปิดอ่านได้วันที่</span>
         <input className="input" type="date" value={openDate} min={today} onChange={e => setOpenDate(e.target.value || today)} />
       </label>
-      <textarea className="input letter-text" value={message} onChange={e => setMessage(e.target.value)} placeholder={`ถึง ${nameOf(other(from))}…`} rows={7} />
+      <textarea className="input letter-text" value={message} onChange={e => setMessage(e.target.value)} placeholder={`ถึง ${nameOf(to)}…`} rows={7} />
       <div className="field"><span>รูปภาพ</span><PhotoPicker draft={draft} max={6} /></div>
       <button className="btn btn-primary btn-block" onClick={send} disabled={draft.busy}>ส่งจดหมาย 💌</button>
     </div>

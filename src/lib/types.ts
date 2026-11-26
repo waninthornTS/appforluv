@@ -17,6 +17,7 @@ export interface Memory extends Base {
   rating?: number; // 0..5
   note?: string;
   photos: string[];
+  author?: Who; // คนที่สร้างบันทึกนี้ (บันทึกเก่าก่อนมีระบบล็อกอินจะไม่มี)
 }
 
 export type EventType = 'date' | 'special' | 'other';
@@ -87,7 +88,10 @@ export interface Dino extends Base {
   bowl?: DinoBowl | null; // จานอาหาร: ใส่ไว้ หิวเมื่อไหร่เดินมากินเอง (อยู่ได้ครึ่งวันแล้วเน่า)
   fire?: { since: number; until: number } | null; // เตาไฟติดผนัง: เปิดตอน since ดับเองตอน until (ทีละ 4 ชม.)
   paused?: number | null; // พักการเลี้ยงชั่วคราวตั้งแต่เวลานี้ (เวลาหยุด) — null/ไม่มี = เลี้ยงปกติ
+  outfit?: DinoOutfit; // ชุดที่ใส่อยู่ (แต่งตัวได้ทั้งตัวที่เลี้ยงอยู่และตัวในสวน)
 }
+/** ชุดที่ไดโนใส่ — id ของแต่ละชิ้น (ดู features/dino/outfits.tsx) ไม่ใส่ = ไม่มีฟิลด์ */
+export interface DinoOutfit { hat?: string; body?: string; shoes?: string }
 /** จานอาหาร: food = อาหารที่ใส่ไว้, at = เวลาที่ใส่, ate = กินจากจานครั้งล่าสุด, n = กินไปแล้วกี่รอบ */
 export interface DinoBowl { food: string; at: number; ate?: number; n?: number }
 export interface GameStat { plays: number; best: number; total: number; food: number }
@@ -115,6 +119,8 @@ export interface LetterDoc extends Base {
   openDate: string; // YYYY-MM-DD เปิดอ่านได้ตั้งแต่วันนี้
   message: string;
   photos: string[];
+  /** เวลาที่ผู้รับเปิดอ่านครั้งแรก — null = ยังไม่เปิด, ไม่มีฟิลด์นี้ = จดหมายเก่าก่อนมีระบบล็อกอิน (นับเป็นจดหมายเก่า) */
+  openedAt?: number | null;
 }
 
 export interface Collections {

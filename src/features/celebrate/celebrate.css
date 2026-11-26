@@ -309,3 +309,7 @@
 /* วันเกิด: กระดาษสีโปรยเบาๆ ในฉาก */
 .cel-decor .confetto { position: absolute; top: -10px; width: 7px; height: 11px; border-radius: 2px; background: var(--c); opacity: .95; animation: confettoFall linear infinite; }
 @keyframes confettoFall { 0% { transform: translateY(0) rotate(0); } 50% { transform: translate(12px, 160px) rotate(220deg); } 100% { transform: translate(-6px, 330px) rotate(480deg); opacity: .2; } }
+.mail-empty { margin: 6px 0 2px; text-align: center; }
+.compose .who-row .me { padding: 4px 12px; border-radius: 999px; font-size: 13px; }
+.compose .who-row .me.A { background: #E4F0FF; color: #3C6FB0; }
+.compose .who-row .me.B { background: #FFE3EC; color: #D2487A; }

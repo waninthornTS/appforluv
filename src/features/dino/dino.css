@@ -647,3 +647,37 @@
 .dino-paused-card { margin-top: 12px; text-align: center; }
 .dino-paused-card p { margin: 4px 0 12px; }
 .dino-bars.paused { opacity: .6; filter: grayscale(.4); }
+.run-who-btn.solo { width: 100%; flex-direction: row; justify-content: center; gap: 12px; padding: 8px 14px; }
+.run-who-btn.solo .pic { height: 72px; }
+.run-who-btn.solo .pic .char-img { height: 72px; }
+
+/* ---------- แต่งตัวไดโน ---------- */
+/* ปุ่มไม้แขวนเสื้อ (เหนือปุ่มสวน มุมขวาล่างของห้อง) */
+.wardrobe-btn { position: absolute; right: 10px; bottom: 64px; z-index: 7; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; padding: 0;
+  color: #E2557F; background: rgba(255, 255, 255, .92); border: 2.5px solid #fff; box-shadow: 0 3px 0 #F2B8CB, 0 6px 12px rgba(80, 40, 60, .18); }
+.wardrobe-btn svg { width: 26px; height: 26px; display: block; }
+.wardrobe-btn:active { transform: scale(.9); }
+/* แตะตัวในสวน → ไอคอนไม้แขวนเด้งบนหัว */
+.dress-pop { position: absolute; left: 50%; bottom: 100%; z-index: 5; width: 42px; height: 42px; margin-left: -21px; padding: 0; border-radius: 50%; display: grid; place-items: center;
+  color: #E2557F; background: #fff; border: 2.5px solid #FFD3E0; box-shadow: 0 4px 10px rgba(80, 40, 60, .22); pointer-events: auto; animation: dressPop .35s cubic-bezier(.3, 1.6, .5, 1) both, dressBob 1.6s ease-in-out .35s infinite; }
+.dress-pop svg { width: 24px; height: 24px; display: block; }
+.dress-pop::after { content: ''; position: absolute; left: 50%; bottom: -7px; margin-left: -6px; border: 6px solid transparent; border-top-color: #fff; border-bottom: 0; }
+@keyframes dressPop { from { transform: scale(0) translateY(10px); } }
+@keyframes dressBob { 50% { transform: translateY(-4px); } }
+/* ตู้เสื้อผ้า */
+.wardrobe { display: flex; flex-direction: column; gap: 12px; padding-bottom: 4px; }
+.ward-stage { height: 220px; display: grid; place-items: end center; border-radius: 22px; overflow: hidden; padding-bottom: 10px;
+  background: radial-gradient(ellipse 60% 14% at 50% 92%, rgba(240, 160, 190, .45), transparent 70%), linear-gradient(180deg, #FFF3F7, #FFE8F0); }
+.ward-note { margin: -4px 2px 0; text-align: center; }
+.ward-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 10px; }
+.ward-item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px 8px; border-radius: 18px; background: #fff;
+  border: 2.5px solid #F6EEDF; box-shadow: 0 3px 0 #EADCC2; color: var(--ink); }
+.ward-item b { font-size: 11.5px; line-height: 1.25; text-align: center; }
+.ward-item.on { border-color: var(--pink-d); background: #FFF4F7; box-shadow: 0 3px 0 #F2B8CB; }
+.ward-item:active { transform: translateY(2px); }
+.ofit-thumb { width: 52px; height: 52px; object-fit: contain; display: block; }
+.ofit-thumb.emo { display: grid; place-items: center; font-size: 34px; line-height: 1; }
+/* รูปไดโนใส่ชุด (หมวกยื่นเกินกรอบรูปเดิมได้) */
+.dz-photo .dz-body { overflow: visible; }
+.ward-item.soon-slot { justify-content: center; min-height: 96px; background: transparent; border: 2.5px dashed #E6D8C2; box-shadow: none; }
+.ward-item.soon-slot span { font-size: 12px; font-weight: 700; color: var(--ink-soft); }

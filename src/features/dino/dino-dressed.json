@@ -1,0 +1,226 @@
+{
+ "crystal-adult--hat-santa": {
+  "w": 560,
+  "h": 399,
+  "bw": 560,
+  "bh": 399,
+  "ox": 0,
+  "oy": 0
+ },
+ "diplo-adult--hat-santa": {
+  "w": 561,
+  "h": 444,
+  "bw": 560,
+  "bh": 444,
+  "ox": 1,
+  "oy": 0
+ },
+ "diplo-baby--hat-santa": {
+  "w": 561,
+  "h": 449,
+  "bw": 560,
+  "bh": 448,
+  "ox": 0,
+  "oy": 1
+ },
+ "diplo-teen--hat-santa": {
+  "w": 560,
+  "h": 524,
+  "bw": 560,
+  "bh": 524,
+  "ox": 0,
+  "oy": 0
+ },
+ "elas-adult--hat-santa": {
+  "w": 440,
+  "h": 561,
+  "bw": 440,
+  "bh": 560,
+  "ox": 0,
+  "oy": 1
+ },
+ "elas-baby--hat-santa": {
+  "w": 363,
+  "h": 560,
+  "bw": 363,
+  "bh": 560,
+  "ox": 0,
+  "oy": 0
+ },
+ "elas-teen--hat-santa": {
+  "w": 516,
+  "h": 560,
+  "bw": 516,
+  "bh": 560,
+  "ox": 0,
+  "oy": 0
+ },
+ "flame-adult--hat-santa": {
+  "w": 560,
+  "h": 513,
+  "bw": 560,
+  "bh": 513,
+  "ox": 0,
+  "oy": 0
+ },
+ "flame-baby--hat-santa": {
+  "w": 450,
+  "h": 560,
+  "bw": 450,
+  "bh": 560,
+  "ox": 0,
+  "oy": 0
+ },
+ "flame-teen--hat-santa": {
+  "w": 561,
+  "h": 405,
+  "bw": 560,
+  "bh": 405,
+  "ox": 1,
+  "oy": 0
+ },
+ "galaxy-adult--hat-santa": {
+  "w": 407,
+  "h": 588,
+  "bw": 387,
+  "bh": 560,
+  "ox": 19,
+  "oy": 28
+ },
+ "galli-adult--hat-santa": {
+  "w": 390,
+  "h": 567,
+  "bw": 385,
+  "bh": 560,
+  "ox": 1,
+  "oy": 7
+ },
+ "galli-baby--hat-santa": {
+  "w": 396,
+  "h": 560,
+  "bw": 396,
+  "bh": 560,
+  "ox": 0,
+  "oy": 0
+ },
+ "galli-teen--hat-santa": {
+  "w": 370,
+  "h": 560,
+  "bw": 369,
+  "bh": 560,
+  "ox": 0,
+  "oy": 0
+ },
+ "lava-adult--hat-santa": {
+  "w": 562,
+  "h": 301,
+  "bw": 560,
+  "bh": 300,
+  "ox": 0,
+  "oy": 1
+ },
+ "pachy-adult--hat-santa": {
+  "w": 376,
+  "h": 562,
+  "bw": 375,
+  "bh": 560,
+  "ox": 1,
+  "oy": 2
+ },
+ "phoenix-adult--hat-santa": {
+  "w": 399,
+  "h": 560,
+  "bw": 399,
+  "bh": 560,
+  "ox": 0,
+  "oy": 0
+ },
+ "phoenix-baby--hat-santa": {
+  "w": 382,
+  "h": 560,
+  "bw": 382,
+  "bh": 560,
+  "ox": 0,
+  "oy": 0
+ },
+ "phoenix-teen--hat-santa": {
+  "w": 364,
+  "h": 560,
+  "bw": 363,
+  "bh": 560,
+  "ox": 1,
+  "oy": 0
+ },
+ "ptero-adult--hat-santa": {
+  "w": 473,
+  "h": 561,
+  "bw": 473,
+  "bh": 560,
+  "ox": 0,
+  "oy": 1
+ },
+ "ptero-baby--hat-santa": {
+  "w": 396,
+  "h": 560,
+  "bw": 396,
+  "bh": 560,
+  "ox": 0,
+  "oy": 0
+ },
+ "ptero-teen--hat-santa": {
+  "w": 471,
+  "h": 560,
+  "bw": 469,
+  "bh": 560,
+  "ox": 0,
+  "oy": 0
+ },
+ "styra-adult--hat-santa": {
+  "w": 433,
+  "h": 561,
+  "bw": 433,
+  "bh": 560,
+  "ox": 0,
+  "oy": 1
+ },
+ "styra-baby--hat-santa": {
+  "w": 420,
+  "h": 560,
+  "bw": 420,
+  "bh": 560,
+  "ox": 0,
+  "oy": 0
+ },
+ "styra-teen--hat-santa": {
+  "w": 546,
+  "h": 560,
+  "bw": 546,
+  "bh": 560,
+  "ox": 0,
+  "oy": 0
+ },
+ "trex-adult--hat-santa": {
+  "w": 494,
+  "h": 560,
+  "bw": 494,
+  "bh": 560,
+  "ox": 0,
+  "oy": 0
+ },
+ "trex-baby--hat-santa": {
+  "w": 462,
+  "h": 560,
+  "bw": 462,
+  "bh": 560,
+  "ox": 0,
+  "oy": 0
+ },
+ "trex-teen--hat-santa": {
+  "w": 478,
+  "h": 576,
+  "bw": 464,
+  "bh": 560,
+  "ox": 13,
+  "oy": 16
+ }
+}

@@ -1,6 +1,6 @@
 // ห้องแบบมินิมอล + ตัวไดโนที่เดินไปมาได้ (แตะพื้นตรงไหน เดินไปตรงนั้น)
 import { useCallback, useEffect, useRef, useState, type ReactNode, type PointerEvent as RPointerEvent } from 'react';
-import type { DinoSpecies } from '../../lib/types';
+import type { DinoOutfit, DinoSpecies } from '../../lib/types';
 import { isXmas } from '../../lib/theme';
 import type { Mood } from './art';
 import type { Food, Stage } from './species';
@@ -118,8 +118,8 @@ export function useActor(start = { x: 50, depth: .3 }) {
   return { a, walkTo, face, place };
 }
 
-export function Actor({ a, species, stage, size = 175, mood = 'normal', pose, react, children, onTap, className = '' }: {
-  a: ActorState; species: DinoSpecies; stage: Stage; size?: number; mood?: Mood; pose?: Pose; react?: string; children?: ReactNode;
+export function Actor({ a, species, stage, size = 175, mood = 'normal', pose, react, outfit, children, onTap, className = '' }: {
+  a: ActorState; species: DinoSpecies; stage: Stage; size?: number; mood?: Mood; pose?: Pose; react?: string; outfit?: DinoOutfit; children?: ReactNode;
   onTap?: () => void; className?: string;
 }) {
   const scale = 1 - a.depth * .28;
@@ -130,7 +130,7 @@ export function Actor({ a, species, stage, size = 175, mood = 'normal', pose, re
       onPointerDown={e => { if (onTap) { e.stopPropagation(); onTap(); } }}>
       <span className="actor-shadow" />
       <div className="actor-body">
-        <DinoSprite species={species} stage={stage} size={size} mood={mood} pose={pose} anim={a.walking ? 'run' : 'idle'} flip={a.face === 'right'} />
+        <DinoSprite species={species} stage={stage} size={size} mood={mood} pose={pose} anim={a.walking ? 'run' : 'idle'} flip={a.face === 'right'} outfit={outfit} />
         {children}
       </div>
     </div>

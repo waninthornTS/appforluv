@@ -1,7 +1,8 @@
 // มินิเกม "วิ่งหาอาหาร" แบบเกมไดโนกระโดดของ Chrome — ใช้ไดโนตัวที่เลี้ยงอยู่วิ่งเอง แตะจอเพื่อกระโดดหลบสิ่งกีดขวาง
-// วิ่งจบได้อาหารแบบสุ่มเข้าคลัง (ยิ่งไกลยิ่งได้เยอะ) · เลือกก่อนว่าใครเล่น แล้วเก็บสถิติแยกคน
+// วิ่งจบได้อาหารแบบสุ่มเข้าคลัง (ยิ่งไกลยิ่งได้เยอะ) · คนเล่น = คนที่เข้าสู่ระบบ แล้วเก็บสถิติแยกคน
 import { useEffect, useRef, useState } from 'react';
 import { Character } from '../../characters/Character';
+import { useMeSure } from '../../lib/auth';
 import { PROFILE } from '../../lib/store';
 import type { DinoSpecies, GameStat } from '../../lib/types';
 import { toast } from '../../ui/overlays';
@@ -19,16 +20,17 @@ export function RunnerMode({ species, stage, stats, canPlay, onFinish }: {
   canPlay: () => string | null;
   onFinish: (who: Who, score: number, prize: FoodId[]) => Promise<boolean>;
 }) {
+  const me = useMeSure(); // คนเล่น = คนที่เข้าสู่ระบบอยู่
   const [phase, setPhase] = useState<'pick' | 'play' | 'over'>('pick');
-  const [who, setWho] = useState<Who>('A');
+  const who = me;
   const [round, setRound] = useState(0);
   const [result, setResult] = useState<{ score: number; prize: FoodId[]; best: boolean; saved: boolean } | null>(null);
 
-  const start = (w: Who) => {
+  const start = () => {
     const no = canPlay();
     if (no) { toast(no); return; }
     sfx.click();
-    setWho(w); setResult(null); setRound(r => r + 1); setPhase('play');
+    setResult(null); setRound(r => r + 1); setPhase('play');
   };
   const over = async (score: number) => {
     const prize = prizeFor(score);
@@ -54,27 +56,22 @@ export function RunnerMode({ species, stage, stats, canPlay, onFinish }: {
           ))}</div>
         </> : <p className="small muted">รอบนี้ไม่ได้อาหารนะ</p>}
         <div className="run-btns">
-          <button className="btn btn-primary" onClick={() => start(who)}>🔁 วิ่งอีกรอบ</button>
-          <button className="btn btn-ghost" onClick={() => setPhase('pick')}>เปลี่ยนคนเล่น</button>
+          <button className="btn btn-primary" onClick={start}>🔁 วิ่งอีกรอบ</button>
+          <button className="btn btn-ghost" onClick={() => setPhase('pick')}>ดูสถิติ</button>
         </div>
       </div>
     );
   }
 
-  // เลือกคนเล่น + สถิติ
+  // เริ่มเล่น (ในชื่อคนที่เข้าสู่ระบบ) + สถิติ
   const lead: Who | null = stats.A.best === stats.B.best ? null : stats.A.best > stats.B.best ? 'A' : 'B';
   return (
     <>
       <div className="card run-pick">
-        <b>เลือกผู้เล่น</b>
-        <div className="run-who">
-          {(['A', 'B'] as const).map(w => (
-            <button key={w} className={`run-who-btn ${w}`} onClick={() => start(w)}>
-              <span className="pic"><Character who={w === 'A' ? 'ploy' : 'dream'} /></span>
-              <span className="nm">{nameOf(w)}</span>
-            </button>
-          ))}
-        </div>
+        <button className={`run-who-btn solo ${who}`} onClick={start}>
+          <span className="pic"><Character who={who === 'A' ? 'ploy' : 'dream'} /></span>
+          <span className="nm">▶️ เริ่มวิ่ง · {nameOf(who)}</span>
+        </button>
       </div>
       <div className="card run-stats">
         <b>📊 สถิติ</b>

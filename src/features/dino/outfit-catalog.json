@@ -1,0 +1,21 @@
+[
+  { "id": "hat-santa", "cat": "hat", "name": "หมวกซานต้า", "emoji": "🎅", "xmas": true },
+  { "id": "hat-antlers", "cat": "hat", "name": "ที่คาดเรนเดียร์", "emoji": "🦌", "xmas": true, "soon": true },
+  { "id": "hat-elf", "cat": "hat", "name": "หมวกเอลฟ์", "emoji": "🧝", "xmas": true, "soon": true },
+  { "id": "hat-party", "cat": "hat", "name": "หมวกปาร์ตี้", "emoji": "🥳", "soon": true },
+  { "id": "hat-crown", "cat": "hat", "name": "มงกุฎ", "emoji": "👑", "soon": true },
+  { "id": "hat-flower", "cat": "hat", "name": "มงกุฎดอกไม้", "emoji": "🌸", "soon": true },
+  { "id": "hat-beanie", "cat": "hat", "name": "หมวกไหมพรม", "emoji": "🧶", "soon": true },
+  { "id": "hat-bow", "cat": "hat", "name": "โบว์ใหญ่", "emoji": "🎀", "soon": true },
+  { "id": "hat-straw", "cat": "hat", "name": "หมวกสาน", "emoji": "👒", "soon": true },
+  { "id": "body-scarf", "cat": "body", "name": "ผ้าพันคอคริสต์มาส", "emoji": "🧣", "xmas": true, "soon": true },
+  { "id": "body-bell", "cat": "body", "name": "ปลอกคอกระดิ่ง", "emoji": "🔔", "xmas": true, "soon": true },
+  { "id": "body-bowtie", "cat": "body", "name": "หูกระต่าย", "emoji": "🎀", "soon": true },
+  { "id": "body-heart", "cat": "body", "name": "สร้อยหัวใจ", "emoji": "💗", "soon": true },
+  { "id": "body-lei", "cat": "body", "name": "พวงมาลัยดอกไม้", "emoji": "🌺", "soon": true },
+  { "id": "body-cape", "cat": "body", "name": "ผ้าคลุมฮีโร่", "emoji": "🦸", "soon": true },
+  { "id": "shoes-santa", "cat": "shoes", "name": "บูทซานต้า", "emoji": "🥾", "xmas": true, "soon": true },
+  { "id": "shoes-sneaker", "cat": "shoes", "name": "รองเท้าผ้าใบ", "emoji": "👟", "soon": true },
+  { "id": "shoes-rain", "cat": "shoes", "name": "บูทกันฝน", "emoji": "🥾", "soon": true },
+  { "id": "shoes-bunny", "cat": "shoes", "name": "สลิปเปอร์กระต่าย", "emoji": "🐰", "soon": true }
+]

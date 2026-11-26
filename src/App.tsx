@@ -1,7 +1,9 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useState, type ComponentType, type LazyExoticComponent } from 'react';
+import { useMe } from './lib/auth';
 import { handleSpotifyCallback } from './lib/spotify';
 import { initSync } from './lib/sync';
 import { MusicHost } from './features/music/Music';
+import { LoginPage } from './ui/Login';
 import { OverlayHost, toast } from './ui/overlays';
 import { SkyBackground, TopBar } from './ui/Sky';
 import { TabBar, type Tab, TABS } from './ui/TabBar';
@@ -30,13 +32,14 @@ handleSpotifyCallback().then(r => {
 });
 
 export default function App() {
+  const me = useMe();
   const [tab, setTab] = useState(readTab);
   useEffect(() => {
     const on = () => setTab(readTab());
     addEventListener('hashchange', on);
     return () => removeEventListener('hashchange', on);
   }, []);
-  useLayoutEffect(() => { window.scrollTo(0, 0); }, [tab]);
+  useLayoutEffect(() => { window.scrollTo(0, 0); }, [tab, me]);
 
   // โหลดหน้าอื่นไว้ล่วงหน้าตอนว่าง เพื่อให้กดสลับแท็บได้ทันที
   useEffect(() => {
@@ -51,15 +54,17 @@ export default function App() {
   return (
     <>
       <SkyBackground />
-      {tab !== 'dino' && <TopBar />}{/* หน้าเลี้ยงไดโนไม่ต้องมีแถบเวลา */}
-      <main className="view" key={tab}>
-        <Suspense fallback={<div className="page-loading"><div className="spinner" /></div>}>
-          <Page />
-        </Suspense>
-      </main>
-      <TabBar active={tab} />
-      <MusicHost />{/* ตัวเล่นเพลงอยู่ระดับแอป สลับแท็บแล้วยังเล่นต่อ */}
-      <OverlayHost />
+      {!me ? <LoginPage />/* ยังไม่ได้เลือกว่าเป็นใคร → หน้าเข้าสู่ระบบก่อน */ : <>
+        {tab !== 'dino' && <TopBar />}{/* หน้าเลี้ยงไดโนไม่ต้องมีแถบเวลา */}
+        <main className="view" key={tab}>
+          <Suspense fallback={<div className="page-loading"><div className="spinner" /></div>}>
+            <Page />
+          </Suspense>
+        </main>
+        <TabBar active={tab} />
+        <MusicHost />{/* ตัวเล่นเพลงอยู่ระดับแอป สลับแท็บแล้วยังเล่นต่อ */}
+      </>}
+      <OverlayHost />{/* อยู่ตำแหน่งเดิมตลอด (ไม่ mount ใหม่ตอนเข้า/ออกจากระบบ toast เก่าจะได้ไม่เด้งซ้ำ) */}
     </>
   );
 }
